@@ -1,0 +1,122 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId          Int       @id @default(autoincrement())
+  username    String    @unique
+  email       String    @unique
+  passwordHash String
+  firstName   String?
+  lastName    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  recipes     Recipe[]
+  reviews     Review[]
+  favorites   Favorite[]  
+}
+
+model Category {
+  categoryId          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  recipes     Recipe[]
+}
+
+model Recipe {
+  recipeId          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  instructions String
+  cookingTime Int?
+  servingSize Int?
+  categoryId  Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  category    Category  @relation(fields: [categoryId], references: [categoryId])
+  userId      Int?
+  user        User?     @relation(fields: [userId], references: [userId])
+  ingredients RecipeIngredient[]
+  tags        RecipeTag[]
+  reviews     Review[]
+  favorites   Favorite[]
+  images      Image[]
+}
+
+model Ingredient {
+  ingredientId          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  recipeIngredients RecipeIngredient[]
+}
+
+
+
+model RecipeIngredient {
+  recipeId    Int
+  ingredientId Int
+  quantity    String
+
+  recipe      Recipe     @relation(fields: [recipeId], references: [recipeId])
+  ingredient  Ingredient @relation(fields: [ingredientId], references: [ingredientId])
+
+  @@id([recipeId, ingredientId])
+}
+
+model Tag {
+  tagId          Int       @id @default(autoincrement())
+  name        String    @unique
+  recipes     RecipeTag[]
+}
+
+model RecipeTag {
+  recipeId Int
+  tagId    Int
+
+  recipe   Recipe  @relation(fields: [recipeId], references: [recipeId])
+  tag      Tag     @relation(fields: [tagId], references: [tagId])
+
+  @@id([recipeId, tagId])
+}
+
+model Review {
+  reviewId          Int       @id @default(autoincrement())
+  rating      Int
+  reviewText  String?
+  createdAt   DateTime  @default(now())
+  userId      Int
+  recipeId    Int
+  user        User      @relation(fields: [userId], references: [userId])
+  recipe      Recipe    @relation(fields: [recipeId], references: [recipeId])
+}
+
+model Favorite {
+  userId    Int
+  recipeId  Int
+
+  user      User    @relation(fields: [userId], references: [userId])
+  recipe    Recipe  @relation(fields: [recipeId], references: [recipeId])
+
+  @@id([userId, recipeId])
+} 
+
+model Image {
+  imageId           Int       @id @default(autoincrement())
+  imageUrl     String
+  description  String?
+  createdAt    DateTime  @default(now())
+  recipeId     Int?
+  recipe       Recipe?   @relation(fields: [recipeId], references: [recipeId])
+}
