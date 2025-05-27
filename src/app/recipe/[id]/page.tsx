@@ -81,9 +81,10 @@ async function getRecipe(id: string) {
 export default async function RecipeDetailsPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const recipe = await getRecipe(params.id);
+  const { id } = await params;
+  const recipe = await getRecipe(id);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
