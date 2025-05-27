@@ -104,7 +104,7 @@ export default function RecipeLandingPage() {
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-orange-200 to-green-200 rounded-3xl transform rotate-3"></div>
               <Image
-                src="/recipesImages/main-section.jpg?height=600&width=600"
+                src="https://dwylojmkbggcdvus.public.blob.vercel-storage.com/main-section-q8TnhyOJ2PWSr6PRfVfV57NWjWL46P.jpg?height=600&width=600"
                 alt="People cooking together in a warm kitchen"
                 width={600}
                 height={600}
@@ -194,7 +194,7 @@ export default function RecipeLandingPage() {
                 time: "25 min",
                 rating: 4.9,
                 image:
-                  "/recipesImages/Aambyachi_Kadhi.jpg?height=300&width=400",
+                  "https://dwylojmkbggcdvus.public.blob.vercel-storage.com/Aambyachi_Kadhi-wb6mc5XAbj85CWIbR90p085O2QC5Y4.jpg?height=300&width=400",
               },
               {
                 title: "Mediterranean Quinoa Bowl",
@@ -203,7 +203,7 @@ export default function RecipeLandingPage() {
                 time: "15 min",
                 rating: 4.8,
                 image:
-                  "/recipesImages/Aambyachi_Kadhi.jpg?height=300&width=400",
+                  "https://dwylojmkbggcdvus.public.blob.vercel-storage.com/Aambyachi_Kadhi-wb6mc5XAbj85CWIbR90p085O2QC5Y4.jpg?height=300&width=400",
               },
               {
                 title: "Homemade Sourdough Bread",
@@ -212,7 +212,7 @@ export default function RecipeLandingPage() {
                 time: "4 hours",
                 rating: 4.9,
                 image:
-                  "/recipesImages/Aambyachi_Kadhi.jpg?height=300&width=400",
+                  "https://dwylojmkbggcdvus.public.blob.vercel-storage.com/Aambyachi_Kadhi-wb6mc5XAbj85CWIbR90p085O2QC5Y4.jpg?height=300&width=400",
               },
               {
                 title: "Thai Green Curry",
@@ -221,7 +221,7 @@ export default function RecipeLandingPage() {
                 time: "30 min",
                 rating: 4.7,
                 image:
-                  "/recipesImages/Aambyachi_Kadhi.jpg?height=300&width=400",
+                  "https://dwylojmkbggcdvus.public.blob.vercel-storage.com/Aambyachi_Kadhi-wb6mc5XAbj85CWIbR90p085O2QC5Y4.jpg?height=300&width=400",
               },
               {
                 title: "Classic Beef Lasagna",
@@ -230,7 +230,7 @@ export default function RecipeLandingPage() {
                 time: "1.5 hours",
                 rating: 4.8,
                 image:
-                  "/recipesImages/Aambyachi_Kadhi.jpg?height=300&width=400",
+                  "https://dwylojmkbggcdvus.public.blob.vercel-storage.com/Aambyachi_Kadhi-wb6mc5XAbj85CWIbR90p085O2QC5Y4.jpg?height=300&width=400",
               },
               {
                 title: "Lemon Blueberry Muffins",
@@ -239,7 +239,7 @@ export default function RecipeLandingPage() {
                 time: "35 min",
                 rating: 4.6,
                 image:
-                  "/recipesImages/Aambyachi_Kadhi.jpg?height=300&width=400",
+                  "https://dwylojmkbggcdvus.public.blob.vercel-storage.com/Aambyachi_Kadhi-wb6mc5XAbj85CWIbR90p085O2QC5Y4.jpg?height=300&width=400",
               },
             ].map((recipe, index) => (
               <Card
