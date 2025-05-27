@@ -16,20 +16,84 @@ import { Separator } from "@/components/ui/separator";
 import { ChefHat, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsLoading(false);
-  };
+  const UserSchema = z
+    .object({
+      firstName: z.string().min(1, "First name is required"),
+      lastName: z.string().min(1, "Last name is required"),
+      email: z
+        .string()
+        .min(1, "Email is required")
+        .email("Invalid email address"),
 
+      password: z
+        .string()
+        .min(1, "Password is required")
+        .min(8, "Password is too short")
+        .max(20, "Password is too long"),
+      confirmPassword: z.string().min(1, "Please confirm your password"),
+      agreementAccepted: z.boolean().refine((val) => val === true, {
+        message: "Please accept the terms and conditions",
+      }),
+    })
+    .refine((value) => value.password === value.confirmPassword, {
+      message: "Password do not match",
+      path: ["confirmPassword"],
+    });
+
+  type IUserSchema = z.infer<typeof UserSchema>;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<IUserSchema>({ resolver: zodResolver(UserSchema) });
+  const onSubmit = async (values: IUserSchema) => {
+    try {
+      setIsLoading(true);
+      console.log("Starting API call with values:", values);
+
+      const response = await fetch("/api/signupUser", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+
+      console.log("Response status:", response.status);
+      console.log(
+        "Response headers:",
+        Object.fromEntries(response.headers.entries())
+      );
+
+      const responseData = await response.json();
+      console.log("Response data:", responseData);
+
+      if (!response.ok) {
+        throw new Error(responseData.message || "Something went wrong");
+      }
+
+      // Handle successful signup here (e.g., redirect to login)
+      console.log("Signup successful:", responseData);
+    } catch (error) {
+      console.error("Detailed error:", error);
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-green-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -54,66 +118,90 @@ export default function SignUpPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName" className="text-gray-700">
-                    First Name
+                    First Name <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                     <Input
-                      id="firstName"
+                      {...register("firstName")}
                       type="text"
                       placeholder="John"
                       className="pl-10 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
-                      required
                     />
                   </div>
+                  <Label>
+                    {errors.firstName && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.firstName.message}
+                      </p>
+                    )}
+                  </Label>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName" className="text-gray-700">
-                    Last Name
+                    Last Name <span className="text-red-500">*</span>
                   </Label>
                   <Input
-                    id="lastName"
+                    {...register("lastName")}
                     type="text"
                     placeholder="Doe"
                     className="border-gray-200 focus:border-orange-500 focus:ring-orange-500"
-                    required
                   />
+                  <Label>
+                    {errors.lastName && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.lastName.message}
+                      </p>
+                    )}
+                  </Label>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-gray-700">
-                  Email
+                  Email <span className="text-red-500">*</span>
                 </Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
-                    id="email"
+                    {...register("email")}
                     type="email"
                     placeholder="john@example.com"
                     className="pl-10 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
-                    required
                   />
+                  <Label>
+                    {errors.email && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.email.message}
+                      </p>
+                    )}
+                  </Label>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-gray-700">
-                  Password
+                  Password <span className="text-red-500">*</span>
                 </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
-                    id="password"
+                    {...register("password")}
                     type={showPassword ? "text" : "password"}
                     placeholder="Create a strong password"
                     className="pl-10 pr-10 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
-                    required
                   />
+                  <Label>
+                    {errors.password && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.password.message}
+                      </p>
+                    )}
+                  </Label>
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
@@ -130,17 +218,23 @@ export default function SignUpPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword" className="text-gray-700">
-                  Confirm Password
+                  Confirm Password <span className="text-red-500">*</span>
                 </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
-                    id="confirmPassword"
+                    {...register("confirmPassword")}
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Confirm your password"
                     className="pl-10 pr-10 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
-                    required
                   />
+                  <Label>
+                    {errors.confirmPassword && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.confirmPassword.message}
+                      </p>
+                    )}
+                  </Label>
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -155,13 +249,14 @@ export default function SignUpPage() {
                 </div>
               </div>
 
-              <div className="flex items-start space-x-2">
+              <div className="flex-1  items-start space-x-2">
                 <input
                   type="checkbox"
                   id="terms"
+                  {...register("agreementAccepted")}
                   className="mt-1 rounded border-gray-300 text-orange-500 focus:ring-orange-500"
-                  required
                 />
+
                 <label
                   htmlFor="terms"
                   className="text-sm text-gray-600 leading-relaxed"
@@ -178,9 +273,16 @@ export default function SignUpPage() {
                     href="/privacy"
                     className="text-orange-600 hover:text-orange-700"
                   >
-                    Privacy Policy
+                    Privacy Policy <span className="text-red-500">*</span>
                   </Link>
                 </label>
+                <Label>
+                  {errors.agreementAccepted && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.agreementAccepted.message}
+                    </p>
+                  )}
+                </Label>
               </div>
 
               <Button
@@ -206,7 +308,7 @@ export default function SignUpPage() {
             <div className="grid grid-cols-2 gap-4">
               <Button
                 variant="outline"
-                className="border-gray-200 hover:bg-gray-50"
+                className="border-gray-200 hover:bg-gray-50 cursor-pointer"
               >
                 <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
                   <path
@@ -230,7 +332,7 @@ export default function SignUpPage() {
               </Button>
               <Button
                 variant="outline"
-                className="border-gray-200 hover:bg-gray-50"
+                className="border-gray-200 hover:bg-gray-50 cursor-pointer"
               >
                 <svg
                   className="h-4 w-4 mr-2"

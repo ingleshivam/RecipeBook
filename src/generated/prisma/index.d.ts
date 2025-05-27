@@ -1918,33 +1918,33 @@ export namespace Prisma {
 
   export type UserMinAggregateOutputType = {
     userId: number | null
-    username: string | null
     email: string | null
     passwordHash: string | null
     firstName: string | null
     lastName: string | null
+    role: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
 
   export type UserMaxAggregateOutputType = {
     userId: number | null
-    username: string | null
     email: string | null
     passwordHash: string | null
     firstName: string | null
     lastName: string | null
+    role: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
 
   export type UserCountAggregateOutputType = {
     userId: number
-    username: number
     email: number
     passwordHash: number
     firstName: number
     lastName: number
+    role: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -1961,33 +1961,33 @@ export namespace Prisma {
 
   export type UserMinAggregateInputType = {
     userId?: true
-    username?: true
     email?: true
     passwordHash?: true
     firstName?: true
     lastName?: true
+    role?: true
     createdAt?: true
     updatedAt?: true
   }
 
   export type UserMaxAggregateInputType = {
     userId?: true
-    username?: true
     email?: true
     passwordHash?: true
     firstName?: true
     lastName?: true
+    role?: true
     createdAt?: true
     updatedAt?: true
   }
 
   export type UserCountAggregateInputType = {
     userId?: true
-    username?: true
     email?: true
     passwordHash?: true
     firstName?: true
     lastName?: true
+    role?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -2081,11 +2081,11 @@ export namespace Prisma {
 
   export type UserGroupByOutputType = {
     userId: number
-    username: string
     email: string
     passwordHash: string
     firstName: string | null
     lastName: string | null
+    role: string | null
     createdAt: Date
     updatedAt: Date
     _count: UserCountAggregateOutputType | null
@@ -2111,11 +2111,11 @@ export namespace Prisma {
 
   export type UserSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     userId?: boolean
-    username?: boolean
     email?: boolean
     passwordHash?: boolean
     firstName?: boolean
     lastName?: boolean
+    role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     recipes?: boolean | User$recipesArgs<ExtArgs>
@@ -2126,38 +2126,38 @@ export namespace Prisma {
 
   export type UserSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     userId?: boolean
-    username?: boolean
     email?: boolean
     passwordHash?: boolean
     firstName?: boolean
     lastName?: boolean
+    role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     userId?: boolean
-    username?: boolean
     email?: boolean
     passwordHash?: boolean
     firstName?: boolean
     lastName?: boolean
+    role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
     userId?: boolean
-    username?: boolean
     email?: boolean
     passwordHash?: boolean
     firstName?: boolean
     lastName?: boolean
+    role?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"userId" | "username" | "email" | "passwordHash" | "firstName" | "lastName" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"userId" | "email" | "passwordHash" | "firstName" | "lastName" | "role" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     recipes?: boolean | User$recipesArgs<ExtArgs>
     reviews?: boolean | User$reviewsArgs<ExtArgs>
@@ -2176,11 +2176,11 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       userId: number
-      username: string
       email: string
       passwordHash: string
       firstName: string | null
       lastName: string | null
+      role: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["user"]>
@@ -2610,11 +2610,11 @@ export namespace Prisma {
    */
   interface UserFieldRefs {
     readonly userId: FieldRef<"User", 'Int'>
-    readonly username: FieldRef<"User", 'String'>
     readonly email: FieldRef<"User", 'String'>
     readonly passwordHash: FieldRef<"User", 'String'>
     readonly firstName: FieldRef<"User", 'String'>
     readonly lastName: FieldRef<"User", 'String'>
+    readonly role: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
   }
@@ -13122,11 +13122,11 @@ export namespace Prisma {
 
   export const UserScalarFieldEnum: {
     userId: 'userId',
-    username: 'username',
     email: 'email',
     passwordHash: 'passwordHash',
     firstName: 'firstName',
     lastName: 'lastName',
+    role: 'role',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -13317,11 +13317,11 @@ export namespace Prisma {
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
     userId?: IntFilter<"User"> | number
-    username?: StringFilter<"User"> | string
     email?: StringFilter<"User"> | string
     passwordHash?: StringFilter<"User"> | string
     firstName?: StringNullableFilter<"User"> | string | null
     lastName?: StringNullableFilter<"User"> | string | null
+    role?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     recipes?: RecipeListRelationFilter
@@ -13331,11 +13331,11 @@ export namespace Prisma {
 
   export type UserOrderByWithRelationInput = {
     userId?: SortOrder
-    username?: SortOrder
     email?: SortOrder
     passwordHash?: SortOrder
     firstName?: SortOrderInput | SortOrder
     lastName?: SortOrderInput | SortOrder
+    role?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     recipes?: RecipeOrderByRelationAggregateInput
@@ -13345,7 +13345,6 @@ export namespace Prisma {
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
     userId?: number
-    username?: string
     email?: string
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
@@ -13353,20 +13352,21 @@ export namespace Prisma {
     passwordHash?: StringFilter<"User"> | string
     firstName?: StringNullableFilter<"User"> | string | null
     lastName?: StringNullableFilter<"User"> | string | null
+    role?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     recipes?: RecipeListRelationFilter
     reviews?: ReviewListRelationFilter
     favorites?: FavoriteListRelationFilter
-  }, "userId" | "username" | "email">
+  }, "userId" | "email">
 
   export type UserOrderByWithAggregationInput = {
     userId?: SortOrder
-    username?: SortOrder
     email?: SortOrder
     passwordHash?: SortOrder
     firstName?: SortOrderInput | SortOrder
     lastName?: SortOrderInput | SortOrder
+    role?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
@@ -13381,11 +13381,11 @@ export namespace Prisma {
     OR?: UserScalarWhereWithAggregatesInput[]
     NOT?: UserScalarWhereWithAggregatesInput | UserScalarWhereWithAggregatesInput[]
     userId?: IntWithAggregatesFilter<"User"> | number
-    username?: StringWithAggregatesFilter<"User"> | string
     email?: StringWithAggregatesFilter<"User"> | string
     passwordHash?: StringWithAggregatesFilter<"User"> | string
     firstName?: StringNullableWithAggregatesFilter<"User"> | string | null
     lastName?: StringNullableWithAggregatesFilter<"User"> | string | null
+    role?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
@@ -13892,11 +13892,11 @@ export namespace Prisma {
   }
 
   export type UserCreateInput = {
-    username: string
     email: string
     passwordHash: string
     firstName?: string | null
     lastName?: string | null
+    role?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     recipes?: RecipeCreateNestedManyWithoutUserInput
@@ -13906,11 +13906,11 @@ export namespace Prisma {
 
   export type UserUncheckedCreateInput = {
     userId?: number
-    username: string
     email: string
     passwordHash: string
     firstName?: string | null
     lastName?: string | null
+    role?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     recipes?: RecipeUncheckedCreateNestedManyWithoutUserInput
@@ -13919,11 +13919,11 @@ export namespace Prisma {
   }
 
   export type UserUpdateInput = {
-    username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     recipes?: RecipeUpdateManyWithoutUserNestedInput
@@ -13933,11 +13933,11 @@ export namespace Prisma {
 
   export type UserUncheckedUpdateInput = {
     userId?: IntFieldUpdateOperationsInput | number
-    username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     recipes?: RecipeUncheckedUpdateManyWithoutUserNestedInput
@@ -13947,32 +13947,32 @@ export namespace Prisma {
 
   export type UserCreateManyInput = {
     userId?: number
-    username: string
     email: string
     passwordHash: string
     firstName?: string | null
     lastName?: string | null
+    role?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type UserUpdateManyMutationInput = {
-    username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UserUncheckedUpdateManyInput = {
     userId?: IntFieldUpdateOperationsInput | number
-    username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -14512,11 +14512,11 @@ export namespace Prisma {
 
   export type UserCountOrderByAggregateInput = {
     userId?: SortOrder
-    username?: SortOrder
     email?: SortOrder
     passwordHash?: SortOrder
     firstName?: SortOrder
     lastName?: SortOrder
+    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -14527,22 +14527,22 @@ export namespace Prisma {
 
   export type UserMaxOrderByAggregateInput = {
     userId?: SortOrder
-    username?: SortOrder
     email?: SortOrder
     passwordHash?: SortOrder
     firstName?: SortOrder
     lastName?: SortOrder
+    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
     userId?: SortOrder
-    username?: SortOrder
     email?: SortOrder
     passwordHash?: SortOrder
     firstName?: SortOrder
     lastName?: SortOrder
+    role?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -16064,11 +16064,11 @@ export namespace Prisma {
   }
 
   export type UserCreateWithoutRecipesInput = {
-    username: string
     email: string
     passwordHash: string
     firstName?: string | null
     lastName?: string | null
+    role?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     reviews?: ReviewCreateNestedManyWithoutUserInput
@@ -16077,11 +16077,11 @@ export namespace Prisma {
 
   export type UserUncheckedCreateWithoutRecipesInput = {
     userId?: number
-    username: string
     email: string
     passwordHash: string
     firstName?: string | null
     lastName?: string | null
+    role?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     reviews?: ReviewUncheckedCreateNestedManyWithoutUserInput
@@ -16231,11 +16231,11 @@ export namespace Prisma {
   }
 
   export type UserUpdateWithoutRecipesInput = {
-    username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reviews?: ReviewUpdateManyWithoutUserNestedInput
@@ -16244,11 +16244,11 @@ export namespace Prisma {
 
   export type UserUncheckedUpdateWithoutRecipesInput = {
     userId?: IntFieldUpdateOperationsInput | number
-    username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     reviews?: ReviewUncheckedUpdateManyWithoutUserNestedInput
@@ -16670,11 +16670,11 @@ export namespace Prisma {
   }
 
   export type UserCreateWithoutReviewsInput = {
-    username: string
     email: string
     passwordHash: string
     firstName?: string | null
     lastName?: string | null
+    role?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     recipes?: RecipeCreateNestedManyWithoutUserInput
@@ -16683,11 +16683,11 @@ export namespace Prisma {
 
   export type UserUncheckedCreateWithoutReviewsInput = {
     userId?: number
-    username: string
     email: string
     passwordHash: string
     firstName?: string | null
     lastName?: string | null
+    role?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     recipes?: RecipeUncheckedCreateNestedManyWithoutUserInput
@@ -16749,11 +16749,11 @@ export namespace Prisma {
   }
 
   export type UserUpdateWithoutReviewsInput = {
-    username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     recipes?: RecipeUpdateManyWithoutUserNestedInput
@@ -16762,11 +16762,11 @@ export namespace Prisma {
 
   export type UserUncheckedUpdateWithoutReviewsInput = {
     userId?: IntFieldUpdateOperationsInput | number
-    username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     recipes?: RecipeUncheckedUpdateManyWithoutUserNestedInput
@@ -16818,11 +16818,11 @@ export namespace Prisma {
   }
 
   export type UserCreateWithoutFavoritesInput = {
-    username: string
     email: string
     passwordHash: string
     firstName?: string | null
     lastName?: string | null
+    role?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     recipes?: RecipeCreateNestedManyWithoutUserInput
@@ -16831,11 +16831,11 @@ export namespace Prisma {
 
   export type UserUncheckedCreateWithoutFavoritesInput = {
     userId?: number
-    username: string
     email: string
     passwordHash: string
     firstName?: string | null
     lastName?: string | null
+    role?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     recipes?: RecipeUncheckedCreateNestedManyWithoutUserInput
@@ -16897,11 +16897,11 @@ export namespace Prisma {
   }
 
   export type UserUpdateWithoutFavoritesInput = {
-    username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     recipes?: RecipeUpdateManyWithoutUserNestedInput
@@ -16910,11 +16910,11 @@ export namespace Prisma {
 
   export type UserUncheckedUpdateWithoutFavoritesInput = {
     userId?: IntFieldUpdateOperationsInput | number
-    username?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     passwordHash?: StringFieldUpdateOperationsInput | string
     firstName?: NullableStringFieldUpdateOperationsInput | string | null
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     recipes?: RecipeUncheckedUpdateManyWithoutUserNestedInput
