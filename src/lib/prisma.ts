@@ -1,18 +1,31 @@
 import { PrismaClient } from '@prisma/client';
+import { withAccelerate } from '@prisma/extension-accelerate'
 
 declare global {
-  var prisma: PrismaClient | undefined;
+  var prisma: ReturnType<typeof prismaWithExtensions> | undefined;
 }
 
-let prisma: PrismaClient;
+const prismaWithExtensions = () => {
+  return new PrismaClient().$extends(withAccelerate());
+};
+
+let prisma: ReturnType<typeof prismaWithExtensions>;
 
 if (process.env.NODE_ENV === 'production') {
-  prisma = new PrismaClient();
+  prisma = prismaWithExtensions();
 } else {
   if (!global.prisma) {
-    global.prisma = new PrismaClient();
+    global.prisma = prismaWithExtensions();
   }
   prisma = global.prisma;
 }
 
 export default prisma;
+
+
+
+
+
+
+
+
