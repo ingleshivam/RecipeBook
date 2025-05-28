@@ -16,8 +16,10 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ message: "User created successfully" }, { status: 201 });
     } catch (error) {
         if (error instanceof Error) {
+            console.log("Error :", error);
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
+        console.log("Error :", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }
