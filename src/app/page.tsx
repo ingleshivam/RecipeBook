@@ -1,3 +1,4 @@
+import { AuthStatus } from "@/components/auth/AuthStatus";
 import NavButton from "@/components/NavButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -50,7 +51,7 @@ export default function RecipeLandingPage() {
               About
             </Link>
             <div className=" flex gap-5">
-              <NavButton buttonName="SignIn" />
+              <AuthStatus />
               <NavButton buttonName="SignUp" />
             </div>
           </nav>
