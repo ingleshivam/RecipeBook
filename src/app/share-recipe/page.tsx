@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -34,22 +33,85 @@ import {
   Send,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import z from "zod";
+import { useForm, Controller } from "react-hook-form";
+import { ISOFormatOptions } from "date-fns";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function ShareRecipePage() {
+  const RecipeSchema = z.object({
+    category: z.string({ required_error: "Category is required" }),
+    recipeTitle: z.string().min(1, "Recipe title is required"),
+    recipeDescription: z
+      .string()
+      .min(1, "Recipe description is required")
+      .min(100, "Recipe description should be at least 100 characters long.")
+      .max(500, "Recipe description should not exceed 500 characters."),
+    prepTime: z.string().min(1, "Prep time is required"),
+    cookTime: z.string().min(1, "Cook time is required"),
+    servings: z.string().min(1, "Number of servings is required"),
+    difficulty: z.string({ required_error: "Difficulty is requied" }),
+    recipeFile: z
+      .instanceof(File, { message: "Recipe image is required" })
+      .refine(
+        (file) => file.size <= 2 * 1024 * 1024,
+        "Image size must be less than 2MB"
+      )
+      .refine(
+        (file) => ["image/jpeg", "image/jpg", "image/png"].includes(file.type),
+        "Only .jpeg. .jpg and .png files are supported"
+      ),
+    ingredients: z
+      .array(
+        z.object({
+          amount: z.string().min(1, "Amount is required"),
+          item: z.string().min(1, "Ingredient name is required"),
+        })
+      )
+      .min(1, "At least one ingredient is required"),
+    instructions: z
+      .array(z.string().min(1, "Instruction is required"))
+      .min(1, "At least one instruction is required"),
+  });
+
+  type IRecipeSchema = z.infer<typeof RecipeSchema>;
+
   const [ingredients, setIngredients] = useState([{ amount: "", item: "" }]);
   const [instructions, setInstructions] = useState([""]);
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [recipeFileName, setRecipeFileName] = useState("");
+  useEffect(() => {
+    setValue("ingredients", ingredients);
+    setValue("instructions", instructions);
+  }, []);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    control,
+    setValue,
+    watch,
+  } = useForm<IRecipeSchema>({
+    resolver: zodResolver(RecipeSchema),
+  });
+
+  const watchedIngredients = watch("ingredients");
+  const watchedInstructions = watch("instructions");
 
   const addIngredient = () => {
-    setIngredients([...ingredients, { amount: "", item: "" }]);
+    const newIngredients = [...ingredients, { amount: "", item: "" }];
+    setIngredients(newIngredients);
+    setValue("ingredients", newIngredients);
   };
 
   const removeIngredient = (index: number) => {
     if (ingredients.length > 1) {
-      setIngredients(ingredients.filter((_, i) => i !== index));
+      const newIngredients = ingredients.filter((_, i) => i !== index);
+      setIngredients(newIngredients);
+      setValue("ingredients", newIngredients);
     }
   };
 
@@ -62,21 +124,27 @@ export default function ShareRecipePage() {
       i === index ? { ...ing, [field]: value } : ing
     );
     setIngredients(updated);
+    setValue("ingredients", updated);
   };
 
   const addInstruction = () => {
-    setInstructions([...instructions, ""]);
+    const newInstructions = [...instructions, ""];
+    setInstructions(newInstructions);
+    setValue("instructions", newInstructions);
   };
 
   const removeInstruction = (index: number) => {
     if (instructions.length > 1) {
-      setInstructions(instructions.filter((_, i) => i !== index));
+      const newInstructions = instructions.filter((_, i) => i !== index);
+      setInstructions(newInstructions);
+      setValue("instructions", newInstructions);
     }
   };
 
   const updateInstruction = (index: number, value: string) => {
     const updated = instructions.map((inst, i) => (i === index ? value : inst));
     setInstructions(updated);
+    setValue("instructions", updated);
   };
 
   const addTag = () => {
@@ -90,19 +158,14 @@ export default function ShareRecipePage() {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsLoading(false);
-    // Show success message or redirect
+  const onSubmit = (values: IRecipeSchema) => {
+    console.log("Values : ", values);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-orange-100 sticky top-0 z-50">
+      <header className="bg-white/80 backdrop-blur-sm border-b border-orange-100 sticky top-0 z-50 px-30">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
             <ChefHat className="h-8 w-8 text-orange-500" />
@@ -119,7 +182,7 @@ export default function ShareRecipePage() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 px-35">
         {/* Back Button */}
         <Link
           href="/"
@@ -140,7 +203,7 @@ export default function ShareRecipePage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             {/* Basic Information */}
             <Card>
               <CardHeader>
@@ -153,107 +216,178 @@ export default function ShareRecipePage() {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="title" className="text-gray-700">
-                      Recipe Title *
+                      Recipe Title <Label className=" text-red-500">*</Label>{" "}
                     </Label>
                     <Input
                       id="title"
+                      {...register("recipeTitle")}
                       placeholder="e.g., Grandma's Chocolate Chip Cookies"
                       className="border-gray-200 focus:border-orange-500 focus:ring-orange-500"
-                      required
                     />
+                    <Label>
+                      {errors?.recipeTitle && (
+                        <p className="text-sm text-red-500 mt-1">
+                          {errors.recipeTitle.message}
+                        </p>
+                      )}
+                    </Label>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="category" className="text-gray-700">
-                      Category *
+                      Category <Label className=" text-red-500">*</Label>
                     </Label>
-                    <Select required>
-                      <SelectTrigger className="border-gray-200 focus:border-orange-500 focus:ring-orange-500">
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="appetizers">Appetizers</SelectItem>
-                        <SelectItem value="main-course">Main Course</SelectItem>
-                        <SelectItem value="desserts">Desserts</SelectItem>
-                        <SelectItem value="beverages">Beverages</SelectItem>
-                        <SelectItem value="snacks">Snacks</SelectItem>
-                        <SelectItem value="breakfast">Breakfast</SelectItem>
-                        <SelectItem value="lunch">Lunch</SelectItem>
-                        <SelectItem value="dinner">Dinner</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Controller
+                      name="category"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectTrigger className="border-gray-200 focus:border-orange-500 focus:ring-orange-500  w-full">
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="appetizers">
+                              Appetizers
+                            </SelectItem>
+                            <SelectItem value="main-course">
+                              Main Course
+                            </SelectItem>
+                            <SelectItem value="desserts">Desserts</SelectItem>
+                            <SelectItem value="beverages">Beverages</SelectItem>
+                            <SelectItem value="snacks">Snacks</SelectItem>
+                            <SelectItem value="breakfast">Breakfast</SelectItem>
+                            <SelectItem value="lunch">Lunch</SelectItem>
+                            <SelectItem value="dinner">Dinner</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    <Label>
+                      {errors?.category && (
+                        <p className="text-sm text-red-500 mt-1">
+                          {errors.category.message}
+                        </p>
+                      )}
+                    </Label>{" "}
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="description" className="text-gray-700">
-                    Description *
+                    Description <Label className=" text-red-500">*</Label>
                   </Label>
                   <Textarea
                     id="description"
+                    {...register("recipeDescription")}
                     placeholder="Describe your recipe, its origin, or what makes it special..."
                     className="border-gray-200 focus:border-orange-500 focus:ring-orange-500 min-h-24"
-                    required
                   />
+                  <Label>
+                    {errors?.recipeDescription && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {errors.recipeDescription.message}
+                      </p>
+                    )}
+                  </Label>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="prepTime" className="text-gray-700">
-                      Prep Time *
+                      Prep Time <Label className=" text-red-500">*</Label>
                     </Label>
                     <div className="relative">
                       <Clock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                       <Input
                         id="prepTime"
+                        {...register("prepTime")}
                         placeholder="15 min"
                         className="pl-10 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
-                        required
                       />
+                      <Label>
+                        {errors?.prepTime && (
+                          <p className="text-sm text-red-500 mt-3">
+                            {errors.prepTime.message}
+                          </p>
+                        )}
+                      </Label>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="cookTime" className="text-gray-700">
-                      Cook Time *
+                      Cook Time <Label className=" text-red-500">*</Label>
                     </Label>
                     <div className="relative">
                       <Clock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                       <Input
                         id="cookTime"
+                        {...register("cookTime")}
                         placeholder="25 min"
                         className="pl-10 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
-                        required
                       />
+                      <Label>
+                        {errors?.cookTime && (
+                          <p className="text-sm text-red-500 mt-3">
+                            {errors.cookTime.message}
+                          </p>
+                        )}
+                      </Label>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="servings" className="text-gray-700">
-                      Servings *
+                      Servings <Label className=" text-red-500">*</Label>
                     </Label>
                     <div className="relative">
                       <Users className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                       <Input
                         id="servings"
+                        {...register("servings")}
                         type="number"
                         placeholder="4"
                         className="pl-10 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
-                        required
                       />
+                      <Label>
+                        {errors?.servings && (
+                          <p className="text-sm text-red-500 mt-3">
+                            {errors.servings.message}
+                          </p>
+                        )}
+                      </Label>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="difficulty" className="text-gray-700">
-                      Difficulty *
+                      Difficulty <Label className=" text-red-500">*</Label>
                     </Label>
-                    <Select required>
-                      <SelectTrigger className="border-gray-200 focus:border-orange-500 focus:ring-orange-500">
-                        <SelectValue placeholder="Level" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="easy">Easy</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="hard">Hard</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Controller
+                      name="difficulty"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectTrigger className="w-full border-gray-200 focus:border-orange-500 focus:ring-orange-500">
+                            <SelectValue placeholder="Level" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="easy">Easy</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="hard">Hard</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    <Label>
+                      {errors?.difficulty && (
+                        <p className="text-sm text-red-500 mt-1">
+                          {errors.difficulty.message}
+                        </p>
+                      )}
+                    </Label>
                   </div>
                 </div>
               </CardContent>
@@ -270,16 +404,54 @@ export default function ShareRecipePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-orange-400 transition-colors">
-                  <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 mb-2">
-                    Click to upload or drag and drop
-                  </p>
-                  <p className="text-sm text-gray-500">PNG, JPG up to 10MB</p>
-                  <Button type="button" variant="outline" className="mt-4">
-                    Choose File
-                  </Button>
-                </div>
+                <Controller
+                  name="recipeFile"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-orange-400 transition-colors">
+                      <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600 mb-2">
+                        Click to upload or drag and drop
+                      </p>
+                      <p
+                        className={`text-sm ${
+                          recipeFileName ? "text-green-500" : "text-gray-500"
+                        }`}
+                      >
+                        {recipeFileName
+                          ? recipeFileName
+                          : "PNG, JPG up to 10MB"}
+                      </p>
+                      <input
+                        type="file"
+                        id="image-upload"
+                        hidden
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          field.onChange(file);
+                          setRecipeFileName(file?.name || "");
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() =>
+                          document.getElementById("image-upload")?.click()
+                        }
+                        className="mt-4"
+                      >
+                        Choose File
+                      </Button>
+                      <Label>
+                        {errors?.recipeFile && (
+                          <p className="w-full text-sm text-center  text-red-500 mt-1">
+                            {errors.recipeFile.message}
+                          </p>
+                        )}
+                      </Label>
+                    </div>
+                  )}
+                />
               </CardContent>
             </Card>
 
@@ -306,6 +478,13 @@ export default function ShareRecipePage() {
                         }
                         className="border-gray-200 focus:border-orange-500 focus:ring-orange-500"
                       />
+                      <Label>
+                        {errors.ingredients?.[index]?.amount && (
+                          <p className="text-sm text-red-500">
+                            {errors.ingredients[index]?.amount?.message}
+                          </p>
+                        )}
+                      </Label>
                     </div>
                     <div className="flex-[2] space-y-2">
                       <Label className="text-gray-700">Ingredient</Label>
@@ -317,6 +496,13 @@ export default function ShareRecipePage() {
                         }
                         className="border-gray-200 focus:border-orange-500 focus:ring-orange-500"
                       />
+                      <Label>
+                        {errors.ingredients?.[index]?.item && (
+                          <p className="text-sm text-red-500">
+                            {errors.ingredients[index]?.item?.message}
+                          </p>
+                        )}
+                      </Label>
                     </div>
                     <Button
                       type="button"
@@ -330,6 +516,11 @@ export default function ShareRecipePage() {
                     </Button>
                   </div>
                 ))}
+                {errors.ingredients && !Array.isArray(errors.ingredients) && (
+                  <p className="text-sm text-red-500">
+                    {errors.ingredients.message}
+                  </p>
+                )}
                 <Button
                   type="button"
                   variant="outline"
@@ -369,6 +560,11 @@ export default function ShareRecipePage() {
                         }
                         className="border-gray-200 focus:border-orange-500 focus:ring-orange-500 min-h-20"
                       />
+                      {errors.instructions?.[index] && (
+                        <p className="text-sm text-red-500">
+                          {errors.instructions[index]?.message}
+                        </p>
+                      )}
                     </div>
                     <Button
                       type="button"
@@ -382,6 +578,11 @@ export default function ShareRecipePage() {
                     </Button>
                   </div>
                 ))}
+                {errors.instructions && !Array.isArray(errors.instructions) && (
+                  <p className="text-sm text-red-500">
+                    {errors.instructions.message}
+                  </p>
+                )}
                 <Button
                   type="button"
                   variant="outline"

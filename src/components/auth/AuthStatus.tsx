@@ -59,7 +59,7 @@ export function AuthStatus() {
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="cursor-pointer border-none p-0 outline-none"
+            className="cursor-pointer border-none p-0 outline-none bg-transparent"
           >
             {session?.user?.image ? (
               <Avatar>
@@ -80,7 +80,7 @@ export function AuthStatus() {
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56">
+        <DropdownMenuContent className="w-56 mt-4">
           <DropdownMenuLabel>{session?.user?.name}</DropdownMenuLabel>
           <DropdownMenuItem>{session?.user?.email}</DropdownMenuItem>
           <DropdownMenuSeparator />

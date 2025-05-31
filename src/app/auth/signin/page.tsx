@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,17 +15,17 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ChefHat, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
 import z from "zod";
 import { useForm } from "react-hook-form";
-import Email from "next-auth/providers/email";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { error } from "console";
 
-export default function SignInPage() {
+function SignInPageContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const error = searchParams.get("error");
 
   const LoginSchema = z.object({
     email: z
@@ -46,11 +46,21 @@ export default function SignInPage() {
   });
 
   const onSubmit = async (values: ILoginSchema) => {
-    await signIn("credentials", {
-      email: values.email,
-      password: values.password,
-    });
+    try {
+      setIsLoading(true);
+      const result = await signIn("credentials", {
+        email: values.email,
+        password: values.password,
+        redirect: true,
+        callbackUrl: "/",
+      });
+    } catch (error) {
+      console.error("Sign in error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-green-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -77,6 +87,21 @@ export default function SignInPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {error && (
+              <div
+                className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded relative"
+                role="alert"
+              >
+                <span className="block sm:inline">
+                  {error === "Invalid password" &&
+                    "Invalid password. Please try again."}
+                  {error === "No user found with this email" &&
+                    "No account found with this email."}
+                  {error === "Email and password required" &&
+                    "Please enter both email and password."}
+                </span>
+              </div>
+            )}
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-gray-700">
@@ -224,5 +249,13 @@ export default function SignInPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={"Loading..."}>
+      <SignInPageContent />
+    </Suspense>
   );
 }

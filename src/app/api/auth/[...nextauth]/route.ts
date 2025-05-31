@@ -54,25 +54,46 @@ const handler = NextAuth({
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/auth/signin",
-    error: "/auth/error",
+    error: "/auth/signin",
   },
   callbacks: {
+    async signIn({ user, account, profile, email, credentials }) {
+      if (account?.provider === "github") {
+        const existingUser = await prisma.user.findUnique({
+          where: { email: user.email! }
+        });
+
+        if (!existingUser) {
+          await prisma.user.create({
+            data: {
+              email: user.email!,
+              firstName: user.name?.split(' ')[0] || '',
+              lastName: user.name?.split(' ')[1] || '',
+              role: "U",
+              passwordHash: await bcrypt.hash(Math.random().toString(36), 10)
+            }
+          });
+        }
+      }
+
+      return true;
+    },
     async redirect({ url, baseUrl }) {
       return baseUrl;
     },
     async session({ session, token }) {
-      if (session.user) {
+      if (session.user) { 
         session.user.id = token.sub;
       }
-      console.log("session :", session);
+      console.log("Session : ", session);
+
       return session;
     },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
       }
-      console.log("token :", token);
-
+      console.log("Token : ", token);
       return token;
     }
   },

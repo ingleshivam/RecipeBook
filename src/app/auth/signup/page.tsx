@@ -19,8 +19,10 @@ import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 
 export default function SignUpPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -69,21 +71,12 @@ export default function SignUpPage() {
         body: JSON.stringify(values),
       });
 
-      console.log("Response status:", response.status);
-      console.log(
-        "Response headers:",
-        Object.fromEntries(response.headers.entries())
-      );
-
       const responseData = await response.json();
-      console.log("Response data:", responseData);
 
       if (!response.ok) {
         throw new Error(responseData.message || "Something went wrong");
       }
-
-      // Handle successful signup here (e.g., redirect to login)
-      console.log("Signup successful:", responseData);
+      router.push("/auth/signin");
     } catch (error) {
       console.error("Detailed error:", error);
       if (error instanceof Error) {
