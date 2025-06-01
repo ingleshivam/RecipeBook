@@ -38,6 +38,7 @@ import z from "zod";
 import { useForm, Controller } from "react-hook-form";
 import { ISOFormatOptions } from "date-fns";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 
 export default function ShareRecipePage() {
   const RecipeSchema = z.object({
@@ -73,6 +74,13 @@ export default function ShareRecipePage() {
     instructions: z
       .array(z.string().min(1, "Instruction is required"))
       .min(1, "At least one instruction is required"),
+    tips: z.string().optional(),
+    calorie: z.string().optional(),
+    fat: z.string().optional(),
+    carbs: z.string().optional(),
+    protein: z.string().optional(),
+    sugar: z.string().optional(),
+    fiber: z.string().optional(),
   });
 
   type IRecipeSchema = z.infer<typeof RecipeSchema>;
@@ -158,8 +166,53 @@ export default function ShareRecipePage() {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
-  const onSubmit = (values: IRecipeSchema) => {
+  const onSubmit = async (values: IRecipeSchema) => {
     console.log("Values : ", values);
+    try {
+      const formData = new FormData();
+      formData.append("file", values.recipeFile);
+
+      const uploadResponse = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const uploadData = await uploadResponse.json();
+
+      if (!uploadResponse.ok) {
+        toast.error("Error", {
+          description: uploadData.message.error,
+        });
+        return;
+      }
+      const newValues = {
+        ...values,
+        tags: tags,
+        imageUrl: uploadData.message.url,
+      };
+
+      const response = await fetch("/api/addRecipe", {
+        body: JSON.stringify(newValues),
+        method: "POST",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error("Error", {
+          description: data.message.error,
+        });
+        return;
+      }
+
+      toast.success("Success", {
+        description: data.message.success,
+      });
+    } catch (error) {
+      toast.error("Error", {
+        description: "An unexpected error occurred",
+      });
+    }
   };
 
   return (
@@ -202,458 +255,526 @@ export default function ShareRecipePage() {
               be reviewed before being published.
             </p>
           </div>
-
+        </div>
+        <div>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-            {/* Basic Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl text-gray-800">
-                  Basic Information
-                </CardTitle>
-                <CardDescription>Tell us about your recipe</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="title" className="text-gray-700">
-                      Recipe Title <Label className=" text-red-500">*</Label>{" "}
-                    </Label>
-                    <Input
-                      id="title"
-                      {...register("recipeTitle")}
-                      placeholder="e.g., Grandma's Chocolate Chip Cookies"
-                      className="border-gray-200 focus:border-orange-500 focus:ring-orange-500"
-                    />
-                    <Label>
-                      {errors?.recipeTitle && (
-                        <p className="text-sm text-red-500 mt-1">
-                          {errors.recipeTitle.message}
+            <div className="grid grid-cols-6 gap-4">
+              {/* Recipe Image */}
+              <Card className="col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-xl text-gray-800">
+                    Recipe Image
+                  </CardTitle>
+                  <CardDescription>
+                    Upload a photo of your finished dish
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Controller
+                    name="recipeFile"
+                    control={control}
+                    render={({ field }) => (
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-orange-400 transition-colors">
+                        <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600 mb-2">
+                          Click to upload or drag and drop
                         </p>
-                      )}
-                    </Label>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="category" className="text-gray-700">
-                      Category <Label className=" text-red-500">*</Label>
-                    </Label>
-                    <Controller
-                      name="category"
-                      control={control}
-                      render={({ field }) => (
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
+                        <p
+                          className={`text-sm ${
+                            recipeFileName ? "text-green-500" : "text-gray-500"
+                          }`}
                         >
-                          <SelectTrigger className="border-gray-200 focus:border-orange-500 focus:ring-orange-500  w-full">
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="appetizers">
-                              Appetizers
-                            </SelectItem>
-                            <SelectItem value="main-course">
-                              Main Course
-                            </SelectItem>
-                            <SelectItem value="desserts">Desserts</SelectItem>
-                            <SelectItem value="beverages">Beverages</SelectItem>
-                            <SelectItem value="snacks">Snacks</SelectItem>
-                            <SelectItem value="breakfast">Breakfast</SelectItem>
-                            <SelectItem value="lunch">Lunch</SelectItem>
-                            <SelectItem value="dinner">Dinner</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      )}
-                    />
-                    <Label>
-                      {errors?.category && (
-                        <p className="text-sm text-red-500 mt-1">
-                          {errors.category.message}
+                          {recipeFileName
+                            ? recipeFileName
+                            : "PNG, JPG up to 10MB"}
                         </p>
-                      )}
-                    </Label>{" "}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description" className="text-gray-700">
-                    Description <Label className=" text-red-500">*</Label>
-                  </Label>
-                  <Textarea
-                    id="description"
-                    {...register("recipeDescription")}
-                    placeholder="Describe your recipe, its origin, or what makes it special..."
-                    className="border-gray-200 focus:border-orange-500 focus:ring-orange-500 min-h-24"
-                  />
-                  <Label>
-                    {errors?.recipeDescription && (
-                      <p className="text-sm text-red-500 mt-1">
-                        {errors.recipeDescription.message}
-                      </p>
+                        <input
+                          type="file"
+                          id="image-upload"
+                          hidden
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            field.onChange(file);
+                            setRecipeFileName(file?.name || "");
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() =>
+                            document.getElementById("image-upload")?.click()
+                          }
+                          className="mt-4"
+                        >
+                          Choose File
+                        </Button>
+                        <Label>
+                          {errors?.recipeFile && (
+                            <p className="w-full text-sm text-center  text-red-500 mt-1">
+                              {errors.recipeFile.message}
+                            </p>
+                          )}
+                        </Label>
+                      </div>
                     )}
-                  </Label>
-                </div>
+                  />
+                </CardContent>
+              </Card>
+              {/* Basic Information */}
+              <Card className="col-span-4">
+                <CardHeader>
+                  <CardTitle className="text-xl text-gray-800">
+                    Basic Information
+                  </CardTitle>
+                  <CardDescription>Tell us about your recipe</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="title" className="text-gray-700">
+                        Recipe Title <Label className=" text-red-500">*</Label>{" "}
+                      </Label>
+                      <Input
+                        id="title"
+                        {...register("recipeTitle")}
+                        placeholder="e.g., Grandma's Chocolate Chip Cookies"
+                        className="border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                      />
+                      <Label>
+                        {errors?.recipeTitle && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {errors.recipeTitle.message}
+                          </p>
+                        )}
+                      </Label>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="category" className="text-gray-700">
+                        Category <Label className=" text-red-500">*</Label>
+                      </Label>
+                      <Controller
+                        name="category"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <SelectTrigger className="border-gray-200 focus:border-orange-500 focus:ring-orange-500  w-full">
+                              <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="appetizers">
+                                Appetizers
+                              </SelectItem>
+                              <SelectItem value="main-course">
+                                Main Course
+                              </SelectItem>
+                              <SelectItem value="desserts">Desserts</SelectItem>
+                              <SelectItem value="beverages">
+                                Beverages
+                              </SelectItem>
+                              <SelectItem value="snacks">Snacks</SelectItem>
+                              <SelectItem value="breakfast">
+                                Breakfast
+                              </SelectItem>
+                              <SelectItem value="lunch">Lunch</SelectItem>
+                              <SelectItem value="dinner">Dinner</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                      <Label>
+                        {errors?.category && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {errors.category.message}
+                          </p>
+                        )}
+                      </Label>{" "}
+                    </div>
+                  </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="prepTime" className="text-gray-700">
-                      Prep Time <Label className=" text-red-500">*</Label>
+                    <Label htmlFor="description" className="text-gray-700">
+                      Description <Label className=" text-red-500">*</Label>
                     </Label>
-                    <div className="relative">
-                      <Clock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        id="prepTime"
-                        {...register("prepTime")}
-                        placeholder="15 min"
-                        className="pl-10 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
-                      />
-                      <Label>
-                        {errors?.prepTime && (
-                          <p className="text-sm text-red-500 mt-3">
-                            {errors.prepTime.message}
-                          </p>
-                        )}
-                      </Label>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cookTime" className="text-gray-700">
-                      Cook Time <Label className=" text-red-500">*</Label>
-                    </Label>
-                    <div className="relative">
-                      <Clock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        id="cookTime"
-                        {...register("cookTime")}
-                        placeholder="25 min"
-                        className="pl-10 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
-                      />
-                      <Label>
-                        {errors?.cookTime && (
-                          <p className="text-sm text-red-500 mt-3">
-                            {errors.cookTime.message}
-                          </p>
-                        )}
-                      </Label>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="servings" className="text-gray-700">
-                      Servings <Label className=" text-red-500">*</Label>
-                    </Label>
-                    <div className="relative">
-                      <Users className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        id="servings"
-                        {...register("servings")}
-                        type="number"
-                        placeholder="4"
-                        className="pl-10 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
-                      />
-                      <Label>
-                        {errors?.servings && (
-                          <p className="text-sm text-red-500 mt-3">
-                            {errors.servings.message}
-                          </p>
-                        )}
-                      </Label>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="difficulty" className="text-gray-700">
-                      Difficulty <Label className=" text-red-500">*</Label>
-                    </Label>
-                    <Controller
-                      name="difficulty"
-                      control={control}
-                      render={({ field }) => (
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <SelectTrigger className="w-full border-gray-200 focus:border-orange-500 focus:ring-orange-500">
-                            <SelectValue placeholder="Level" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="easy">Easy</SelectItem>
-                            <SelectItem value="medium">Medium</SelectItem>
-                            <SelectItem value="hard">Hard</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      )}
+                    <Textarea
+                      id="description"
+                      {...register("recipeDescription")}
+                      placeholder="Describe your recipe, its origin, or what makes it special..."
+                      className="border-gray-200 focus:border-orange-500 focus:ring-orange-500 min-h-24"
                     />
                     <Label>
-                      {errors?.difficulty && (
+                      {errors?.recipeDescription && (
                         <p className="text-sm text-red-500 mt-1">
-                          {errors.difficulty.message}
+                          {errors.recipeDescription.message}
                         </p>
                       )}
                     </Label>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
 
-            {/* Recipe Image */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl text-gray-800">
-                  Recipe Image
-                </CardTitle>
-                <CardDescription>
-                  Upload a photo of your finished dish
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Controller
-                  name="recipeFile"
-                  control={control}
-                  render={({ field }) => (
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-orange-400 transition-colors">
-                      <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600 mb-2">
-                        Click to upload or drag and drop
-                      </p>
-                      <p
-                        className={`text-sm ${
-                          recipeFileName ? "text-green-500" : "text-gray-500"
-                        }`}
-                      >
-                        {recipeFileName
-                          ? recipeFileName
-                          : "PNG, JPG up to 10MB"}
-                      </p>
-                      <input
-                        type="file"
-                        id="image-upload"
-                        hidden
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          field.onChange(file);
-                          setRecipeFileName(file?.name || "");
-                        }}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="prepTime" className="text-gray-700">
+                        Prep Time <Label className=" text-red-500">*</Label>
+                      </Label>
+                      <div className="relative">
+                        <Clock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input
+                          id="prepTime"
+                          {...register("prepTime")}
+                          placeholder="15 min"
+                          className="pl-10 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                        />
+                        <Label>
+                          {errors?.prepTime && (
+                            <p className="text-sm text-red-500 mt-3">
+                              {errors.prepTime.message}
+                            </p>
+                          )}
+                        </Label>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="cookTime" className="text-gray-700">
+                        Cook Time <Label className=" text-red-500">*</Label>
+                      </Label>
+                      <div className="relative">
+                        <Clock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input
+                          id="cookTime"
+                          {...register("cookTime")}
+                          placeholder="25 min"
+                          className="pl-10 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                        />
+                        <Label>
+                          {errors?.cookTime && (
+                            <p className="text-sm text-red-500 mt-3">
+                              {errors.cookTime.message}
+                            </p>
+                          )}
+                        </Label>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="servings" className="text-gray-700">
+                        Servings <Label className=" text-red-500">*</Label>
+                      </Label>
+                      <div className="relative">
+                        <Users className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input
+                          id="servings"
+                          {...register("servings")}
+                          type="number"
+                          placeholder="4"
+                          className="pl-10 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                        />
+                        <Label>
+                          {errors?.servings && (
+                            <p className="text-sm text-red-500 mt-3">
+                              {errors.servings.message}
+                            </p>
+                          )}
+                        </Label>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="difficulty" className="text-gray-700">
+                        Difficulty <Label className=" text-red-500">*</Label>
+                      </Label>
+                      <Controller
+                        name="difficulty"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <SelectTrigger className="w-full border-gray-200 focus:border-orange-500 focus:ring-orange-500">
+                              <SelectValue placeholder="Level" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="easy">Easy</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="hard">Hard</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
                       />
+                      <Label>
+                        {errors?.difficulty && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {errors.difficulty.message}
+                          </p>
+                        )}
+                      </Label>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="grid grid-cols-6 gap-4">
+              {/* Ingredients */}
+              <Card className="col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-xl text-gray-800">
+                    Ingredients
+                  </CardTitle>
+                  <CardDescription>
+                    List all ingredients with their amounts
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {ingredients.map((ingredient, index) => (
+                    <div key={index} className="flex gap-4 items-end">
+                      <div className="flex-1 space-y-2">
+                        <Label className="text-gray-700">Amount</Label>
+                        <Input
+                          placeholder="1 cup"
+                          value={ingredient.amount}
+                          onChange={(e) =>
+                            updateIngredient(index, "amount", e.target.value)
+                          }
+                          className="border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                        />
+                        <Label>
+                          {errors.ingredients?.[index]?.amount && (
+                            <p className="text-sm text-red-500">
+                              {errors.ingredients[index]?.amount?.message}
+                            </p>
+                          )}
+                        </Label>
+                      </div>
+                      <div className="flex-[2] space-y-2">
+                        <Label className="text-gray-700">Ingredient</Label>
+                        <Input
+                          placeholder="all-purpose flour"
+                          value={ingredient.item}
+                          onChange={(e) =>
+                            updateIngredient(index, "item", e.target.value)
+                          }
+                          className="border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                        />
+                        <Label>
+                          {errors.ingredients?.[index]?.item && (
+                            <p className="text-sm text-red-500">
+                              {errors.ingredients[index]?.item?.message}
+                            </p>
+                          )}
+                        </Label>
+                      </div>
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() =>
-                          document.getElementById("image-upload")?.click()
-                        }
-                        className="mt-4"
+                        size="sm"
+                        onClick={() => removeIngredient(index)}
+                        disabled={ingredients.length === 1}
+                        className="mb-0"
                       >
-                        Choose File
+                        <Minus className="h-4 w-4" />
                       </Button>
-                      <Label>
-                        {errors?.recipeFile && (
-                          <p className="w-full text-sm text-center  text-red-500 mt-1">
-                            {errors.recipeFile.message}
-                          </p>
-                        )}
-                      </Label>
                     </div>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Ingredients */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl text-gray-800">
-                  Ingredients
-                </CardTitle>
-                <CardDescription>
-                  List all ingredients with their amounts
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {ingredients.map((ingredient, index) => (
-                  <div key={index} className="flex gap-4 items-end">
-                    <div className="flex-1 space-y-2">
-                      <Label className="text-gray-700">Amount</Label>
-                      <Input
-                        placeholder="1 cup"
-                        value={ingredient.amount}
-                        onChange={(e) =>
-                          updateIngredient(index, "amount", e.target.value)
-                        }
-                        className="border-gray-200 focus:border-orange-500 focus:ring-orange-500"
-                      />
-                      <Label>
-                        {errors.ingredients?.[index]?.amount && (
-                          <p className="text-sm text-red-500">
-                            {errors.ingredients[index]?.amount?.message}
-                          </p>
-                        )}
-                      </Label>
-                    </div>
-                    <div className="flex-[2] space-y-2">
-                      <Label className="text-gray-700">Ingredient</Label>
-                      <Input
-                        placeholder="all-purpose flour"
-                        value={ingredient.item}
-                        onChange={(e) =>
-                          updateIngredient(index, "item", e.target.value)
-                        }
-                        className="border-gray-200 focus:border-orange-500 focus:ring-orange-500"
-                      />
-                      <Label>
-                        {errors.ingredients?.[index]?.item && (
-                          <p className="text-sm text-red-500">
-                            {errors.ingredients[index]?.item?.message}
-                          </p>
-                        )}
-                      </Label>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => removeIngredient(index)}
-                      disabled={ingredients.length === 1}
-                      className="mb-0"
-                    >
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-                {errors.ingredients && !Array.isArray(errors.ingredients) && (
-                  <p className="text-sm text-red-500">
-                    {errors.ingredients.message}
-                  </p>
-                )}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={addIngredient}
-                  className="w-full border-orange-200 text-orange-600 hover:bg-orange-50"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Ingredient
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Instructions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl text-gray-800">
-                  Instructions
-                </CardTitle>
-                <CardDescription>
-                  Step-by-step cooking instructions
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {instructions.map((instruction, index) => (
-                  <div key={index} className="flex gap-4 items-start">
-                    <div className="flex-shrink-0 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-semibold text-sm mt-2">
-                      {index + 1}
-                    </div>
-                    <div className="flex-1 space-y-2">
-                      <Textarea
-                        placeholder={`Step ${
-                          index + 1
-                        }: Describe what to do...`}
-                        value={instruction}
-                        onChange={(e) =>
-                          updateInstruction(index, e.target.value)
-                        }
-                        className="border-gray-200 focus:border-orange-500 focus:ring-orange-500 min-h-20"
-                      />
-                      {errors.instructions?.[index] && (
+                  ))}
+                  <Label>
+                    {errors.ingredients &&
+                      !Array.isArray(errors.ingredients) && (
                         <p className="text-sm text-red-500">
-                          {errors.instructions[index]?.message}
+                          {errors.ingredients.message}
                         </p>
                       )}
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => removeInstruction(index)}
-                      disabled={instructions.length === 1}
-                      className="mt-2"
-                    >
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-                {errors.instructions && !Array.isArray(errors.instructions) && (
-                  <p className="text-sm text-red-500">
-                    {errors.instructions.message}
-                  </p>
-                )}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={addInstruction}
-                  className="w-full border-orange-200 text-orange-600 hover:bg-orange-50"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Step
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Tags and Additional Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl text-gray-800">
-                  Tags & Additional Info
-                </CardTitle>
-                <CardDescription>
-                  Help others discover your recipe
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label className="text-gray-700">Tags</Label>
-                  <div className="flex gap-2 mb-2 flex-wrap">
-                    {tags.map((tag) => (
-                      <Badge
-                        key={tag}
-                        variant="secondary"
-                        className="bg-orange-100 text-orange-700"
-                      >
-                        {tag}
-                        <button
-                          type="button"
-                          onClick={() => removeTag(tag)}
-                          className="ml-2 hover:text-orange-900"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Add a tag (e.g., vegetarian, quick, comfort-food)"
-                      value={newTag}
-                      onChange={(e) => setNewTag(e.target.value)}
-                      onKeyPress={(e) =>
-                        e.key === "Enter" && (e.preventDefault(), addTag())
-                      }
-                      className="border-gray-200 focus:border-orange-500 focus:ring-orange-500"
-                    />
-                    <Button type="button" onClick={addTag} variant="outline">
-                      Add
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="tips" className="text-gray-700">
-                    Chef's Tips (Optional)
                   </Label>
-                  <Textarea
-                    id="tips"
-                    placeholder="Share any helpful tips, substitutions, or variations..."
-                    className="border-gray-200 focus:border-orange-500 focus:ring-orange-500 min-h-24"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={addIngredient}
+                    className="w-full border-orange-200 text-orange-600 hover:bg-orange-50"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Ingredient
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Instructions */}
+              <Card className="col-span-4">
+                <CardHeader>
+                  <CardTitle className="text-xl text-gray-800">
+                    Instructions
+                  </CardTitle>
+                  <CardDescription>
+                    Step-by-step cooking instructions
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {instructions.map((instruction, index) => (
+                    <div key={index} className="flex gap-4 items-start">
+                      <div className="flex-shrink-0 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-semibold text-sm mt-2">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <Textarea
+                          placeholder={`Step ${
+                            index + 1
+                          }: Describe what to do...`}
+                          value={instruction}
+                          onChange={(e) =>
+                            updateInstruction(index, e.target.value)
+                          }
+                          className="border-gray-200 focus:border-orange-500 focus:ring-orange-500 min-h-20"
+                        />
+                        <Label>
+                          {errors.instructions?.[index] && (
+                            <p className="text-sm text-red-500">
+                              {errors.instructions[index]?.message}
+                            </p>
+                          )}
+                        </Label>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeInstruction(index)}
+                        disabled={instructions.length === 1}
+                        className="mt-2"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Label>
+                    {errors.instructions &&
+                      !Array.isArray(errors.instructions) && (
+                        <p className="text-sm text-red-500">
+                          {errors.instructions.message}
+                        </p>
+                      )}
+                  </Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={addInstruction}
+                    className="w-full border-orange-200 text-orange-600 hover:bg-orange-50"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Step
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="grid grid-cols-6 gap-4">
+              {/* Nutrition Information */}
+              <Card className="col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-xl text-gray-800">
+                    Nutrition Information
+                  </CardTitle>
+                  <CardDescription>
+                    Help others make informed food choices.{" "}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-2">
+                      <Label className="text-gray-700">Calories</Label>
+                      <div className="flex gap-2 mb-2 flex-wrap">
+                        <Input placeholder="180" {...register("calorie")} />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-gray-700">Fat</Label>
+                      <div className="flex gap-2 mb-2 flex-wrap">
+                        <Input placeholder="8gm" {...register("fat")} />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-gray-700">Carbs</Label>
+                      <div className="flex gap-2 mb-2 flex-wrap">
+                        <Input placeholder="26gm" {...register("carbs")} />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-gray-700">Protein</Label>
+                      <div className="flex gap-2 mb-2 flex-wrap">
+                        <Input placeholder="2gm" {...register("protein")} />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-gray-700">Sugar</Label>
+                      <div className="flex gap-2 mb-2 flex-wrap">
+                        <Input placeholder="18gm" {...register("sugar")} />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-gray-700">Fiber</Label>
+                      <div className="flex gap-2 mb-2 flex-wrap">
+                        <Input placeholder="3gm" {...register("fiber")} />
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              {/* Tags and Additional Info */}
+              <Card className="col-span-4">
+                <CardHeader>
+                  <CardTitle className="text-xl text-gray-800">
+                    Tags & Additional Info
+                  </CardTitle>
+                  <CardDescription>
+                    Help others discover your recipe
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <Label className="text-gray-700">Tags</Label>
+                    <div className="flex gap-2 mb-2 flex-wrap">
+                      {tags.map((tag) => (
+                        <Badge
+                          key={tag}
+                          variant="secondary"
+                          className="bg-orange-100 text-orange-700"
+                        >
+                          {tag}
+                          <button
+                            type="button"
+                            onClick={() => removeTag(tag)}
+                            className="ml-2 hover:text-orange-900"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Add a tag (e.g., vegetarian, quick, comfort-food)"
+                        value={newTag}
+                        onChange={(e) => setNewTag(e.target.value)}
+                        onKeyPress={(e) =>
+                          e.key === "Enter" && (e.preventDefault(), addTag())
+                        }
+                        className="border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                      />
+                      <Button type="button" onClick={addTag} variant="outline">
+                        Add
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="tips" className="text-gray-700">
+                      Chef's Tips (Optional)
+                    </Label>
+                    <Textarea
+                      id="tips"
+                      {...register("tips")}
+                      placeholder="Share any helpful tips, substitutions, or variations..."
+                      className="border-gray-200 focus:border-orange-500 focus:ring-orange-500 min-h-24"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
             {/* Submit Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

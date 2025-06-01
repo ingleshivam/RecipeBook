@@ -28,6 +28,18 @@ model User {
   favorites   Favorite[]  
 }
 
+model NutritionInfo {
+  nutritionId Int      @id @default(autoincrement())
+  calorie    String?
+  fat        String?
+  carbs      String?
+  protein    String?
+  sugar      String?
+  fiber      String?
+  recipe     Recipe?  @relation(fields: [recipeId], references: [recipeId])
+  recipeId   Int?     @unique
+}
+
 model Category {
   categoryId          Int       @id @default(autoincrement())
   name        String    @unique
@@ -48,6 +60,7 @@ model Recipe {
   category    Category  @relation(fields: [categoryId], references: [categoryId])
   userId      Int?
   user        User?     @relation(fields: [userId], references: [userId])
+  nutritionInfo NutritionInfo?
   ingredients RecipeIngredient[]
   tags        RecipeTag[]
   reviews     Review[]
@@ -61,8 +74,6 @@ model Ingredient {
   description String?
   recipeIngredients RecipeIngredient[]
 }
-
-
 
 model RecipeIngredient {
   recipeId    Int
