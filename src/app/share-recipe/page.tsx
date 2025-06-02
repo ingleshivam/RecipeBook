@@ -39,7 +39,10 @@ import { useForm, Controller } from "react-hook-form";
 import { ISOFormatOptions } from "date-fns";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import useSWR from "swr";
+import { BlobData } from "@/types/blobData";
 
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function ShareRecipePage() {
   const RecipeSchema = z.object({
     category: z.string({ required_error: "Category is required" }),
@@ -84,6 +87,12 @@ export default function ShareRecipePage() {
   });
 
   type IRecipeSchema = z.infer<typeof RecipeSchema>;
+
+  const {
+    data: blobData,
+    isLoading: isGettingBlobData,
+    error: blobErrors,
+  } = useSWR<BlobData>("/api/getBlobs", fetcher);
 
   const [ingredients, setIngredients] = useState([{ amount: "", item: "" }]);
   const [instructions, setInstructions] = useState([""]);
@@ -167,7 +176,15 @@ export default function ShareRecipePage() {
   };
 
   const onSubmit = async (values: IRecipeSchema) => {
-    console.log("Values : ", values);
+    if (isGettingBlobData) {
+      toast.warning("Please wait while we prepare the upload...");
+      return;
+    }
+    console.log("blobData : ", blobData);
+    console.log(
+      "Blob data : ",
+      blobData?.blobs.some((val) => val.pathname === values.recipeFile.name)
+    );
     try {
       const formData = new FormData();
       formData.append("file", values.recipeFile);
@@ -364,22 +381,14 @@ export default function ShareRecipePage() {
                               <SelectValue placeholder="Select a category" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="appetizers">
-                                Appetizers
-                              </SelectItem>
-                              <SelectItem value="main-course">
-                                Main Course
-                              </SelectItem>
-                              <SelectItem value="desserts">Desserts</SelectItem>
-                              <SelectItem value="beverages">
-                                Beverages
-                              </SelectItem>
-                              <SelectItem value="snacks">Snacks</SelectItem>
-                              <SelectItem value="breakfast">
-                                Breakfast
-                              </SelectItem>
-                              <SelectItem value="lunch">Lunch</SelectItem>
-                              <SelectItem value="dinner">Dinner</SelectItem>
+                              <SelectItem value="1">Appetizers</SelectItem>
+                              <SelectItem value="2">Main Course</SelectItem>
+                              <SelectItem value="3">Desserts</SelectItem>
+                              <SelectItem value="4">Beverages</SelectItem>
+                              <SelectItem value="5">Snacks</SelectItem>
+                              <SelectItem value="6">Breakfast</SelectItem>
+                              <SelectItem value="7">Lunch</SelectItem>
+                              <SelectItem value="8">Dinner</SelectItem>
                             </SelectContent>
                           </Select>
                         )}
@@ -494,9 +503,9 @@ export default function ShareRecipePage() {
                               <SelectValue placeholder="Level" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="easy">Easy</SelectItem>
-                              <SelectItem value="medium">Medium</SelectItem>
-                              <SelectItem value="hard">Hard</SelectItem>
+                              <SelectItem value="1">Easy</SelectItem>
+                              <SelectItem value="2">Medium</SelectItem>
+                              <SelectItem value="3">Hard</SelectItem>
                             </SelectContent>
                           </Select>
                         )}
