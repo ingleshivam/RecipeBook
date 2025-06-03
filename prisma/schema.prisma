@@ -36,8 +36,7 @@ model NutritionInfo {
   protein    String?
   sugar      String?
   fiber      String?
-  recipe     Recipe?  @relation(fields: [recipeId], references: [recipeId])
-  recipeId   Int?     @unique
+  recipeNutritionInfos RecipeNutritionInfo[]
 }
 
 model Category {
@@ -60,7 +59,7 @@ model Recipe {
   category    Category  @relation(fields: [categoryId], references: [categoryId])
   userId      Int?
   user        User?     @relation(fields: [userId], references: [userId])
-  nutritionInfo NutritionInfo?
+  nutritionInfo RecipeNutritionInfo[]
   ingredients RecipeIngredient[]
   tags        RecipeTag[]
   reviews     Review[]
@@ -68,22 +67,40 @@ model Recipe {
   images      Image[]
 }
 
+
 model Ingredient {
   ingredientId          Int       @id @default(autoincrement())
   name        String    @unique
+  quantity    String 
   description String?
   recipeIngredients RecipeIngredient[]
 }
 
+model 
+
 model RecipeIngredient {
   recipeId    Int
   ingredientId Int
-  quantity    String
 
   recipe      Recipe     @relation(fields: [recipeId], references: [recipeId])
   ingredient  Ingredient @relation(fields: [ingredientId], references: [ingredientId])
 
   @@id([recipeId, ingredientId])
+}
+
+model RecipeNutritionInfo{
+  recipeId Int
+  nutritionId Int
+
+  recipe Recipe @relation(fields : [recipeId], references: [recipeId])
+  nutritionInfo NutritionInfo @relation(fields : [nutritionId], references: [nutritionId])
+
+  @@id([recipeId, nutritionId])
+}
+
+model RecipeInstructions{
+  recipeId Int
+  instructionId Int
 }
 
 model Tag {
