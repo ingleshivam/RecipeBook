@@ -5,7 +5,7 @@ import { blob } from "stream/consumers";
 export async function GET(request: Request){
  try {
     const {blobs} = await list();
-    console.log("Blobs :", blobs);
+   //  console.log("Blobs :", blobs);
     return NextResponse.json({status: 200, blobs});
  } catch (error) {
     if(error instanceof Error){

@@ -39,48 +39,51 @@ model NutritionInfo {
   recipeNutritionInfos RecipeNutritionInfo[]
 }
 
-model Category {
-  categoryId          Int       @id @default(autoincrement())
-  name        String    @unique
-  description String?
-  recipes     Recipe[]
-}
+
 
 model Recipe {
   recipeId          Int       @id @default(autoincrement())
   title       String
   description String?
-  instructions String
   cookingTime Int?
   servingSize Int?
+  prepTime Int?
+  difficulty Int?
+  approveStatus String
+  isSavedAsDraft Int
   categoryId  Int
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  category    Category  @relation(fields: [categoryId], references: [categoryId])
   userId      Int?
   user        User?     @relation(fields: [userId], references: [userId])
   nutritionInfo RecipeNutritionInfo[]
   ingredients RecipeIngredient[]
+  instructions RecipeInstructions[]
   tags        RecipeTag[]
   reviews     Review[]
   favorites   Favorite[]
   images      Image[]
 }
 
+ model Instructions {
+  instructionId Int @id @default(autoincrement())
+  description String
+  recipeInstructions RecipeInstructions[]
+ }
+
 
 model Ingredient {
   ingredientId          Int       @id @default(autoincrement())
   name        String    @unique
-  quantity    String 
   description String?
   recipeIngredients RecipeIngredient[]
 }
 
-model 
 
 model RecipeIngredient {
   recipeId    Int
   ingredientId Int
+  quantity    String
 
   recipe      Recipe     @relation(fields: [recipeId], references: [recipeId])
   ingredient  Ingredient @relation(fields: [ingredientId], references: [ingredientId])
@@ -101,6 +104,11 @@ model RecipeNutritionInfo{
 model RecipeInstructions{
   recipeId Int
   instructionId Int
+
+  recipe Recipe @relation(fields : [recipeId], references : [recipeId])
+  instruction Instructions @relation(fields :[instructionId], references : [instructionId])
+
+  @@id([recipeId, instructionId])
 }
 
 model Tag {

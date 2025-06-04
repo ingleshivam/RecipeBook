@@ -21,6 +21,7 @@ const handler = NextAuth({
           throw new Error("Email and password required");
         }
 
+        
         const user = await prisma.user.findUnique({
           where: {
             email: credentials.email
@@ -64,7 +65,7 @@ const handler = NextAuth({
         });
 
         if (!existingUser) {
-          await prisma.user.create({
+          const newUser = await prisma.user.create({
             data: {
               email: user.email!,
               firstName: user.name?.split(' ')[0] || '',
@@ -73,6 +74,9 @@ const handler = NextAuth({
               passwordHash: await bcrypt.hash(Math.random().toString(36), 10)
             }
           });
+          (user as any).id = newUser.userId.toString();
+        } else {
+          (user as any).id = existingUser.userId.toString();
         }
       }
 
@@ -83,7 +87,7 @@ const handler = NextAuth({
     },
     async session({ session, token }) {
       if (session.user) { 
-        session.user.id = token.sub;
+        session.user.id = (token as any).id;
       }
       console.log("Session : ", session);
 
