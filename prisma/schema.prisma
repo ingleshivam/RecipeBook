@@ -69,16 +69,14 @@ model Recipe {
   instructionId Int @id @default(autoincrement())
   description String
   recipeInstructions RecipeInstructions[]
- }
-
-
+ } 
+ 
 model Ingredient {
   ingredientId          Int       @id @default(autoincrement())
   name        String    @unique
   description String?
   recipeIngredients RecipeIngredient[]
 }
-
 
 model RecipeIngredient {
   recipeId    Int
@@ -156,3 +154,4 @@ model Image {
   recipeId     Int?
   recipe       Recipe?   @relation(fields: [recipeId], references: [recipeId])
 }
+
