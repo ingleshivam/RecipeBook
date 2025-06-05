@@ -16,9 +16,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 
-// This would typically come from your database
 async function getRecipe(id: string) {
-  // Simulated recipe data
   return {
     id,
     title: "Grandma's Chocolate Chip Cookies",

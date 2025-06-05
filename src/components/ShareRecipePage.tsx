@@ -42,6 +42,7 @@ import { toast } from "sonner";
 import useSWR from "swr";
 import { BlobData } from "@/types/blobData";
 import { useSession } from "next-auth/react";
+import { del } from "@vercel/blob";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function ShareRecipePage() {
@@ -118,6 +119,7 @@ export default function ShareRecipePage() {
     control,
     setValue,
     watch,
+    reset,
   } = useForm<IRecipeSchema>({
     resolver: zodResolver(RecipeSchema),
   });
@@ -204,7 +206,7 @@ export default function ShareRecipePage() {
       });
 
       const uploadData = await uploadResponse.json();
-
+      console.log("Upload Data : ", uploadData.message.url);
       if (!uploadResponse.ok) {
         toast.error("Error", {
           description: uploadData.message.error,
@@ -227,11 +229,20 @@ export default function ShareRecipePage() {
       const data = await response.json();
 
       if (!response.ok) {
+        await del(uploadData.message.url);
         toast.error("Error", {
           description: data.message.error,
         });
         return;
       }
+
+      reset();
+      setIngredients([{ amount: "", item: "" }]);
+      setInstructions([""]);
+      setTags([]);
+      setNewTag("");
+      setRecipeFileName("");
+      setIsDraft(false);
 
       toast.success("Success", {
         description: data.message.success,

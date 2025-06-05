@@ -1,23 +1,53 @@
-import { error } from "console";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 export async function POST(request: Request) {
-  
   try {
     const data = await request.json();
     console.log("Data : ", data);
+
+    const ingredientPromises = data.ingredients.map(async (val: any) => {
+      const existingIngredient = await prisma.ingredient.findUnique({
+        where: {
+          name: val.item,
+        },
+      });
+
+      return {
+        quantity: val.amount,
+        ingredient: existingIngredient
+          ? { connect: { ingredientId: existingIngredient.ingredientId } }
+          : { create: { name: val.item } },
+      };
+    });
+
+    const tagPromises = data.tags.map(async (val: any) => {
+      const existingTag = await prisma.tag.findUnique({
+        where: {
+          name: val,
+        },
+      });
+
+      return existingTag
+        ? { tag: { connect: { tagId: existingTag.tagId } } }
+        : { tag: { create: { name: val } } };
+    });
+
+    const [processedIngredients, processedTags] = await Promise.all([
+      Promise.all(ingredientPromises),
+      Promise.all(tagPromises),
+    ]);
+
     const response = await prisma.recipe.create({
       data: {
         title: data.recipeTitle,
         description: data.recipeDescription,
-        
         cookingTime: parseInt(data.cookTime),
-        servingSize: parseInt(data.servings), 
+        servingSize: parseInt(data.servings),
         categoryId: parseInt(data.category),
-        prepTime : parseInt(data.prepTime),
-        difficulty : parseInt(data.difficulty),
-        userId : parseInt(data.userId),
+        prepTime: parseInt(data.prepTime),
+        difficulty: parseInt(data.difficulty),
+        userId: parseInt(data.userId),
         approveStatus: data.isDraft ? "D" : "U",
         isSavedAsDraft: data.isDraft ? 1 : 0,
         images: {
@@ -27,14 +57,7 @@ export async function POST(request: Request) {
           },
         },
         ingredients: {
-          create: data.ingredients.map((ing: any) => ({
-            quantity: ing.amount,
-            ingredient: {
-              create: {
-                name: ing.item,
-              }
-            }
-          })),
+          create: processedIngredients,
         },
         instructions: {
           create: data.instructions.map((ing: any) => ({
@@ -59,29 +82,26 @@ export async function POST(request: Request) {
             },
           },
         },
-        tags : {
-            create : data.tags.map((int:any)=>({
-                tag : {
-                    create : {
-                        name : int
-                    }
-                }
-            }))
-        }
+        tags: {
+          create: processedTags,
+        },
       },
     });
     return NextResponse.json(
-        {message: { success: "Data is stored successfully !", error: "" }},
-      {status : 200}
+      { message: { success: "Data is stored successfully !", error: "" } },
+      { status: 200 }
     );
   } catch (error) {
     if (error instanceof Error) {
-        console.log("Error :",error)
-        return NextResponse.json({message : {success : "", error : error.message}}, {status : 400});
+      console.log("Error :", error);
+      return NextResponse.json(
+        { message: { success: "", error: error.message } },
+        { status: 400 }
+      );
     }
     return NextResponse.json(
-        {message: { success: "", error: "Internal server error !" }},
-      {status: 500},
+      { message: { success: "", error: "Internal server error !" } },
+      { status: 500 }
     );
   }
 }
