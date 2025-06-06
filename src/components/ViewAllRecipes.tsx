@@ -202,6 +202,7 @@ const sortOptions = [
 ];
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 export default function ViewAllRecipes() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
