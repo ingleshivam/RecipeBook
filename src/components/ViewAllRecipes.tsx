@@ -31,6 +31,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useMemo, useEffect } from "react";
 import useSWR from "swr";
+import { category, difficulty } from "../../public/dropdownData.js";
+import ViewAllRecipesSkeleton from "./skeleton/ViewAllRecipeSkeleton";
 
 // Mock recipe data
 const allRecipes = [
@@ -215,96 +217,14 @@ export default function ViewAllRecipes() {
   const recipesPerPage = 12;
 
   const {
-    data: allRecipes1,
+    data: allRecipes,
     isLoading: recipesLoading,
     error: recipesError,
   } = useSWR("/api/getRecipeDeatils", fetcher);
 
-  // Get all unique tags
-  const allTags = useMemo(() => {
-    const tags = new Set<string>();
-    allRecipes.forEach((recipe) => {
-      recipe.tags.forEach((tag) => tags.add(tag));
-    });
-    return Array.from(tags).sort();
-  }, []);
+  // if (true) return <ViewAllRecipesSkeleton viewMode={viewMode} />;
 
-  // Filter and sort recipes
-  const filteredAndSortedRecipes = useMemo(() => {
-    const filtered = allRecipes.filter((recipe) => {
-      const matchesSearch =
-        recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        recipe.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        recipe.author.toLowerCase().includes(searchTerm.toLowerCase());
-
-      const matchesCategory =
-        selectedCategory === "All Categories" ||
-        recipe.category === selectedCategory;
-      const matchesDifficulty =
-        selectedDifficulty === "All Levels" ||
-        recipe.difficulty === selectedDifficulty;
-      const matchesTags =
-        selectedTags.length === 0 ||
-        selectedTags.some((tag) => recipe.tags.includes(tag));
-
-      return (
-        matchesSearch && matchesCategory && matchesDifficulty && matchesTags
-      );
-    });
-
-    // Sort recipes
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "newest":
-          return (
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-        case "oldest":
-          return (
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          );
-        case "rating":
-          return b.rating - a.rating;
-        case "reviews":
-          return b.reviews - a.reviews;
-        case "title":
-          return a.title.localeCompare(b.title);
-        default:
-          return 0;
-      }
-    });
-
-    return filtered;
-  }, [searchTerm, selectedCategory, selectedDifficulty, selectedTags, sortBy]);
-
-  // Pagination
-  const totalPages = Math.ceil(
-    filteredAndSortedRecipes.length / recipesPerPage
-  );
-  const startIndex = (currentPage - 1) * recipesPerPage;
-  const paginatedRecipes = filteredAndSortedRecipes.slice(
-    startIndex,
-    startIndex + recipesPerPage
-  );
-
-  const handleTagToggle = (tag: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
-    setCurrentPage(1);
-  };
-
-  const clearFilters = () => {
-    setSearchTerm("");
-    setSelectedCategory("All Categories");
-    setSelectedDifficulty("All Levels");
-    setSelectedTags([]);
-    setSortBy("newest");
-    setCurrentPage(1);
-  };
-  if (recipesLoading) return <div>Loading...</div>;
-
-  console.log("All recipes :", allRecipes1.result);
+  // console.log("All recipes :", allRecipes.result);
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
       {/* Header */}
@@ -354,198 +274,20 @@ export default function ViewAllRecipes() {
           </p>
         </div>
 
-        {/* Search and Filters */}
-        <div className="mb-8 space-y-4">
-          {/* Search Bar */}
-          <div className="relative max-w-2xl mx-auto">
-            <Search className="absolute left-4 top-3 h-5 w-5 text-gray-400" />
-            <Input
-              placeholder="Search recipes, ingredients, or authors..."
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="pl-12 pr-4 py-3 text-lg border-gray-200 focus:border-orange-500 focus:ring-orange-500"
-            />
-          </div>
-
-          {/* Filter Controls */}
-          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
-            <div className="flex flex-wrap gap-4 items-center">
-              <Select
-                value={selectedCategory}
-                onValueChange={(value) => {
-                  setSelectedCategory(value);
-                  setCurrentPage(1);
-                }}
-              >
-                <SelectTrigger className="w-48 border-gray-200 focus:border-orange-500 focus:ring-orange-500">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={selectedDifficulty}
-                onValueChange={(value) => {
-                  setSelectedDifficulty(value);
-                  setCurrentPage(1);
-                }}
-              >
-                <SelectTrigger className="w-40 border-gray-200 focus:border-orange-500 focus:ring-orange-500">
-                  <SelectValue placeholder="Difficulty" />
-                </SelectTrigger>
-                <SelectContent>
-                  {difficulties.map((difficulty) => (
-                    <SelectItem key={difficulty} value={difficulty}>
-                      {difficulty}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Button
-                variant="outline"
-                onClick={() => setShowFilters(!showFilters)}
-                className="border-gray-200 hover:bg-gray-50"
-              >
-                <SlidersHorizontal className="h-4 w-4 mr-2" />
-                More Filters
-              </Button>
-
-              {(searchTerm ||
-                selectedCategory !== "All Categories" ||
-                selectedDifficulty !== "All Levels" ||
-                selectedTags.length > 0) && (
-                <Button
-                  variant="ghost"
-                  onClick={clearFilters}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  Clear Filters
-                </Button>
-              )}
-            </div>
-
-            <div className="flex items-center gap-4">
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-48 border-gray-200 focus:border-orange-500 focus:ring-orange-500">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  {sortOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <div className="flex border border-gray-200 rounded-lg">
-                <Button
-                  variant={viewMode === "grid" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("grid")}
-                  className={
-                    viewMode === "grid"
-                      ? "bg-orange-500 hover:bg-orange-600"
-                      : ""
-                  }
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === "list" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("list")}
-                  className={
-                    viewMode === "list"
-                      ? "bg-orange-500 hover:bg-orange-600"
-                      : ""
-                  }
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Advanced Filters */}
-          {showFilters && (
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                Filter by Tags
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {allTags.map((tag) => (
-                  <div key={tag} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={tag}
-                      checked={selectedTags.includes(tag)}
-                      onCheckedChange={() => handleTagToggle(tag)}
-                    />
-                    <Label
-                      htmlFor={tag}
-                      className="text-sm text-gray-600 cursor-pointer"
-                    >
-                      {tag}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
-
-          {/* Active Filters */}
-          {selectedTags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              <span className="text-sm text-gray-500">Active tags:</span>
-              {selectedTags.map((tag) => (
-                <Badge
-                  key={tag}
-                  variant="secondary"
-                  className="bg-orange-100 text-orange-700 cursor-pointer"
-                  onClick={() => handleTagToggle(tag)}
-                >
-                  {tag}
-                  <X className="h-3 w-3 ml-1" />
-                </Badge>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Results Count */}
-        <div className="mb-6 text-gray-600">
-          Showing {startIndex + 1}-
-          {Math.min(
-            startIndex + recipesPerPage,
-            filteredAndSortedRecipes.length
-          )}{" "}
-          of {filteredAndSortedRecipes.length} recipes
-        </div>
-
-        {/* Recipe Grid/List */}
-        {paginatedRecipes.length > 0 ? (
+        {recipesLoading ? (
+          <ViewAllRecipesSkeleton viewMode={viewMode} />
+        ) : allRecipes?.result?.length > 0 ? (
           <div
             className={
               viewMode === "grid"
                 ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8"
-                : "space-y-6 mb-8"
+                : "space-y-6 mb-8 "
             }
           >
-            {paginatedRecipes.map((recipe) => (
+            {allRecipes.result.map((recipe: any, index: number) => (
               <Card
-                key={recipe.id}
-                className={`group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm ${
+                key={index}
+                className={` group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm ${
                   viewMode === "list" ? "flex flex-row" : ""
                 }`}
               >
@@ -618,7 +360,7 @@ export default function ViewAllRecipes() {
                       <span className="text-sm text-gray-500">
                         by {recipe.author}
                       </span>
-                      <Link href={`/recipe/${recipe.id}`}>
+                      <Link href={`/recipe/${recipe.recipeId}`}>
                         <Button
                           variant="ghost"
                           className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
@@ -643,72 +385,11 @@ export default function ViewAllRecipes() {
                 Try adjusting your search terms or filters to find what you're
                 looking for.
               </p>
-              <Button
-                onClick={clearFilters}
-                className="bg-orange-500 hover:bg-orange-600"
-              >
-                Clear All Filters
-              </Button>
             </div>
           </div>
         )}
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className="border-gray-200"
-            >
-              <ChevronLeft className="h-4 w-4 mr-2" />
-              Previous
-            </Button>
-
-            <div className="flex space-x-1">
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNumber;
-                if (totalPages <= 5) {
-                  pageNumber = i + 1;
-                } else if (currentPage <= 3) {
-                  pageNumber = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNumber = totalPages - 4 + i;
-                } else {
-                  pageNumber = currentPage - 2 + i;
-                }
-
-                return (
-                  <Button
-                    key={pageNumber}
-                    variant={currentPage === pageNumber ? "default" : "outline"}
-                    onClick={() => setCurrentPage(pageNumber)}
-                    className={
-                      currentPage === pageNumber
-                        ? "bg-orange-500 hover:bg-orange-600"
-                        : "border-gray-200 hover:bg-gray-50"
-                    }
-                  >
-                    {pageNumber}
-                  </Button>
-                );
-              })}
-            </div>
-
-            <Button
-              variant="outline"
-              onClick={() =>
-                setCurrentPage(Math.min(totalPages, currentPage + 1))
-              }
-              disabled={currentPage === totalPages}
-              className="border-gray-200"
-            >
-              Next
-              <ChevronRight className="h-4 w-4 ml-2" />
-            </Button>
-          </div>
-        )}
+        {/* Recipe Grid/List */}
+        {}
       </div>
     </div>
   );

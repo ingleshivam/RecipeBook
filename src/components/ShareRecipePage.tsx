@@ -302,7 +302,7 @@ export default function ShareRecipePage() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             <div className="grid grid-cols-6 gap-4">
               {/* Recipe Image */}
-              <Card className="col-span-2">
+              <Card className="col-span-2 py-6">
                 <CardHeader>
                   <CardTitle className="text-xl text-gray-800">
                     Recipe Image
@@ -363,7 +363,7 @@ export default function ShareRecipePage() {
                 </CardContent>
               </Card>
               {/* Basic Information */}
-              <Card className="col-span-4">
+              <Card className="col-span-4 py-6">
                 <CardHeader>
                   <CardTitle className="text-xl text-gray-800">
                     Basic Information
@@ -549,7 +549,7 @@ export default function ShareRecipePage() {
             </div>
             <div className="grid grid-cols-6 gap-4">
               {/* Ingredients */}
-              <Card className="col-span-2">
+              <Card className="col-span-2 py-6">
                 <CardHeader>
                   <CardTitle className="text-xl text-gray-800">
                     Ingredients
@@ -630,7 +630,7 @@ export default function ShareRecipePage() {
               </Card>
 
               {/* Instructions */}
-              <Card className="col-span-4">
+              <Card className="col-span-4 py-6">
                 <CardHeader>
                   <CardTitle className="text-xl text-gray-800">
                     Instructions
@@ -698,7 +698,7 @@ export default function ShareRecipePage() {
             </div>
             <div className="grid grid-cols-6 gap-4">
               {/* Nutrition Information */}
-              <Card className="col-span-2">
+              <Card className="col-span-2 py-6">
                 <CardHeader>
                   <CardTitle className="text-xl text-gray-800">
                     Nutrition Information
@@ -749,7 +749,7 @@ export default function ShareRecipePage() {
                 </CardContent>
               </Card>
               {/* Tags and Additional Info */}
-              <Card className="col-span-4">
+              <Card className="col-span-4 py-6">
                 <CardHeader>
                   <CardTitle className="text-xl text-gray-800">
                     Tags & Additional Info

@@ -141,3 +141,53 @@ export const masalas = [
     }
   ]
   
+export const category = [
+  {
+    "value" :"1",
+    "category_name" : "Appetizers"
+  }, 
+  {
+    "value" :"2",
+    "category_name" : "Main Course"
+  }, 
+  {
+    "value" :"3",
+    "category_name" : "Desserts"
+  }, 
+  {
+    "value" :"4",
+    "category_name" : "Beverages"
+  }, 
+  {
+    "value" :"5",
+    "category_name" : "Snacks"
+  }, 
+  {
+    "value" :"6",
+    "category_name" : "Breakfast"
+  }, 
+  {
+    "value" :"7",
+    "category_name" : "Lunch"
+  }, 
+  
+  {
+    "value" :"8",
+    "category_name" : "Dinner"
+  },     
+]
+
+export const difficulty =[
+  {
+    "value" : "1",
+    "diffuculty" : "Easy"
+  },
+  {
+    "value" : "2",
+    "diffuculty" : "Medium"
+  },
+  {
+    "value" : "3",
+    "diffuculty" : "EaHardsy"
+  },
+]

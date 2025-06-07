@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { truncateByDomain } from "recharts/types/util/ChartUtils";
-
+import { category, difficulty } from "@/data/dropdownData";
 export async function GET(request: Request) {
   try {
     const response = await prisma?.recipe.findMany({
@@ -17,6 +16,7 @@ export async function GET(request: Request) {
     let result;
     if (response && response?.length > 0) {
       result = response.map((item) => ({
+        recipeId: item.recipeId,
         title: item.title,
         description: item.description,
         image: item.images[0].imageUrl,
@@ -30,8 +30,12 @@ export async function GET(request: Request) {
             ? item.prepTime + item.cookingTime
             : 0,
         servings: item.servingSize,
-        difficulty: item.difficulty,
-        category: item.difficulty,
+        difficulty: difficulty.find(
+          (val: any) => parseInt(val.value) === item.difficulty
+        )?.diffuculty,
+        category: category.find(
+          (val: any) => parseInt(val.value) === item.categoryId
+        )?.category_name,
         tags: item.tags,
         createdAt: item.createdAt,
       }));
