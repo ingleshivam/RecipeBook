@@ -19,50 +19,21 @@ import Link from "next/link";
 import useSWR from "swr";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { receiveMessageOnPort } from "worker_threads";
 
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function RecipeDetailsPage({ id }: { id: number }) {
   const [isDataLoading, setIsDataLoading] = useState(false);
-  const [recipe, setRecipe] = useState<any>([]);
+  // const [recipe, setRecipe] = useState<any>([]);
+  const {
+    data: recipe,
+    isLoading: recipeLoading,
+    error: recipeError,
+  } = useSWR(`/api/getRecipeDetailsById?id=${id}`, fetcher);
 
-  useEffect(() => {
-    setIsDataLoading(true);
-
-    const getRecipeDetails = async (id: number) => {
-      setIsDataLoading(true);
-      try {
-        const response = await fetch(`/api/getRecipeDetailsById?id=${id}`, {
-          method: "GET",
-        });
-
-        if (!response.ok) {
-          toast.error("Error", {
-            description: response.statusText,
-          });
-        }
-        const data = await response.json();
-        setRecipe(data.result);
-        console.log("Get recipe details by id : ", data);
-        console.log("Get recipe details by id : ", isDataLoading);
-
-        setIsDataLoading(false);
-      } catch (error) {
-        if (error instanceof Error) {
-          toast.error("Error", {
-            description: error.message,
-          });
-        }
-      } finally {
-        setIsDataLoading(false);
-      }
-    };
-    getRecipeDetails(id);
-  }, [id]);
-  if (isDataLoading) return <div>Loading..</div>;
-
+  console.log("Recipe : ", recipe);
   return (
     <>
-      {isDataLoading || recipe.length === 0 ? (
+      {recipeLoading ? (
         <div>Loading...</div>
       ) : (
         <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
@@ -105,16 +76,18 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                 <div className="space-y-6">
                   <div className="relative rounded-2xl overflow-hidden">
                     <Image
-                      src={recipe.image || "/placeholder.svg"}
-                      alt={recipe.title}
+                      src={recipe.result.image || "/placeholder.svg"}
+                      alt={recipe.result.title}
                       width={800}
                       height={600}
                       className="w-full h-96 object-cover"
                     />
                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center space-x-1">
                       <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                      <span className="font-medium">{recipe.rating}</span>
-                      <span className="text-gray-500">({recipe.reviews})</span>
+                      <span className="font-medium">{recipe.rating || 0}</span>
+                      <span className="text-gray-500">
+                        ({recipe.reviews || ""})
+                      </span>
                     </div>
                   </div>
 
@@ -124,17 +97,17 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                         variant="secondary"
                         className="bg-orange-100 text-orange-700"
                       >
-                        {recipe.category}
+                        {recipe.result.category}
                       </Badge>
                       <Badge
                         variant="outline"
                         className="border-green-200 text-green-700"
                       >
-                        {recipe.difficulty}
+                        {recipe.result.difficulty}
                       </Badge>
-                      {recipe.tags.map((tag: any) => (
+                      {recipe.result.tags.map((tag: any, index: number) => (
                         <Badge
-                          key={tag}
+                          key={tag + index}
                           variant="outline"
                           className="text-gray-600"
                         >
@@ -144,27 +117,27 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                     </div>
 
                     <h1 className="text-3xl lg:text-4xl font-bold text-gray-800">
-                      {recipe.title}
+                      {recipe.result.title}
                     </h1>
                     <p className="text-lg text-gray-600 leading-relaxed">
-                      {recipe.description}
+                      {recipe.result.description}
                     </p>
 
                     {/* Author Info */}
                     <div className="flex items-center space-x-4 p-4 bg-white rounded-lg border border-orange-100">
                       <Image
-                        src={recipe.author.avatar || "/placeholder.svg"}
-                        alt={recipe.author.name}
+                        src={recipe.result.author || "/placeholder.svg"}
+                        alt={recipe.result.author}
                         width={50}
                         height={50}
                         className="rounded-full"
                       />
                       <div>
                         <p className="font-semibold text-gray-800">
-                          {recipe.author.name}
+                          {recipe.result.author}
                         </p>
                         <p className="text-sm text-gray-500">
-                          {recipe.author.recipes} recipes shared
+                          {recipe.result.author} recipes shared
                         </p>
                       </div>
                     </div>
@@ -178,22 +151,30 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                       <div className="text-center">
                         <Timer className="h-6 w-6 text-orange-500 mx-auto mb-2" />
                         <p className="text-sm text-gray-500">Prep Time</p>
-                        <p className="font-semibold">{recipe.prepTime}</p>
+                        <p className="font-semibold">
+                          {recipe.result.prepTime}
+                        </p>
                       </div>
                       <div className="text-center">
                         <Clock className="h-6 w-6 text-orange-500 mx-auto mb-2" />
                         <p className="text-sm text-gray-500">Cook Time</p>
-                        <p className="font-semibold">{recipe.cookTime}</p>
+                        <p className="font-semibold">
+                          {recipe.result.cookTime}
+                        </p>
                       </div>
                       <div className="text-center">
                         <Users className="h-6 w-6 text-orange-500 mx-auto mb-2" />
                         <p className="text-sm text-gray-500">Servings</p>
-                        <p className="font-semibold">{recipe.servings}</p>
+                        <p className="font-semibold">
+                          {recipe.result.servings}
+                        </p>
                       </div>
                       <div className="text-center">
                         <Utensils className="h-6 w-6 text-orange-500 mx-auto mb-2" />
                         <p className="text-sm text-gray-500">Total Time</p>
-                        <p className="font-semibold">{recipe.totalTime}</p>
+                        <p className="font-semibold">
+                          {recipe.result.totalTime}
+                        </p>
                       </div>
                     </div>
                   </CardContent>
@@ -206,7 +187,7 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                       Ingredients
                     </h2>
                     <ul className="space-y-3">
-                      {recipe.ingredients.map(
+                      {recipe.result.ingredients.map(
                         (ingredient: any, index: number) => (
                           <li
                             key={index}
@@ -214,10 +195,10 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                           >
                             <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0"></div>
                             <span className="font-medium text-orange-600 min-w-20">
-                              {ingredient.amount}
+                              {ingredient.quantity}
                             </span>
                             <span className="text-gray-700">
-                              {ingredient.item}
+                              {ingredient.ingredient.name}
                             </span>
                           </li>
                         )
@@ -233,16 +214,18 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                       Instructions
                     </h2>
                     <ol className="space-y-4">
-                      {recipe.instructions.map((step: any, index: number) => (
-                        <li key={index} className="flex space-x-4">
-                          <div className="flex-shrink-0 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-semibold">
-                            {index + 1}
-                          </div>
-                          <p className="text-gray-700 leading-relaxed pt-1">
-                            {step}
-                          </p>
-                        </li>
-                      ))}
+                      {recipe.result.instructions.map(
+                        (item: any, index: number) => (
+                          <li key={index} className="flex space-x-4">
+                            <div className="flex-shrink-0 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-semibold">
+                              {index + 1}
+                            </div>
+                            <p className="text-gray-700 leading-relaxed pt-1">
+                              {item.instruction.description}
+                            </p>
+                          </li>
+                        )
+                      )}
                     </ol>
                   </CardContent>
                 </Card>
@@ -277,31 +260,31 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                       <div className="flex justify-between">
                         <span className="text-gray-600">Calories</span>
                         <span className="font-medium">
-                          {recipe.nutrition.calories}
+                          {recipe.result.nutritionInfo[0].nutritionInfo.calorie}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Fat</span>
                         <span className="font-medium">
-                          {recipe.nutrition.fat}
+                          {recipe.result.nutritionInfo[0].nutritionInfo.fat}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Carbs</span>
                         <span className="font-medium">
-                          {recipe.nutrition.carbs}
+                          {recipe.result.nutritionInfo[0].nutritionInfo.carbs}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Protein</span>
                         <span className="font-medium">
-                          {recipe.nutrition.protein}
+                          {recipe.result.nutritionInfo[0].nutritionInfo.protein}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Sugar</span>
                         <span className="font-medium">
-                          {recipe.nutrition.sugar}
+                          {recipe.result.nutritionInfo[0].nutritionInfo.sugar}
                         </span>
                       </div>
                     </div>
@@ -332,7 +315,7 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                 <Card>
                   <CardContent className="p-6">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                      More from {recipe.author.name}
+                      More from {recipe.author}
                     </h3>
                     <div className="space-y-4">
                       {[1, 2, 3].map((i) => (

@@ -13,14 +13,29 @@ export async function GET(request: Request) {
 
       include: {
         images: true,
-        ingredients: true,
-        instructions: true,
-        nutritionInfo: true,
+        ingredients: {
+          include: {
+            ingredient: true,
+          },
+        },
+        instructions: {
+          include: {
+            instruction: true,
+          },
+          orderBy: {
+            instructionId: "desc",
+          },
+        },
+        nutritionInfo: {
+          include: {
+            nutritionInfo: true,
+          },
+        },
         tags: true,
         user: true,
       },
     });
-
+    console.log("response  : ", response);
     let result;
     if (response) {
       result = {
@@ -48,7 +63,7 @@ export async function GET(request: Request) {
         tags: response.tags,
         instructions: response.instructions,
         ingredients: response.ingredients,
-        nutritionInfor: response.nutritionInfo,
+        nutritionInfo: response.nutritionInfo,
         createdAt: response.createdAt,
       };
     }
