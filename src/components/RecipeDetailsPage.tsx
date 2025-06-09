@@ -19,16 +19,140 @@ import Link from "next/link";
 import useSWR from "swr";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 export default function RecipeDetailsPage({ id }: { id: number }) {
   const [isDataLoading, setIsDataLoading] = useState(false);
-  // const [recipe, setRecipe] = useState<any>([]);
   const {
     data: recipe,
     isLoading: recipeLoading,
     error: recipeError,
   } = useSWR(`/api/getRecipeDetailsById?id=${id}`, fetcher);
+
+  const handlePrint = () => {
+    if (!recipe) return;
+
+    const printContent = document.createElement("div");
+    printContent.innerHTML = `
+      <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+        <h1 style="color: #333; text-align: center; margin-bottom: 20px;">${
+          recipe.result.title
+        }</h1>
+        
+        <div style="margin-bottom: 20px;">
+          <p style="color: #666; line-height: 1.6;">${
+            recipe.result.description
+          }</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px;">
+          <div>
+            <h3 style="color: #333;">Prep Time</h3>
+            <p>${recipe.result.prepTime}</p>
+          </div>
+          <div>
+            <h3 style="color: #333;">Cook Time</h3>
+            <p>${recipe.result.cookTime}</p>
+          </div>
+          <div>
+            <h3 style="color: #333;">Servings</h3>
+            <p>${recipe.result.servings}</p>
+          </div>
+          <div>
+            <h3 style="color: #333;">Total Time</h3>
+            <p>${recipe.result.totalTime}</p>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+          <h2 style="color: #333; border-bottom: 2px solid #f97316; padding-bottom: 10px;">Ingredients</h2>
+          <ul style="list-style-type: none; padding: 0;">
+            ${recipe.result.ingredients
+              .map(
+                (ingredient: any) => `
+              <li style="margin-bottom: 10px; display: flex; gap: 10px;">
+                <span style="color: #f97316; font-weight: bold;">${ingredient.quantity}</span>
+                <span>${ingredient.ingredient.name}</span>
+              </li>
+            `
+              )
+              .join("")}
+          </ul>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+          <h2 style="color: #333; border-bottom: 2px solid #f97316; padding-bottom: 10px;">Instructions</h2>
+          <ol style="padding-left: 20px;">
+            ${recipe.result.instructions
+              .map(
+                (item: any, index: number) => `
+              <li style="margin-bottom: 15px; line-height: 1.6;">
+                ${item.instruction.description}
+              </li>
+            `
+              )
+              .join("")}
+          </ol>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+          <h2 style="color: #333; border-bottom: 2px solid #f97316; padding-bottom: 10px;">Nutrition Information</h2>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+            <div>
+              <strong>Calories:</strong> ${
+                recipe.result.nutritionInfo[0].nutritionInfo.calorie
+              }
+            </div>
+            <div>
+              <strong>Fat:</strong> ${
+                recipe.result.nutritionInfo[0].nutritionInfo.fat
+              }
+            </div>
+            <div>
+              <strong>Carbs:</strong> ${
+                recipe.result.nutritionInfo[0].nutritionInfo.carbs
+              }
+            </div>
+            <div>
+              <strong>Protein:</strong> ${
+                recipe.result.nutritionInfo[0].nutritionInfo.protein
+              }
+            </div>
+            <div>
+              <strong>Sugar:</strong> ${
+                recipe.result.nutritionInfo[0].nutritionInfo.sugar
+              }
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align: center; color: #666; font-size: 0.9em; margin-top: 40px;">
+          <p>Recipe from RecipeShare</p>
+          <p>Printed on ${new Date().toLocaleDateString()}</p>
+        </div>
+      </div>
+    `;
+
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(`
+          <html>
+            <head>
+              <title>${recipe.result.title} - Recipe</title>
+            </head>
+            <body>
+              ${printContent.innerHTML}
+            </body>
+          </html>
+        `);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }
+  };
 
   console.log("Recipe : ", recipe);
   return (
@@ -62,7 +186,7 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
           <div className="container mx-auto px-4 py-8">
             {/* Back Button */}
             <Link
-              href="/"
+              href="/recipe"
               className="inline-flex items-center text-orange-600 hover:text-orange-700 mb-6"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -111,7 +235,7 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                           variant="outline"
                           className="text-gray-600"
                         >
-                          #{tag.tagId}
+                          {tag.tag.name}
                         </Badge>
                       ))}
                     </div>
@@ -126,7 +250,9 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                     {/* Author Info */}
                     <div className="flex items-center space-x-4 p-4 bg-white rounded-lg border border-orange-100">
                       <Image
-                        src={recipe.result.author || "/placeholder.svg"}
+                        src={
+                          "https://ui-avatars.com/api/?name=Shivam+Ingle&rounded=true"
+                        }
                         alt={recipe.result.author}
                         width={50}
                         height={50}
@@ -137,7 +263,7 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                           {recipe.result.author}
                         </p>
                         <p className="text-sm text-gray-500">
-                          {recipe.result.author} recipes shared
+                          {recipe.count.recipeId} recipes shared
                         </p>
                       </div>
                     </div>
@@ -254,7 +380,7 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                 <Card>
                   <CardContent className="p-6">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                      Nutrition (per serving)
+                      Nutrition
                     </h3>
                     <div className="space-y-3">
                       <div className="flex justify-between">
@@ -305,7 +431,11 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                       <Share2 className="h-4 w-4 mr-2" />
                       Share Recipe
                     </Button>
-                    <Button variant="outline" className="w-full">
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={handlePrint}
+                    >
                       Print Recipe
                     </Button>
                   </CardContent>
@@ -318,25 +448,30 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                       More from {recipe.author}
                     </h3>
                     <div className="space-y-4">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="flex space-x-3">
-                          <Image
-                            src={`/placeholder.svg?height=60&width=60`}
-                            alt="Related recipe"
-                            width={60}
-                            height={60}
-                            className="rounded-lg object-cover"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-800 truncate">
-                              Chocolate Brownies
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              25 min • 4.8 ⭐
-                            </p>
+                      {recipe.allRecipesByUseId.map(
+                        (item: any, index: number) => (
+                          <div key={item.recipeId} className="flex space-x-3">
+                            <Image
+                              src={`${item.images[0].imageUrl}`}
+                              alt="Related recipe"
+                              width={50}
+                              height={50}
+                              className="rounded-full object-cover aspect-square"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-gray-800 truncate">
+                                <Link href={`/recipe/${item.recipeId}`}>
+                                  {item.title}
+                                </Link>
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                {item.prepTime + item.cookingTime}
+                                min • 4.8 ⭐
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        )
+                      )}
                     </div>
                   </CardContent>
                 </Card>

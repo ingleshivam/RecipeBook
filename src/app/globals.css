@@ -261,9 +261,10 @@
   body {
     @apply bg-background text-foreground;
   }
+  html {
+    scroll-behavior: smooth;
+  }
 }
-
-
 
 @layer utilities {
   .animate-fade-in {
@@ -279,9 +280,10 @@
       opacity: 1;
       transform: translateY(0);
     }
-  }}
+  }
+}
 
-  input::-webkit-outer-spin-button,
+input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;

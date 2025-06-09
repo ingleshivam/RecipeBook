@@ -14,13 +14,15 @@ import {
   Twitter,
   Instagram,
   Youtube,
+  Linkedin,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 export default function RecipeLandingPage() {
   const router = useRouter();
-
+  const { status } = useSession();
   return (
     <>
       <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white ">
@@ -54,7 +56,9 @@ export default function RecipeLandingPage() {
               </Link>
               <div className=" flex gap-5">
                 <AuthStatus />
-                <NavButton buttonName="SignUp" />
+                {status === "unauthenticated" && (
+                  <NavButton buttonName="SignUp" />
+                )}
               </div>
             </nav>
           </div>
@@ -82,7 +86,7 @@ export default function RecipeLandingPage() {
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button
                     size="lg"
-                    className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 text-lg"
+                    className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 text-lg cursor-pointer"
                     onClick={() => router.push("/share-recipe")}
                   >
                     <ChefHat className="mr-2 h-5 w-5" />
@@ -91,7 +95,8 @@ export default function RecipeLandingPage() {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="border-orange-200 text-orange-600 hover:bg-orange-50 px-8 py-4 text-lg"
+                    className="border-orange-200 text-orange-600 hover:bg-orange-50 px-8 py-4 text-lg cursor-pointer"
+                    onClick={() => router.push("/recipe")}
                   >
                     Explore Recipes
                   </Button>
@@ -294,7 +299,8 @@ export default function RecipeLandingPage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-orange-200 text-orange-600 hover:bg-orange-50"
+                className="border-orange-200 text-orange-600 hover:bg-orange-50 cursor-pointer"
+                onClick={() => router.push("/recipe")}
               >
                 View All Recipes
               </Button>
@@ -318,17 +324,21 @@ export default function RecipeLandingPage() {
                 <Button
                   size="lg"
                   className="bg-white text-orange-600 hover:bg-gray-50 px-8 py-4 text-lg cursor-pointer"
+                  onClick={() => router.push("/share-recipe")}
                 >
                   <ChefHat className="mr-2 h-5 w-5" />
                   Share Your Recipe
                 </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white text-orange-600 hover:bg-white/10 hover:text-white cursor-pointer px-8 py-4 text-lg"
-                >
-                  Create Account
-                </Button>
+                {status === "unauthenticated" && (
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-white text-orange-600 hover:bg-white/10 hover:text-white cursor-pointer px-8 py-4 text-lg"
+                    onClick={() => router.push("/auth/signup")}
+                  >
+                    Create Account
+                  </Button>
+                )}
               </div>
             </div>
           </div>
@@ -337,7 +347,7 @@ export default function RecipeLandingPage() {
         {/* Footer */}
         <footer className="bg-gray-800 px-30 text-white py-16">
           <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-4 gap-8">
+            {/* <div className="grid md:grid-cols-4 gap-8">
               <div className="space-y-4">
                 <div className="flex items-center space-x-2">
                   <ChefHat className="h-8 w-8 text-orange-500" />
@@ -485,12 +495,32 @@ export default function RecipeLandingPage() {
                   </li>
                 </ul>
               </div>
-            </div>
-            <div className="border-t border-gray-700 mt-12 pt-8 text-center text-gray-400">
+            </div> */}
+            <div className=" text-center text-gray-400">
               <p>
-                &copy; {new Date().getFullYear()} RecipeShare. All rights
-                reserved. Made with ❤️ for food lovers everywhere.
+                &copy; {new Date().getFullYear()} Shivam Ingle. MBuilt with ❤️
+                using Next.js.{" "}
               </p>
+            </div>
+            <div className="flex space-x-4 mx-auto mt-5  w-fit">
+              <Link
+                href="#"
+                className="text-gray-400 hover:text-orange-500 transition-colors"
+              >
+                <Twitter className="h-5 w-5" />
+              </Link>
+              <Link
+                href="#"
+                className="text-gray-400 hover:text-orange-500 transition-colors"
+              >
+                <Instagram className="h-5 w-5" />
+              </Link>
+              <Link
+                href="#"
+                className="text-gray-400 hover:text-orange-500 transition-colors"
+              >
+                <Linkedin className="h-5 w-5" />
+              </Link>
             </div>
           </div>
         </footer>

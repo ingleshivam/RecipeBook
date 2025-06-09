@@ -1,7 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { category, difficulty } from "@/data/dropdownData";
+import { getToken } from "next-auth/jwt";
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  const token = await getToken({ req: request });
+  console.log("Token 1123 :", token);
   const url = request.url;
   const { searchParams } = new URL(url);
   const id = searchParams.get("id");
@@ -31,11 +34,42 @@ export async function GET(request: Request) {
             nutritionInfo: true,
           },
         },
-        tags: true,
+        tags: {
+          include: {
+            tag: true,
+          },
+        },
         user: true,
       },
     });
+
     console.log("response  : ", response);
+
+    const recipeCount = await prisma?.recipe.aggregate({
+      where: {
+        userId: response?.user?.userId,
+      },
+      _count: {
+        recipeId: true,
+      },
+    });
+
+    const allRecipesByUseId = await prisma?.recipe.findMany({
+      where: {
+        userId: response?.user?.userId,
+        NOT: {
+          recipeId: Number(id),
+        },
+      },
+      include: {
+        images: true,
+      },
+    });
+
+    console.log("allRecipesByUseId : ", allRecipesByUseId);
+
+    const count = recipeCount?._count;
+
     let result;
     if (response) {
       result = {
@@ -44,7 +78,6 @@ export async function GET(request: Request) {
         description: response.description,
         image: response.images[0].imageUrl,
         author: response.user?.firstName + " " + response.user?.lastName,
-
         // rating: 4.9,
         // reviews: 127,
         prepTime: response.prepTime,
@@ -70,7 +103,10 @@ export async function GET(request: Request) {
 
     console.log("Get recipe details by id : ", result);
 
-    return NextResponse.json({ result }, { status: 200 });
+    return NextResponse.json(
+      { result, count, allRecipesByUseId },
+      { status: 200 }
+    );
   } catch (error) {
     if (error instanceof Error) {
       return NextResponse.json(
