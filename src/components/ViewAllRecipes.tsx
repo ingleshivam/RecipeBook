@@ -227,42 +227,7 @@ export default function ViewAllRecipes() {
   // console.log("All recipes :", allRecipes.result);
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-orange-100 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <ChefHat className="h-8 w-8 text-orange-500" />
-            <span className="text-2xl font-bold text-gray-800">
-              RecipeShare
-            </span>
-          </Link>
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link
-              href="/"
-              className="text-gray-600 hover:text-orange-500 transition-colors"
-            >
-              Home
-            </Link>
-            <Link href="/recipes" className="text-orange-500 font-medium">
-              All Recipes
-            </Link>
-            <Link
-              href="/share-recipe"
-              className="text-gray-600 hover:text-orange-500 transition-colors"
-            >
-              Share Recipe
-            </Link>
-            <Button
-              variant="outline"
-              className="border-orange-200 text-orange-600 hover:bg-orange-50"
-            >
-              Sign In
-            </Button>
-          </nav>
-        </div>
-      </header>
-
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-34 py-8">
         {/* Page Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-4">

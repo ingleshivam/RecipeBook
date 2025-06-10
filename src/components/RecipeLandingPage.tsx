@@ -1,6 +1,4 @@
 "use client";
-import { AuthStatus } from "@/components/auth/AuthStatus";
-import NavButton from "@/components/NavButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -20,50 +18,23 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function RecipeLandingPage() {
   const router = useRouter();
   const { status } = useSession();
+  const {
+    data: recipeData,
+    isLoading: recipeLaoding,
+    error: recipeError,
+  } = useSWR("/api/getRecipeDeatils", fetcher);
+
+  if (recipeLaoding) return <div>Loading...</div>;
+  console.log("recipeData : ", recipeData);
   return (
     <>
       <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white ">
-        {/* Header */}
-        <header className="bg-white/80 backdrop-blur-sm border-b border-orange-100 sticky top-0 z-50 px-30">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <ChefHat className="h-8 w-8 text-orange-500" />
-              <span className="text-2xl font-bold text-gray-800">
-                RecipeShare
-              </span>
-            </div>
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link
-                href="#recipes"
-                className="text-gray-600 hover:text-orange-500 transition-colors"
-              >
-                Recipes
-              </Link>
-              <Link
-                href="#how-it-works"
-                className="text-gray-600 hover:text-orange-500 transition-colors"
-              >
-                How It Works
-              </Link>
-              <Link
-                href="#about"
-                className="text-gray-600 hover:text-orange-500 transition-colors"
-              >
-                About
-              </Link>
-              <div className=" flex gap-5">
-                <AuthStatus />
-                {status === "unauthenticated" && (
-                  <NavButton buttonName="SignUp" />
-                )}
-              </div>
-            </nav>
-          </div>
-        </header>
-
         {/* Hero Section */}
         <section className="relative py-20 px-30 lg:py-32 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-orange-100/50 to-green-100/30"></div>
@@ -197,62 +168,7 @@ export default function RecipeLandingPage() {
               </p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[
-                {
-                  title: "Grandma's Chocolate Chip Cookies",
-                  description:
-                    "Soft, chewy, and loaded with chocolate chips. A family recipe passed down through generations.",
-                  time: "25 min",
-                  rating: 4.9,
-                  image:
-                    "https://dwylojmkbggcdvus.public.blob.vercel-storage.com/Aambyachi_Kadhi-wb6mc5XAbj85CWIbR90p085O2QC5Y4.jpg?height=300&width=400",
-                },
-                {
-                  title: "Mediterranean Quinoa Bowl",
-                  description:
-                    "Fresh, healthy, and bursting with Mediterranean flavors. Perfect for a nutritious lunch.",
-                  time: "15 min",
-                  rating: 4.8,
-                  image:
-                    "https://dwylojmkbggcdvus.public.blob.vercel-storage.com/Aambyachi_Kadhi-wb6mc5XAbj85CWIbR90p085O2QC5Y4.jpg?height=300&width=400",
-                },
-                {
-                  title: "Homemade Sourdough Bread",
-                  description:
-                    "Artisanal sourdough with a perfect crust and tangy flavor. Worth the wait!",
-                  time: "4 hours",
-                  rating: 4.9,
-                  image:
-                    "https://dwylojmkbggcdvus.public.blob.vercel-storage.com/Aambyachi_Kadhi-wb6mc5XAbj85CWIbR90p085O2QC5Y4.jpg?height=300&width=400",
-                },
-                {
-                  title: "Thai Green Curry",
-                  description:
-                    "Authentic Thai flavors with coconut milk, fresh herbs, and aromatic spices.",
-                  time: "30 min",
-                  rating: 4.7,
-                  image:
-                    "https://dwylojmkbggcdvus.public.blob.vercel-storage.com/Aambyachi_Kadhi-wb6mc5XAbj85CWIbR90p085O2QC5Y4.jpg?height=300&width=400",
-                },
-                {
-                  title: "Classic Beef Lasagna",
-                  description:
-                    "Layers of pasta, rich meat sauce, and melted cheese. Comfort food at its finest.",
-                  time: "1.5 hours",
-                  rating: 4.8,
-                  image:
-                    "https://dwylojmkbggcdvus.public.blob.vercel-storage.com/Aambyachi_Kadhi-wb6mc5XAbj85CWIbR90p085O2QC5Y4.jpg?height=300&width=400",
-                },
-                {
-                  title: "Lemon Blueberry Muffins",
-                  description:
-                    "Fluffy muffins bursting with fresh blueberries and bright lemon flavor.",
-                  time: "35 min",
-                  rating: 4.6,
-                  image:
-                    "https://dwylojmkbggcdvus.public.blob.vercel-storage.com/Aambyachi_Kadhi-wb6mc5XAbj85CWIbR90p085O2QC5Y4.jpg?height=300&width=400",
-                },
-              ].map((recipe, index) => (
+              {recipeData.result.map((recipe: any, index: number) => (
                 <Card
                   key={index}
                   className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm"
@@ -282,11 +198,16 @@ export default function RecipeLandingPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2 text-gray-500">
                         <Clock className="h-4 w-4" />
-                        <span className="text-sm">{recipe.time}</span>
+                        <span className="text-sm">
+                          {recipe.prepTime + recipe.cookTime}
+                        </span>
                       </div>
                       <Button
                         variant="ghost"
-                        className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                        className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 cursor-pointer"
+                        onClick={() =>
+                          router.push(`/recipe/${recipe?.recipeId}`)
+                        }
                       >
                         View Recipe
                       </Button>
@@ -498,7 +419,7 @@ export default function RecipeLandingPage() {
             </div> */}
             <div className=" text-center text-gray-400">
               <p>
-                &copy; {new Date().getFullYear()} Shivam Ingle. MBuilt with ❤️
+                &copy; {new Date().getFullYear()} Shivam Ingle. Built with ❤️
                 using Next.js.{" "}
               </p>
             </div>

@@ -77,7 +77,7 @@ function SignInPageContent() {
           </p>
         </div>
 
-        <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
+        <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm py-6">
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-bold text-gray-800">
               Sign In
