@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { category, difficulty } from "@/data/dropdownData";
+import prisma from "@/lib/prisma";
+
 export async function GET(request: Request) {
   try {
     const response = await prisma?.recipe.findMany({
