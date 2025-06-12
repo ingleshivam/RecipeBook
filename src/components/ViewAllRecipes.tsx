@@ -238,6 +238,18 @@ export default function ViewAllRecipes() {
             passionate home cooks
           </p>
         </div>
+        <Card className="relative max-w-2xl mx-auto mb-10">
+          <Search className="absolute left-4 top-3 h-5 w-5 text-gray-400" />
+          <Input
+            placeholder="Search recipes, ingredients, or authors..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="pl-12 pr-4 py-3 text-lg border-gray-200 focus:border-orange-500 focus:ring-orange-500 outline-none"
+          />
+        </Card>
 
         {recipesLoading ? (
           <ViewAllRecipesSkeleton viewMode={viewMode} />
