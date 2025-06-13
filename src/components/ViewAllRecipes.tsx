@@ -207,6 +207,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function ViewAllRecipes() {
   const [searchTerm, setSearchTerm] = useState("");
+  console.log("Search Term : ", searchTerm);
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [selectedDifficulty, setSelectedDifficulty] = useState("All Levels");
   const [sortBy, setSortBy] = useState("newest");
@@ -224,7 +225,23 @@ export default function ViewAllRecipes() {
 
   // if (true) return <ViewAllRecipesSkeleton viewMode={viewMode} />;
 
-  // console.log("All recipes :", allRecipes.result);
+  console.log("All recipes :", allRecipes?.result);
+  console.log(
+    allRecipes?.result?.find((item: any) =>
+      item.title.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  // const filteredRecipes = allRecipes?.result?.filter((item: any) => {
+  //   const searchLower = searchTerm.toLowerCase();
+  //   return (
+  //     item.title.toLowerCase().includes(searchLower) ||
+  //     item.description.toLowerCase().includes(searchLower) ||
+  //     item.author.toLowerCase().includes(searchLower) ||
+  //     item.tags?.some((tag: string) => tag.toLowerCase().includes(searchLower))
+  //   );
+  // });
+  // console.log("Filtered recipes:", filteredRecipes);
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
       <div className="container mx-auto px-34 py-8">
@@ -238,7 +255,7 @@ export default function ViewAllRecipes() {
             passionate home cooks
           </p>
         </div>
-        <Card className="relative max-w-2xl mx-auto mb-10">
+        <Card className="relative max-w-2xl mx-auto mb-10 rounded-md">
           <Search className="absolute left-4 top-3 h-5 w-5 text-gray-400" />
           <Input
             placeholder="Search recipes, ingredients, or authors..."
@@ -247,7 +264,7 @@ export default function ViewAllRecipes() {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="pl-12 pr-4 py-3 text-lg border-gray-200 focus:border-orange-500 focus:ring-orange-500 outline-none"
+            className="pl-12 pr-4 py-5 text-lg border-gray-200 focus:border-red-500 focus:ring-orange-500 :outline-none"
           />
         </Card>
 
