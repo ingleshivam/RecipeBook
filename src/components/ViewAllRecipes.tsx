@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -34,181 +36,13 @@ import useSWR from "swr";
 import { category, difficulty } from "../../public/dropdownData.js";
 import ViewAllRecipesSkeleton from "./skeleton/ViewAllRecipeSkeleton";
 
-// Mock recipe data
-const allRecipes = [
-  {
-    id: 1,
-    title: "Grandma's Chocolate Chip Cookies",
-    description:
-      "Soft, chewy, and loaded with chocolate chips. A family recipe passed down through generations.",
-    image: "/placeholder.svg?height=300&width=400",
-    author: "Sarah Johnson",
-    rating: 4.9,
-    reviews: 127,
-    prepTime: "15 min",
-    cookTime: "10 min",
-    totalTime: "25 min",
-    servings: 24,
-    difficulty: "Easy",
-    category: "Desserts",
-    tags: ["cookies", "chocolate", "family-recipe", "comfort-food"],
-    createdAt: "2024-01-15",
-  },
-  {
-    id: 2,
-    title: "Mediterranean Quinoa Bowl",
-    description:
-      "Fresh, healthy, and bursting with Mediterranean flavors. Perfect for a nutritious lunch.",
-    image: "/placeholder.svg?height=300&width=400",
-    author: "Alex Chen",
-    rating: 4.8,
-    reviews: 89,
-    prepTime: "10 min",
-    cookTime: "5 min",
-    totalTime: "15 min",
-    servings: 2,
-    difficulty: "Easy",
-    category: "Main Course",
-    tags: ["healthy", "vegetarian", "mediterranean", "quinoa"],
-    createdAt: "2024-01-14",
-  },
-  {
-    id: 3,
-    title: "Homemade Sourdough Bread",
-    description:
-      "Artisanal sourdough with a perfect crust and tangy flavor. Worth the wait!",
-    image: "/placeholder.svg?height=300&width=400",
-    author: "Emma Baker",
-    rating: 4.9,
-    reviews: 203,
-    prepTime: "30 min",
-    cookTime: "45 min",
-    totalTime: "4 hours",
-    servings: 8,
-    difficulty: "Hard",
-    category: "Bread & Baking",
-    tags: ["bread", "sourdough", "artisanal", "fermented"],
-    createdAt: "2024-01-13",
-  },
-  {
-    id: 4,
-    title: "Thai Green Curry",
-    description:
-      "Authentic Thai flavors with coconut milk, fresh herbs, and aromatic spices.",
-    image: "/placeholder.svg?height=300&width=400",
-    author: "Ploy Siriporn",
-    rating: 4.7,
-    reviews: 156,
-    prepTime: "20 min",
-    cookTime: "10 min",
-    totalTime: "30 min",
-    servings: 4,
-    difficulty: "Medium",
-    category: "Main Course",
-    tags: ["thai", "curry", "spicy", "coconut"],
-    createdAt: "2024-01-12",
-  },
-  {
-    id: 5,
-    title: "Classic Beef Lasagna",
-    description:
-      "Layers of pasta, rich meat sauce, and melted cheese. Comfort food at its finest.",
-    image: "/placeholder.svg?height=300&width=400",
-    author: "Tony Romano",
-    rating: 4.8,
-    reviews: 178,
-    prepTime: "45 min",
-    cookTime: "45 min",
-    totalTime: "1.5 hours",
-    servings: 8,
-    difficulty: "Medium",
-    category: "Main Course",
-    tags: ["italian", "pasta", "beef", "comfort-food"],
-    createdAt: "2024-01-11",
-  },
-  {
-    id: 6,
-    title: "Lemon Blueberry Muffins",
-    description:
-      "Fluffy muffins bursting with fresh blueberries and bright lemon flavor.",
-    image: "/placeholder.svg?height=300&width=400",
-    author: "Lisa Park",
-    rating: 4.6,
-    reviews: 94,
-    prepTime: "15 min",
-    cookTime: "20 min",
-    totalTime: "35 min",
-    servings: 12,
-    difficulty: "Easy",
-    category: "Breakfast",
-    tags: ["muffins", "blueberry", "lemon", "breakfast"],
-    createdAt: "2024-01-10",
-  },
-  {
-    id: 7,
-    title: "Avocado Toast Supreme",
-    description:
-      "Elevated avocado toast with poached egg, everything seasoning, and microgreens.",
-    image: "/placeholder.svg?height=300&width=400",
-    author: "Jordan Smith",
-    rating: 4.5,
-    reviews: 67,
-    prepTime: "10 min",
-    cookTime: "5 min",
-    totalTime: "15 min",
-    servings: 2,
-    difficulty: "Easy",
-    category: "Breakfast",
-    tags: ["avocado", "toast", "healthy", "quick"],
-    createdAt: "2024-01-09",
-  },
-  {
-    id: 8,
-    title: "Chicken Tikka Masala",
-    description:
-      "Creamy, aromatic Indian curry with tender chicken in a rich tomato-based sauce.",
-    image: "/placeholder.svg?height=300&width=400",
-    author: "Priya Sharma",
-    rating: 4.9,
-    reviews: 234,
-    prepTime: "30 min",
-    cookTime: "25 min",
-    totalTime: "55 min",
-    servings: 6,
-    difficulty: "Medium",
-    category: "Main Course",
-    tags: ["indian", "curry", "chicken", "spicy"],
-    createdAt: "2024-01-08",
-  },
-];
-
-const categories = [
-  "All Categories",
-  "Main Course",
-  "Desserts",
-  "Breakfast",
-  "Bread & Baking",
-  "Appetizers",
-  "Beverages",
-  "Snacks",
-];
-
-const difficulties = ["All Levels", "Easy", "Medium", "Hard"];
-
-const sortOptions = [
-  { value: "newest", label: "Newest First" },
-  { value: "oldest", label: "Oldest First" },
-  { value: "rating", label: "Highest Rated" },
-  { value: "reviews", label: "Most Reviewed" },
-  { value: "title", label: "Alphabetical" },
-];
-
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function ViewAllRecipes() {
   const [searchTerm, setSearchTerm] = useState("");
-  console.log("Search Term : ", searchTerm);
-  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [selectedCategory, setSelectedCategory] = useState("0");
+
+  console.log("selectedCategory : ", selectedCategory);
   const [selectedDifficulty, setSelectedDifficulty] = useState("All Levels");
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -218,30 +52,31 @@ export default function ViewAllRecipes() {
   const recipesPerPage = 12;
 
   const {
-    data: allRecipes,
+    data: response,
     isLoading: recipesLoading,
     error: recipesError,
   } = useSWR("/api/getRecipeDeatils", fetcher);
 
-  // if (true) return <ViewAllRecipesSkeleton viewMode={viewMode} />;
+  if (recipesLoading) return <ViewAllRecipesSkeleton viewMode={viewMode} />;
+  if (recipesError) return <div>Error loading recipes</div>;
+  if (!response?.result || !Array.isArray(response.result))
+    return <div>No recipes found</div>;
 
-  console.log("All recipes :", allRecipes?.result);
-  console.log(
-    allRecipes?.result?.find((item: any) =>
-      item.title.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  const filteredRecipes = response.result.filter((item: any) => {
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch =
+      searchTerm === "" ||
+      item.title.toLowerCase().includes(searchLower) ||
+      item.description.toLowerCase().includes(searchLower) ||
+      item.author.toLowerCase().includes(searchLower);
 
-  // const filteredRecipes = allRecipes?.result?.filter((item: any) => {
-  //   const searchLower = searchTerm.toLowerCase();
-  //   return (
-  //     item.title.toLowerCase().includes(searchLower) ||
-  //     item.description.toLowerCase().includes(searchLower) ||
-  //     item.author.toLowerCase().includes(searchLower) ||
-  //     item.tags?.some((tag: string) => tag.toLowerCase().includes(searchLower))
-  //   );
-  // });
-  // console.log("Filtered recipes:", filteredRecipes);
+    const matchesCategory =
+      selectedCategory === "0" || item.category === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  console.log("Filtered recipes:", filteredRecipes);
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
       <div className="container mx-auto px-34 py-8">
@@ -255,22 +90,81 @@ export default function ViewAllRecipes() {
             passionate home cooks
           </p>
         </div>
-        <Card className="relative max-w-2xl mx-auto mb-10 rounded-md">
-          <Search className="absolute left-4 top-3 h-5 w-5 text-gray-400" />
-          <Input
-            placeholder="Search recipes, ingredients, or authors..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="pl-12 pr-4 py-5 text-lg border-gray-200 focus:border-red-500 focus:ring-orange-500 :outline-none"
-          />
-        </Card>
+        <div className="space-y-3 mb-10">
+          <Card className="relative max-w-2xl mx-auto mb-10 rounded-md">
+            <Search className="absolute left-4 top-3 h-5 w-5 text-gray-400" />
+            <Input
+              placeholder="Search recipes, ingredients, or authors..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="pl-12 pr-4 py-5 text-lg border-gray-200 focus:border-red-500 focus:ring-orange-500 :outline-none"
+            />
+          </Card>
+
+          <div className="grid grid-cols-3 gap-8">
+            <Card className="rounded-md">
+              <Select
+                value={selectedCategory}
+                onValueChange={(value) => setSelectedCategory(value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="0">All Categories</SelectItem>
+                    {category.map((item) => (
+                      <SelectItem value={item.value}>
+                        {item.category_name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </Card>
+            <Card className="rounded-md">
+              <Select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a fruit" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Fruits</SelectLabel>
+                    <SelectItem value="apple">Apple</SelectItem>
+                    <SelectItem value="banana">Banana</SelectItem>
+                    <SelectItem value="blueberry">Blueberry</SelectItem>
+                    <SelectItem value="grapes">Grapes</SelectItem>
+                    <SelectItem value="pineapple">Pineapple</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </Card>
+            <Card className="rounded-md">
+              <Select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a fruit" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Fruits</SelectLabel>
+                    <SelectItem value="apple">Apple</SelectItem>
+                    <SelectItem value="banana">Banana</SelectItem>
+                    <SelectItem value="blueberry">Blueberry</SelectItem>
+                    <SelectItem value="grapes">Grapes</SelectItem>
+                    <SelectItem value="pineapple">Pineapple</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </Card>
+          </div>
+        </div>
 
         {recipesLoading ? (
           <ViewAllRecipesSkeleton viewMode={viewMode} />
-        ) : allRecipes?.result?.length > 0 ? (
+        ) : filteredRecipes?.length > 0 ? (
           <div
             className={
               viewMode === "grid"
@@ -278,7 +172,7 @@ export default function ViewAllRecipes() {
                 : "space-y-6 mb-8 "
             }
           >
-            {allRecipes.result.map((recipe: any, index: number) => (
+            {filteredRecipes?.map((recipe: any, index: number) => (
               <Card
                 key={index}
                 className={` group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm ${

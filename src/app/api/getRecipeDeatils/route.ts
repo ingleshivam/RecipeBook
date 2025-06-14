@@ -34,10 +34,10 @@ export async function GET(request: Request) {
         servings: item.servingSize,
         difficulty: difficulty.find(
           (val: any) => parseInt(val.value) === item.difficulty
-        )?.diffuculty,
+        )?.value,
         category: category.find(
           (val: any) => parseInt(val.value) === item.categoryId
-        )?.category_name,
+        )?.value,
         tags: item.tags,
         createdAt: item.createdAt,
       }));
