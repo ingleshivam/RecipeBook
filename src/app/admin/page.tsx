@@ -92,12 +92,10 @@ export default function AdminPage() {
   const [selectedTab, setSelectedTab] = useState("pending");
 
   const handleApprove = (recipeId: number) => {
-    console.log("Approving recipe:", recipeId);
     // Handle approval logic
   };
 
   const handleReject = (recipeId: number) => {
-    console.log("Rejecting recipe:", recipeId);
     // Handle rejection logic
   };
 

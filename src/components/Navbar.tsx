@@ -9,7 +9,6 @@ import { Button } from "./ui/button";
 
 export default function Navbar() {
   const pathname = usePathname();
-  console.log("pathname ; ", pathname);
   return (
     <>
       <header className="bg-white/80 backdrop-blur-sm border-b border-orange-100 sticky top-0 z-50 px-30">
@@ -33,7 +32,6 @@ export default function Navbar() {
 const AllRecipeNavBar = () => {
   const { status } = useSession();
   const pathname = usePathname();
-  console.log("pathname ; ", pathname);
   return (
     <>
       <nav className="hidden md:flex items-center space-x-8">

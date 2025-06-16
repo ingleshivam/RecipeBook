@@ -154,7 +154,6 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
     }
   };
 
-  console.log("Recipe : ", recipe);
   return (
     <>
       {recipeLoading ? (

@@ -4,7 +4,6 @@ import { getToken } from "next-auth/jwt";
 
 export async function GET(request: NextRequest) {
   const token = await getToken({ req: request });
-  console.log("Token 1123 :", token);
   const url = request.url;
   const { searchParams } = new URL(url);
   const id = searchParams.get("id");
@@ -43,8 +42,6 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    console.log("response  : ", response);
-
     const recipeCount = await prisma?.recipe.aggregate({
       where: {
         userId: response?.user?.userId,
@@ -65,8 +62,6 @@ export async function GET(request: NextRequest) {
         images: true,
       },
     });
-
-    console.log("allRecipesByUseId : ", allRecipesByUseId);
 
     const count = recipeCount?._count;
 
@@ -100,8 +95,6 @@ export async function GET(request: NextRequest) {
         createdAt: response.createdAt,
       };
     }
-
-    console.log("Get recipe details by id : ", result);
 
     return NextResponse.json(
       { result, count, allRecipesByUseId },

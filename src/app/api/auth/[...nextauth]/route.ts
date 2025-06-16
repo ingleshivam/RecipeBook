@@ -14,18 +14,17 @@ const handler = NextAuth({
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Email and password required");
         }
 
-        
         const user = await prisma.user.findUnique({
           where: {
-            email: credentials.email
-          }
+            email: credentials.email,
+          },
         });
 
         if (!user) {
@@ -49,8 +48,8 @@ const handler = NextAuth({
             `${user.firstName} ${user.lastName}`
           )}&background=random`,
         };
-      }
-    })
+      },
+    }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
@@ -61,18 +60,18 @@ const handler = NextAuth({
     async signIn({ user, account, profile, email, credentials }) {
       if (account?.provider === "github") {
         const existingUser = await prisma.user.findUnique({
-          where: { email: user.email! }
+          where: { email: user.email! },
         });
 
         if (!existingUser) {
           const newUser = await prisma.user.create({
             data: {
               email: user.email!,
-              firstName: user.name?.split(' ')[0] || '',
-              lastName: user.name?.split(' ')[1] || '',
+              firstName: user.name?.split(" ")[0] || "",
+              lastName: user.name?.split(" ")[1] || "",
               role: "U",
-              passwordHash: await bcrypt.hash(Math.random().toString(36), 10)
-            }
+              passwordHash: await bcrypt.hash(Math.random().toString(36), 10),
+            },
           });
           (user as any).id = newUser.userId.toString();
         } else {
@@ -86,10 +85,9 @@ const handler = NextAuth({
       return baseUrl;
     },
     async session({ session, token }) {
-      if (session.user) { 
+      if (session.user) {
         session.user.id = (token as any).id;
       }
-      console.log("Session : ", session);
 
       return session;
     },
@@ -97,13 +95,12 @@ const handler = NextAuth({
       if (user) {
         token.id = user.id;
       }
-      console.log("Token : ", token);
       return token;
-    }
+    },
   },
   session: {
-    strategy: "jwt"
-  }
+    strategy: "jwt",
+  },
 });
 
-export { handler as GET, handler as POST }; 
+export { handler as GET, handler as POST };

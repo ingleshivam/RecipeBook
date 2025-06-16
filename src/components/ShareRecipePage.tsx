@@ -47,7 +47,6 @@ import { del } from "@vercel/blob";
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function ShareRecipePage() {
   const { data: sessionData } = useSession();
-  console.log("Loggedin users data : ", sessionData);
   const RecipeSchema = z.object({
     category: z.string({ required_error: "Category is required" }),
     recipeTitle: z.string().min(1, "Recipe title is required"),
@@ -189,11 +188,7 @@ export default function ShareRecipePage() {
       toast.warning("Please wait while we prepare the upload...");
       return;
     }
-    console.log("blobData : ", blobData);
-    console.log(
-      "Blob data : ",
-      blobData?.blobs.some((val) => val.pathname === values.recipeFile.name)
-    );
+
     try {
       setIsSubmittingDraft(true);
       setIsSubmittingDraft(true);
@@ -206,7 +201,6 @@ export default function ShareRecipePage() {
       });
 
       const uploadData = await uploadResponse.json();
-      console.log("Upload Data : ", uploadData.message.url);
       if (!uploadResponse.ok) {
         toast.error("Error", {
           description: uploadData.message.error,

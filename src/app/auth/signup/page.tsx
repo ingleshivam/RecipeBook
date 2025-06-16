@@ -61,7 +61,6 @@ export default function SignUpPage() {
   const onSubmit = async (values: IUserSchema) => {
     try {
       setIsLoading(true);
-      console.log("Starting API call with values:", values);
 
       const response = await fetch("/api/signupUser", {
         method: "POST",

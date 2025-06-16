@@ -188,6 +188,14 @@ export const difficulty =[
   },
   {
     "value" : "3",
-    "diffuculty" : "EaHardsy"
+    "diffuculty" : "Hard"
   },
+]
+
+export const sortOptions = [
+  { value: "newest", label: "Newest First" },
+  { value: "oldest", label: "Oldest First" },
+//   { value: "rating", label: "Highest Rated" },
+//   { value: "reviews", label: "Most Reviewed" },
+//   { value: "title", label: "Alphabetical" },
 ]

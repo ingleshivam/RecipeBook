@@ -33,7 +33,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useMemo, useEffect } from "react";
 import useSWR from "swr";
-import { category, difficulty } from "../../public/dropdownData.js";
+import {
+  category,
+  difficulty,
+  sortOptions,
+} from "../../public/dropdownData.js";
 import ViewAllRecipesSkeleton from "./skeleton/ViewAllRecipeSkeleton";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -41,9 +45,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function ViewAllRecipes() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("0");
-
-  console.log("selectedCategory : ", selectedCategory);
-  const [selectedDifficulty, setSelectedDifficulty] = useState("All Levels");
+  const [selectedDifficulty, setSelectedDifficulty] = useState("0");
   const [sortBy, setSortBy] = useState("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
@@ -57,26 +59,79 @@ export default function ViewAllRecipes() {
     error: recipesError,
   } = useSWR("/api/getRecipeDeatils", fetcher);
 
-  if (recipesLoading) return <ViewAllRecipesSkeleton viewMode={viewMode} />;
   if (recipesError) return <div>Error loading recipes</div>;
-  if (!response?.result || !Array.isArray(response.result))
-    return <div>No recipes found</div>;
 
-  const filteredRecipes = response.result.filter((item: any) => {
-    const searchLower = searchTerm.toLowerCase();
-    const matchesSearch =
-      searchTerm === "" ||
-      item.title.toLowerCase().includes(searchLower) ||
-      item.description.toLowerCase().includes(searchLower) ||
-      item.author.toLowerCase().includes(searchLower);
-
-    const matchesCategory =
-      selectedCategory === "0" || item.category === selectedCategory;
-
-    return matchesSearch && matchesCategory;
+  console.log("API Response:", response);
+  console.log("Initial State:", {
+    searchTerm,
+    selectedCategory,
+    selectedDifficulty,
+    sortBy,
   });
 
-  console.log("Filtered recipes:", filteredRecipes);
+  const filteredAndSortedRecipes = useMemo(() => {
+    if (!response?.result) return [];
+
+    const filteredRecipes = response.result.filter((item: any) => {
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearch =
+        searchTerm === "" ||
+        item.title.toLowerCase().includes(searchLower) ||
+        item.description.toLowerCase().includes(searchLower) ||
+        item.author.toLowerCase().includes(searchLower);
+
+      const matchesCategory =
+        selectedCategory === "0" || item.category === selectedCategory;
+
+      const matchesDifficulty =
+        selectedDifficulty === "0" || item.difficulty === selectedDifficulty;
+
+      return matchesSearch && matchesCategory && matchesDifficulty;
+    });
+
+    filteredRecipes?.sort((a: any, b: any) => {
+      switch (sortBy) {
+        case "newest":
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        case "oldest":
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+        case "rating":
+          return b.rating - a.rating;
+        case "reviews":
+          return b.reviews - a.reviews;
+        case "title":
+          return a.title.localeCompare(b.title);
+        default:
+          return 0;
+      }
+    });
+
+    return filteredRecipes || [];
+  }, [response, searchTerm, selectedCategory, selectedDifficulty, sortBy]);
+
+  const totalPages = Math.ceil(
+    filteredAndSortedRecipes.length / recipesPerPage
+  );
+  const startIndex = (currentPage - 1) * recipesPerPage;
+  const paginatedRecipes = filteredAndSortedRecipes.slice(
+    startIndex,
+    startIndex + recipesPerPage
+  );
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedCategory("0");
+    setSelectedDifficulty("0");
+    setSelectedTags([]);
+    setSortBy("newest");
+    setCurrentPage(1);
+  };
+
+  console.log("Filtered recipes:", filteredAndSortedRecipes);
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
       <div className="container mx-auto px-34 py-8">
@@ -110,14 +165,14 @@ export default function ViewAllRecipes() {
                 value={selectedCategory}
                 onValueChange={(value) => setSelectedCategory(value)}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full py-5">
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
                     <SelectItem value="0">All Categories</SelectItem>
-                    {category.map((item) => (
-                      <SelectItem value={item.value}>
+                    {category.map((item, index) => (
+                      <SelectItem key={item.value + index} value={item.value}>
                         {item.category_name}
                       </SelectItem>
                     ))}
@@ -125,36 +180,42 @@ export default function ViewAllRecipes() {
                 </SelectContent>
               </Select>
             </Card>
+
             <Card className="rounded-md">
-              <Select>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a fruit" />
+              <Select
+                value={selectedDifficulty}
+                onValueChange={(value) => setSelectedDifficulty(value)}
+              >
+                <SelectTrigger className="w-full py-5 ">
+                  <SelectValue placeholder="Select a level" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>Fruits</SelectLabel>
-                    <SelectItem value="apple">Apple</SelectItem>
-                    <SelectItem value="banana">Banana</SelectItem>
-                    <SelectItem value="blueberry">Blueberry</SelectItem>
-                    <SelectItem value="grapes">Grapes</SelectItem>
-                    <SelectItem value="pineapple">Pineapple</SelectItem>
+                    <SelectItem value="0">All Levels</SelectItem>
+                    {difficulty.map((item, index) => (
+                      <SelectItem key={item.value + index} value={item.value}>
+                        {item.diffuculty}
+                      </SelectItem>
+                    ))}
                   </SelectGroup>
                 </SelectContent>
               </Select>
             </Card>
             <Card className="rounded-md">
-              <Select>
-                <SelectTrigger className="w-full">
+              <Select
+                value={sortBy}
+                onValueChange={(value) => setSortBy(value)}
+              >
+                <SelectTrigger className="w-full py-5">
                   <SelectValue placeholder="Select a fruit" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>Fruits</SelectLabel>
-                    <SelectItem value="apple">Apple</SelectItem>
-                    <SelectItem value="banana">Banana</SelectItem>
-                    <SelectItem value="blueberry">Blueberry</SelectItem>
-                    <SelectItem value="grapes">Grapes</SelectItem>
-                    <SelectItem value="pineapple">Pineapple</SelectItem>
+                    {sortOptions.map((item, index) => (
+                      <SelectItem key={item.value + index} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -164,7 +225,19 @@ export default function ViewAllRecipes() {
 
         {recipesLoading ? (
           <ViewAllRecipesSkeleton viewMode={viewMode} />
-        ) : filteredRecipes?.length > 0 ? (
+        ) : !response?.result ? (
+          <div className="text-center py-16">
+            <div className="max-w-md mx-auto">
+              <Search className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                Loading recipes...
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Please wait while we fetch the recipes.
+              </p>
+            </div>
+          </div>
+        ) : paginatedRecipes.length > 0 ? (
           <div
             className={
               viewMode === "grid"
@@ -172,7 +245,7 @@ export default function ViewAllRecipes() {
                 : "space-y-6 mb-8 "
             }
           >
-            {filteredRecipes?.map((recipe: any, index: number) => (
+            {paginatedRecipes?.map((recipe: any, index: number) => (
               <Card
                 key={index}
                 className={` group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm ${
@@ -214,13 +287,21 @@ export default function ViewAllRecipes() {
                         variant="secondary"
                         className="bg-orange-100 text-orange-700"
                       >
-                        {recipe.category}
+                        {
+                          category.find(
+                            (item) => item.value === recipe.category
+                          )?.category_name
+                        }
                       </Badge>
                       <Badge
                         variant="outline"
                         className="border-green-200 text-green-700"
                       >
-                        {recipe.difficulty}
+                        {
+                          difficulty.find(
+                            (item) => item.value === recipe.difficulty
+                          )?.diffuculty
+                        }
                       </Badge>
                     </div>
                     <h3 className="text-xl font-semibold text-gray-800 group-hover:text-orange-600 transition-colors line-clamp-2">
@@ -273,11 +354,71 @@ export default function ViewAllRecipes() {
                 Try adjusting your search terms or filters to find what you're
                 looking for.
               </p>
+              <Button
+                onClick={clearFilters}
+                className="bg-orange-500 hover:bg-orange-600"
+              >
+                Clear All Filters
+              </Button>
             </div>
           </div>
         )}
-        {/* Recipe Grid/List */}
-        {}
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              className="border-gray-200"
+            >
+              <ChevronLeft className="h-4 w-4 mr-2" />
+              Previous
+            </Button>
+
+            <div className="flex space-x-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNumber;
+                if (totalPages <= 5) {
+                  pageNumber = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNumber = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNumber = totalPages - 4 + i;
+                } else {
+                  pageNumber = currentPage - 2 + i;
+                }
+
+                return (
+                  <Button
+                    key={pageNumber}
+                    variant={currentPage === pageNumber ? "default" : "outline"}
+                    onClick={() => setCurrentPage(pageNumber)}
+                    className={
+                      currentPage === pageNumber
+                        ? "bg-orange-500 hover:bg-orange-600"
+                        : "border-gray-200 hover:bg-gray-50"
+                    }
+                  >
+                    {pageNumber}
+                  </Button>
+                );
+              })}
+            </div>
+
+            <Button
+              variant="outline"
+              onClick={() =>
+                setCurrentPage(Math.min(totalPages, currentPage + 1))
+              }
+              disabled={currentPage === totalPages}
+              className="border-gray-200"
+            >
+              Next
+              <ChevronRight className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

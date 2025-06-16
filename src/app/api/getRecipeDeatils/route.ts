@@ -43,7 +43,6 @@ export async function GET(request: Request) {
       }));
     }
 
-    console.log("Response from api : ", result);
     return NextResponse.json({ result }, { status: 200 });
   } catch (error) {
     if (error instanceof Error) {
