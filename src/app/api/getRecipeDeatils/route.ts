@@ -14,7 +14,7 @@ export async function GET(request: Request) {
         ingredients: true,
       },
     });
-
+    console.log("Response :", response);
     let result;
     if (response && response?.length > 0) {
       result = response.map((item) => ({
@@ -25,6 +25,8 @@ export async function GET(request: Request) {
         author: item.user?.firstName + " " + item.user?.lastName,
         // rating: 4.9,
         // reviews: 127,
+        approveStatus: item.approveStatus,
+        approvedDate: item.approvedDate,
         prepTime: item.prepTime,
         cookTime: item.cookingTime,
         totalTime:
