@@ -24,68 +24,27 @@ import {
   TrendingUp,
   Star,
   AlertCircle,
+  Utensils,
+  Timer,
 } from "lucide-react";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import useSWR from "swr";
-
-const pendingRecipes = [
-  {
-    id: 1,
-    title: "Authentic Italian Carbonara",
-    author: "Marco Rossi",
-    authorEmail: "marco@email.com",
-    submittedAt: "2024-01-15T10:30:00Z",
-    category: "Main Course",
-    difficulty: "Medium",
-    prepTime: "15 min",
-    cookTime: "20 min",
-    servings: 4,
-    image: "/placeholder.svg?height=200&width=300",
-    status: "pending",
-    description:
-      "Traditional Roman carbonara with eggs, pecorino cheese, and guanciale.",
-  },
-  {
-    id: 2,
-    title: "Vegan Chocolate Brownies",
-    author: "Sarah Green",
-    authorEmail: "sarah@email.com",
-    submittedAt: "2024-01-14T15:45:00Z",
-    category: "Desserts",
-    difficulty: "Easy",
-    prepTime: "20 min",
-    cookTime: "35 min",
-    servings: 12,
-    image: "/placeholder.svg?height=200&width=300",
-    status: "pending",
-    description: "Rich, fudgy brownies made with plant-based ingredients.",
-  },
-  {
-    id: 3,
-    title: "Thai Green Curry",
-    author: "Ploy Siriporn",
-    authorEmail: "ploy@email.com",
-    submittedAt: "2024-01-13T09:15:00Z",
-    category: "Main Course",
-    difficulty: "Hard",
-    prepTime: "30 min",
-    cookTime: "25 min",
-    servings: 6,
-    image: "/placeholder.svg?height=200&width=300",
-    status: "pending",
-    description:
-      "Authentic Thai green curry with fresh herbs and coconut milk.",
-  },
-];
-
-const stats = {
-  totalRecipes: 1247,
-  pendingReviews: 23,
-  approvedToday: 8,
-  totalUsers: 5432,
-};
+import { category, difficulty } from "../../../public/dropdownData";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
+import clsx from "clsx";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function AdminPage() {
@@ -93,6 +52,7 @@ export default function AdminPage() {
     data: response,
     isLoading: responseLoading,
     error: responseError,
+    mutate: mutateData,
   } = useSWR("/api/getRecipeDeatils", fetcher);
 
   const {
@@ -101,18 +61,60 @@ export default function AdminPage() {
     error: userDataError,
   } = useSWR("/api/getUserDetails", fetcher);
 
+  const pendingRecipes =
+    response?.result?.filter((item: any) => item.approveStatus == "U") || [];
+
+  const approvedRecipes =
+    response?.result?.filter((item: any) => item.approveStatus == "A") || [];
+
+  const rejectedRecipes =
+    response?.result?.filter((item: any) => item.approveStatus == "R") || [];
+
   console.log("Response :", response);
   console.log("userData :", userData);
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [recipeViewDetails, setRecipeViewDetails] = useState<any>([]);
   const [selectedTab, setSelectedTab] = useState("pending");
 
-  const handleApprove = (recipeId: number) => {
-    // Handle approval logic
+  const handleApprove = async (recipeId: number) => {
+    const status = "A";
+    const response = await fetch("/api/getRecipeDetailsById", {
+      method: "PUT",
+      body: JSON.stringify({ recipeId, status }),
+    });
+
+    if (response.ok) {
+      console.log("Status text : ", response.statusText);
+      toast.success("Success", {
+        description: response.statusText,
+      });
+    }
+
+    await mutateData();
   };
 
-  const handleReject = (recipeId: number) => {
-    // Handle rejection logic
+  const handleReject = async (recipeId: number) => {
+    const status = "R";
+    const response = await fetch("/api/getRecipeDetailsById", {
+      method: "PUT",
+      body: JSON.stringify({ recipeId, status }),
+    });
+
+    if (response.ok) {
+      console.log("Status text : ", response.statusText);
+      toast.success("Success", {
+        description: response.statusText,
+      });
+    }
+
+    await mutateData();
+  };
+
+  const hadleViewDetails = (recipeId: number) => {
+    const getReleventRecipe = response.result.find(
+      (item: any) => item.recipeId === recipeId
+    );
+    setRecipeViewDetails(getReleventRecipe);
   };
 
   const formatDate = (dateString: string) => {
@@ -125,7 +127,7 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white px-30">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white md:px-30">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-2">
@@ -224,33 +226,17 @@ export default function AdminPage() {
               className="space-y-6"
             >
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <TabsList className="grid w-full sm:w-auto grid-cols-3">
+                <TabsList className="grid w-full sm:w-full sm:h-11 grid-cols-3">
                   <TabsTrigger value="pending">
-                    Pending ({stats.pendingReviews})
+                    Pending ({pendingRecipes.length})
                   </TabsTrigger>
                   <TabsTrigger value="approved">Approved</TabsTrigger>
                   <TabsTrigger value="rejected">Rejected</TabsTrigger>
                 </TabsList>
-
-                <div className="flex gap-2 w-full sm:w-auto">
-                  <div className="relative flex-1 sm:w-80">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      placeholder="Search recipes..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
-                    />
-                  </div>
-                  <Button variant="outline" size="sm">
-                    <Filter className="h-4 w-4 mr-2" />
-                    Filter
-                  </Button>
-                </div>
               </div>
 
               <TabsContent value="pending" className="space-y-6">
-                <Card className="p-6">
+                <Card className="py-6 md:p-6">
                   <CardHeader>
                     <CardTitle className="text-xl text-gray-800">
                       Pending Recipe Reviews
@@ -262,9 +248,9 @@ export default function AdminPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-6">
-                      {pendingRecipes.map((recipe) => (
+                      {pendingRecipes?.map((recipe: any, index: number) => (
                         <div
-                          key={recipe.id}
+                          key={recipe.recipeId + index}
                           className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
                         >
                           <div className="flex flex-col lg:flex-row gap-6">
@@ -294,13 +280,23 @@ export default function AdminPage() {
                                       variant="secondary"
                                       className="bg-orange-100 text-orange-700"
                                     >
-                                      {recipe.category}
+                                      {
+                                        category.find(
+                                          (item) =>
+                                            item.value === recipe.category
+                                        )?.category_name
+                                      }
                                     </Badge>
                                     <Badge
                                       variant="outline"
                                       className="border-green-200 text-green-700"
                                     >
-                                      {recipe.difficulty}
+                                      {
+                                        difficulty.find(
+                                          (item) =>
+                                            item.value === recipe.difficulty
+                                        )?.diffuculty
+                                      }
                                     </Badge>
                                   </div>
                                 </div>
@@ -312,10 +308,10 @@ export default function AdminPage() {
                                     {recipe.author}
                                   </p>
                                   <p className="text-sm text-gray-500">
-                                    {recipe.authorEmail}
+                                    {recipe?.user?.email}
                                   </p>
                                   <p className="text-xs text-gray-400 mt-1">
-                                    {formatDate(recipe.submittedAt)}
+                                    {formatDate(recipe.createdAt)}
                                   </p>
                                 </div>
                               </div>
@@ -338,18 +334,211 @@ export default function AdminPage() {
 
                               {/* Action Buttons */}
                               <div className="flex flex-wrap gap-3 pt-2">
+                                <Sheet>
+                                  <SheetTrigger asChild>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="outline"
+                                      className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                                      onClick={() =>
+                                        hadleViewDetails(recipe.recipeId)
+                                      }
+                                    >
+                                      <Eye className="h-4 w-4 mr-2" />
+                                      View Details
+                                    </Button>
+                                  </SheetTrigger>
+                                  <SheetContent className="w-[100%] sm:max-w-[50%] md:text-2xl">
+                                    <ScrollArea className="h-[100%] ">
+                                      <SheetHeader className="space-y-4">
+                                        <SheetTitle>
+                                          {recipeViewDetails?.title}
+                                        </SheetTitle>
+                                        <SheetDescription className="leading-7">
+                                          {recipeViewDetails?.description}
+                                        </SheetDescription>
+                                      </SheetHeader>
+                                      <div className="grid flex-1 auto-rows-min gap-6 px-4">
+                                        <div className="space-y-6">
+                                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                            <div className="text-center">
+                                              <Timer className="h-6 w-6 text-orange-500 mx-auto mb-2" />
+                                              <p className="text-sm text-gray-500">
+                                                Prep Time
+                                              </p>
+                                              <p className="font-semibold text-lg">
+                                                {recipe?.prepTime}
+                                              </p>
+                                            </div>
+                                            <div className="text-center">
+                                              <Clock className="h-6 w-6 text-orange-500 mx-auto mb-2" />
+                                              <p className="text-sm text-gray-500">
+                                                Cook Time
+                                              </p>
+                                              <p className="font-semibold text-lg">
+                                                {recipe?.cookTime}
+                                              </p>
+                                            </div>
+                                            <div className="text-center">
+                                              <Users className="h-6 w-6 text-orange-500 mx-auto mb-2" />
+                                              <p className="text-sm text-gray-500">
+                                                Servings
+                                              </p>
+                                              <p className="font-semibold text-lg">
+                                                {recipe?.servings}
+                                              </p>
+                                            </div>
+                                            <div className="text-center">
+                                              <Utensils className="h-6 w-6 text-orange-500 mx-auto mb-2" />
+                                              <p className="text-sm text-gray-500">
+                                                Total Time
+                                              </p>
+                                              <p className="font-semibold text-lg">
+                                                {recipe?.totalTime}
+                                              </p>
+                                            </div>
+                                          </div>
+
+                                          <div>
+                                            <span className="font-medium text-1xl">
+                                              Ingredients
+                                            </span>
+                                            <ul className="space-y-3 text-sm mt-4 px-10">
+                                              {recipe.ingredients.map(
+                                                (
+                                                  ingredient: any,
+                                                  index: number
+                                                ) => (
+                                                  <li
+                                                    key={index}
+                                                    className="flex items-center space-x-3"
+                                                  >
+                                                    <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0"></div>
+                                                    <span className="font-medium text-orange-600 min-w-20">
+                                                      {ingredient.quantity}
+                                                    </span>
+                                                    <span className="text-gray-700">
+                                                      {
+                                                        ingredient.ingredient
+                                                          .name
+                                                      }
+                                                    </span>
+                                                  </li>
+                                                )
+                                              )}
+                                            </ul>
+                                          </div>
+
+                                          <div>
+                                            <span className="font-medium text-1xl">
+                                              Instructions
+                                            </span>
+                                            <ol className="space-y-3 text-sm mt-4 px-10">
+                                              {recipe.instructions.map(
+                                                (item: any, index: number) => (
+                                                  <li
+                                                    key={index}
+                                                    className="flex space-x-4"
+                                                  >
+                                                    <div className="flex-shrink-0 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-semibold">
+                                                      {index + 1}
+                                                    </div>
+                                                    <p className="text-gray-700 leading-relaxed pt-1">
+                                                      {
+                                                        item.instruction
+                                                          .description
+                                                      }
+                                                    </p>
+                                                  </li>
+                                                )
+                                              )}
+                                            </ol>
+                                          </div>
+
+                                          <div>
+                                            <h3 className="text-1xl font-medium">
+                                              Nutrition
+                                            </h3>
+                                            <div className="space-y-3 text-sm mt-4 px-10">
+                                              <div className="flex justify-between">
+                                                <span className="text-gray-600">
+                                                  Calories
+                                                </span>
+                                                <span className="font-medium">
+                                                  {
+                                                    recipe.nutritionInfo[0]
+                                                      .nutritionInfo.calorie
+                                                  }
+                                                </span>
+                                              </div>
+                                              <div className="flex justify-between">
+                                                <span className="text-gray-600">
+                                                  Fat
+                                                </span>
+                                                <span className="font-medium">
+                                                  {
+                                                    recipe.nutritionInfo[0]
+                                                      .nutritionInfo.fat
+                                                  }
+                                                </span>
+                                              </div>
+                                              <div className="flex justify-between">
+                                                <span className="text-gray-600">
+                                                  Carbs
+                                                </span>
+                                                <span className="font-medium">
+                                                  {
+                                                    recipe.nutritionInfo[0]
+                                                      .nutritionInfo.carbs
+                                                  }
+                                                </span>
+                                              </div>
+                                              <div className="flex justify-between">
+                                                <span className="text-gray-600">
+                                                  Protein
+                                                </span>
+                                                <span className="font-medium">
+                                                  {
+                                                    recipe.nutritionInfo[0]
+                                                      .nutritionInfo.protein
+                                                  }
+                                                </span>
+                                              </div>
+                                              <div className="flex justify-between">
+                                                <span className="text-gray-600">
+                                                  Sugar
+                                                </span>
+                                                <span className="font-medium">
+                                                  {
+                                                    recipe.nutritionInfo[0]
+                                                      .nutritionInfo.sugar
+                                                  }
+                                                </span>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <SheetFooter>
+                                        <SheetClose asChild>
+                                          <Button
+                                            variant="outline"
+                                            className="cursor-pointer"
+                                          >
+                                            Close
+                                          </Button>
+                                        </SheetClose>
+                                      </SheetFooter>
+                                    </ScrollArea>
+                                  </SheetContent>
+                                </Sheet>
+
                                 <Button
                                   size="sm"
-                                  variant="outline"
-                                  className="border-blue-200 text-blue-600 hover:bg-blue-50"
-                                >
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  View Details
-                                </Button>
-                                <Button
-                                  size="sm"
+                                  type="button"
                                   className="bg-green-500 hover:bg-green-600 text-white"
-                                  onClick={() => handleApprove(recipe.id)}
+                                  onClick={() => handleApprove(recipe.recipeId)}
                                 >
                                   <CheckCircle className="h-4 w-4 mr-2" />
                                   Approve
@@ -357,15 +546,16 @@ export default function AdminPage() {
                                 <Button
                                   size="sm"
                                   variant="outline"
+                                  type="button"
                                   className="border-red-200 text-red-600 hover:bg-red-50"
-                                  onClick={() => handleReject(recipe.id)}
+                                  onClick={() => handleReject(recipe.recipeId)}
                                 >
                                   <XCircle className="h-4 w-4 mr-2" />
                                   Reject
                                 </Button>
-                                <Button size="sm" variant="ghost">
+                                {/* <Button size="sm" variant="ghost">
                                   <MoreHorizontal className="h-4 w-4" />
-                                </Button>
+                                </Button> */}
                               </div>
                             </div>
                           </div>
@@ -400,15 +590,336 @@ export default function AdminPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-center py-12">
-                      <TrendingUp className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                        Approved Recipes
-                      </h3>
-                      <p className="text-gray-600">
-                        View and manage all approved recipes here.
-                      </p>
+                    <div className="space-y-6">
+                      {approvedRecipes?.map((recipe: any, index: number) => (
+                        <div
+                          key={recipe.recipeId + index}
+                          className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex flex-col lg:flex-row gap-6">
+                            {/* Recipe Image */}
+                            <div className="lg:w-48 flex-shrink-0">
+                              <Image
+                                src={recipe.image || "/placeholder.svg"}
+                                alt={recipe.title}
+                                width={300}
+                                height={200}
+                                className="w-full h-32 lg:h-32 object-cover rounded-lg"
+                              />
+                            </div>
+
+                            {/* Recipe Details */}
+                            <div className="flex-1 space-y-4">
+                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                                <div>
+                                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                                    {recipe.title}
+                                  </h3>
+                                  <p className="text-gray-600 mb-3">
+                                    {recipe.description}
+                                  </p>
+                                  <div className="flex flex-wrap gap-2 mb-3">
+                                    <Badge
+                                      variant="secondary"
+                                      className="bg-orange-100 text-orange-700"
+                                    >
+                                      {
+                                        category.find(
+                                          (item) =>
+                                            item.value === recipe.category
+                                        )?.category_name
+                                      }
+                                    </Badge>
+                                    <Badge
+                                      variant="outline"
+                                      className="border-green-200 text-green-700"
+                                    >
+                                      {
+                                        difficulty.find(
+                                          (item) =>
+                                            item.value === recipe.difficulty
+                                        )?.diffuculty
+                                      }
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <div className="flex flex-col sm:items-end">
+                                  <p className="text-sm text-gray-500 mb-1">
+                                    Submitted by
+                                  </p>
+                                  <p className="font-medium text-gray-800">
+                                    {recipe.author}
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    {recipe?.user?.email}
+                                  </p>
+                                  <p className="text-xs text-gray-400 mt-1">
+                                    {formatDate(recipe.createdAt)}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Recipe Stats */}
+                              <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                                <div className="flex items-center space-x-1">
+                                  <Clock className="h-4 w-4" />
+                                  <span>Prep: {recipe.prepTime}</span>
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                  <Clock className="h-4 w-4" />
+                                  <span>Cook: {recipe.cookTime}</span>
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                  <Users className="h-4 w-4" />
+                                  <span>{recipe.servings} servings</span>
+                                </div>
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="flex flex-wrap gap-3 pt-2">
+                                <Sheet>
+                                  <SheetTrigger asChild>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="outline"
+                                      className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                                      onClick={() =>
+                                        hadleViewDetails(recipe.recipeId)
+                                      }
+                                    >
+                                      <Eye className="h-4 w-4 mr-2" />
+                                      View Details
+                                    </Button>
+                                  </SheetTrigger>
+                                  <SheetContent className="w-[100%] sm:max-w-[50%] md:text-2xl">
+                                    <ScrollArea className="h-[100%] ">
+                                      <SheetHeader className="space-y-4">
+                                        <SheetTitle>
+                                          {recipeViewDetails?.title}
+                                        </SheetTitle>
+                                        <SheetDescription className="leading-7">
+                                          {recipeViewDetails?.description}
+                                        </SheetDescription>
+                                      </SheetHeader>
+                                      <div className="grid flex-1 auto-rows-min gap-6 px-4">
+                                        <div className="space-y-6">
+                                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                            <div className="text-center">
+                                              <Timer className="h-6 w-6 text-orange-500 mx-auto mb-2" />
+                                              <p className="text-sm text-gray-500">
+                                                Prep Time
+                                              </p>
+                                              <p className="font-semibold text-lg">
+                                                {recipe?.prepTime}
+                                              </p>
+                                            </div>
+                                            <div className="text-center">
+                                              <Clock className="h-6 w-6 text-orange-500 mx-auto mb-2" />
+                                              <p className="text-sm text-gray-500">
+                                                Cook Time
+                                              </p>
+                                              <p className="font-semibold text-lg">
+                                                {recipe?.cookTime}
+                                              </p>
+                                            </div>
+                                            <div className="text-center">
+                                              <Users className="h-6 w-6 text-orange-500 mx-auto mb-2" />
+                                              <p className="text-sm text-gray-500">
+                                                Servings
+                                              </p>
+                                              <p className="font-semibold text-lg">
+                                                {recipe?.servings}
+                                              </p>
+                                            </div>
+                                            <div className="text-center">
+                                              <Utensils className="h-6 w-6 text-orange-500 mx-auto mb-2" />
+                                              <p className="text-sm text-gray-500">
+                                                Total Time
+                                              </p>
+                                              <p className="font-semibold text-lg">
+                                                {recipe?.totalTime}
+                                              </p>
+                                            </div>
+                                          </div>
+
+                                          <div>
+                                            <span className="font-medium text-1xl">
+                                              Ingredients
+                                            </span>
+                                            <ul className="space-y-3 text-sm mt-4 px-10">
+                                              {recipe.ingredients.map(
+                                                (
+                                                  ingredient: any,
+                                                  index: number
+                                                ) => (
+                                                  <li
+                                                    key={index}
+                                                    className="flex items-center space-x-3"
+                                                  >
+                                                    <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0"></div>
+                                                    <span className="font-medium text-orange-600 min-w-20">
+                                                      {ingredient.quantity}
+                                                    </span>
+                                                    <span className="text-gray-700">
+                                                      {
+                                                        ingredient.ingredient
+                                                          .name
+                                                      }
+                                                    </span>
+                                                  </li>
+                                                )
+                                              )}
+                                            </ul>
+                                          </div>
+
+                                          <div>
+                                            <span className="font-medium text-1xl">
+                                              Instructions
+                                            </span>
+                                            <ol className="space-y-3 text-sm mt-4 px-10">
+                                              {recipe.instructions.map(
+                                                (item: any, index: number) => (
+                                                  <li
+                                                    key={index}
+                                                    className="flex space-x-4"
+                                                  >
+                                                    <div className="flex-shrink-0 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-semibold">
+                                                      {index + 1}
+                                                    </div>
+                                                    <p className="text-gray-700 leading-relaxed pt-1">
+                                                      {
+                                                        item.instruction
+                                                          .description
+                                                      }
+                                                    </p>
+                                                  </li>
+                                                )
+                                              )}
+                                            </ol>
+                                          </div>
+
+                                          <div>
+                                            <h3 className="text-1xl font-medium">
+                                              Nutrition
+                                            </h3>
+                                            <div className="space-y-3 text-sm mt-4 px-10">
+                                              <div className="flex justify-between">
+                                                <span className="text-gray-600">
+                                                  Calories
+                                                </span>
+                                                <span className="font-medium">
+                                                  {
+                                                    recipe.nutritionInfo[0]
+                                                      .nutritionInfo.calorie
+                                                  }
+                                                </span>
+                                              </div>
+                                              <div className="flex justify-between">
+                                                <span className="text-gray-600">
+                                                  Fat
+                                                </span>
+                                                <span className="font-medium">
+                                                  {
+                                                    recipe.nutritionInfo[0]
+                                                      .nutritionInfo.fat
+                                                  }
+                                                </span>
+                                              </div>
+                                              <div className="flex justify-between">
+                                                <span className="text-gray-600">
+                                                  Carbs
+                                                </span>
+                                                <span className="font-medium">
+                                                  {
+                                                    recipe.nutritionInfo[0]
+                                                      .nutritionInfo.carbs
+                                                  }
+                                                </span>
+                                              </div>
+                                              <div className="flex justify-between">
+                                                <span className="text-gray-600">
+                                                  Protein
+                                                </span>
+                                                <span className="font-medium">
+                                                  {
+                                                    recipe.nutritionInfo[0]
+                                                      .nutritionInfo.protein
+                                                  }
+                                                </span>
+                                              </div>
+                                              <div className="flex justify-between">
+                                                <span className="text-gray-600">
+                                                  Sugar
+                                                </span>
+                                                <span className="font-medium">
+                                                  {
+                                                    recipe.nutritionInfo[0]
+                                                      .nutritionInfo.sugar
+                                                  }
+                                                </span>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <SheetFooter>
+                                        <SheetClose asChild>
+                                          <Button
+                                            variant="outline"
+                                            className="cursor-pointer"
+                                          >
+                                            Close
+                                          </Button>
+                                        </SheetClose>
+                                      </SheetFooter>
+                                    </ScrollArea>
+                                  </SheetContent>
+                                </Sheet>
+
+                                <Button
+                                  size="sm"
+                                  type="button"
+                                  className={clsx(
+                                    "bg-green-500 hover:bg-green-600 text-white",
+                                    recipe.approveStatus === "A" && "hidden"
+                                  )}
+                                  onClick={() => handleApprove(recipe.recipeId)}
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-2" />
+                                  Approve
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  type="button"
+                                  className="border-red-200 text-red-600 hover:bg-red-50"
+                                  onClick={() => handleReject(recipe.recipeId)}
+                                >
+                                  <XCircle className="h-4 w-4 mr-2" />
+                                  Reject
+                                </Button>
+                                {/* <Button size="sm" variant="ghost">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button> */}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
+
+                    {approvedRecipes.length === 0 && (
+                      <div className="text-center py-12">
+                        <TrendingUp className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                          Approved Recipes
+                        </h3>
+                        <p className="text-gray-600">
+                          View and manage all approved recipes here.
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -424,21 +935,342 @@ export default function AdminPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-center py-12">
-                      <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                        Rejected Recipes
-                      </h3>
-                      <p className="text-gray-600">
-                        View rejected recipes and rejection reasons here.
-                      </p>
+                    <div className="space-y-6">
+                      {rejectedRecipes?.map((recipe: any, index: number) => (
+                        <div
+                          key={recipe.recipeId + index}
+                          className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex flex-col lg:flex-row gap-6">
+                            {/* Recipe Image */}
+                            <div className="lg:w-48 flex-shrink-0">
+                              <Image
+                                src={recipe.image || "/placeholder.svg"}
+                                alt={recipe.title}
+                                width={300}
+                                height={200}
+                                className="w-full h-32 lg:h-32 object-cover rounded-lg"
+                              />
+                            </div>
+
+                            {/* Recipe Details */}
+                            <div className="flex-1 space-y-4">
+                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                                <div>
+                                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                                    {recipe.title}
+                                  </h3>
+                                  <p className="text-gray-600 mb-3">
+                                    {recipe.description}
+                                  </p>
+                                  <div className="flex flex-wrap gap-2 mb-3">
+                                    <Badge
+                                      variant="secondary"
+                                      className="bg-orange-100 text-orange-700"
+                                    >
+                                      {
+                                        category.find(
+                                          (item) =>
+                                            item.value === recipe.category
+                                        )?.category_name
+                                      }
+                                    </Badge>
+                                    <Badge
+                                      variant="outline"
+                                      className="border-green-200 text-green-700"
+                                    >
+                                      {
+                                        difficulty.find(
+                                          (item) =>
+                                            item.value === recipe.difficulty
+                                        )?.diffuculty
+                                      }
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <div className="flex flex-col sm:items-end">
+                                  <p className="text-sm text-gray-500 mb-1">
+                                    Submitted by
+                                  </p>
+                                  <p className="font-medium text-gray-800">
+                                    {recipe.author}
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    {recipe?.user?.email}
+                                  </p>
+                                  <p className="text-xs text-gray-400 mt-1">
+                                    {formatDate(recipe.createdAt)}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Recipe Stats */}
+                              <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                                <div className="flex items-center space-x-1">
+                                  <Clock className="h-4 w-4" />
+                                  <span>Prep: {recipe.prepTime}</span>
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                  <Clock className="h-4 w-4" />
+                                  <span>Cook: {recipe.cookTime}</span>
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                  <Users className="h-4 w-4" />
+                                  <span>{recipe.servings} servings</span>
+                                </div>
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="flex flex-wrap gap-3 pt-2">
+                                <Sheet>
+                                  <SheetTrigger asChild>
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="outline"
+                                      className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                                      onClick={() =>
+                                        hadleViewDetails(recipe.recipeId)
+                                      }
+                                    >
+                                      <Eye className="h-4 w-4 mr-2" />
+                                      View Details
+                                    </Button>
+                                  </SheetTrigger>
+                                  <SheetContent className="w-[100%] sm:max-w-[50%] md:text-2xl">
+                                    <ScrollArea className="h-[100%] ">
+                                      <SheetHeader className="space-y-4">
+                                        <SheetTitle>
+                                          {recipeViewDetails?.title}
+                                        </SheetTitle>
+                                        <SheetDescription className="leading-7">
+                                          {recipeViewDetails?.description}
+                                        </SheetDescription>
+                                      </SheetHeader>
+                                      <div className="grid flex-1 auto-rows-min gap-6 px-4">
+                                        <div className="space-y-6">
+                                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                            <div className="text-center">
+                                              <Timer className="h-6 w-6 text-orange-500 mx-auto mb-2" />
+                                              <p className="text-sm text-gray-500">
+                                                Prep Time
+                                              </p>
+                                              <p className="font-semibold text-lg">
+                                                {recipe?.prepTime}
+                                              </p>
+                                            </div>
+                                            <div className="text-center">
+                                              <Clock className="h-6 w-6 text-orange-500 mx-auto mb-2" />
+                                              <p className="text-sm text-gray-500">
+                                                Cook Time
+                                              </p>
+                                              <p className="font-semibold text-lg">
+                                                {recipe?.cookTime}
+                                              </p>
+                                            </div>
+                                            <div className="text-center">
+                                              <Users className="h-6 w-6 text-orange-500 mx-auto mb-2" />
+                                              <p className="text-sm text-gray-500">
+                                                Servings
+                                              </p>
+                                              <p className="font-semibold text-lg">
+                                                {recipe?.servings}
+                                              </p>
+                                            </div>
+                                            <div className="text-center">
+                                              <Utensils className="h-6 w-6 text-orange-500 mx-auto mb-2" />
+                                              <p className="text-sm text-gray-500">
+                                                Total Time
+                                              </p>
+                                              <p className="font-semibold text-lg">
+                                                {recipe?.totalTime}
+                                              </p>
+                                            </div>
+                                          </div>
+
+                                          <div>
+                                            <span className="font-medium text-1xl">
+                                              Ingredients
+                                            </span>
+                                            <ul className="space-y-3 text-sm mt-4 px-10">
+                                              {recipe.ingredients.map(
+                                                (
+                                                  ingredient: any,
+                                                  index: number
+                                                ) => (
+                                                  <li
+                                                    key={index}
+                                                    className="flex items-center space-x-3"
+                                                  >
+                                                    <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0"></div>
+                                                    <span className="font-medium text-orange-600 min-w-20">
+                                                      {ingredient.quantity}
+                                                    </span>
+                                                    <span className="text-gray-700">
+                                                      {
+                                                        ingredient.ingredient
+                                                          .name
+                                                      }
+                                                    </span>
+                                                  </li>
+                                                )
+                                              )}
+                                            </ul>
+                                          </div>
+
+                                          <div>
+                                            <span className="font-medium text-1xl">
+                                              Instructions
+                                            </span>
+                                            <ol className="space-y-3 text-sm mt-4 px-10">
+                                              {recipe.instructions.map(
+                                                (item: any, index: number) => (
+                                                  <li
+                                                    key={index}
+                                                    className="flex space-x-4"
+                                                  >
+                                                    <div className="flex-shrink-0 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-semibold">
+                                                      {index + 1}
+                                                    </div>
+                                                    <p className="text-gray-700 leading-relaxed pt-1">
+                                                      {
+                                                        item.instruction
+                                                          .description
+                                                      }
+                                                    </p>
+                                                  </li>
+                                                )
+                                              )}
+                                            </ol>
+                                          </div>
+
+                                          <div>
+                                            <h3 className="text-1xl font-medium">
+                                              Nutrition
+                                            </h3>
+                                            <div className="space-y-3 text-sm mt-4 px-10">
+                                              <div className="flex justify-between">
+                                                <span className="text-gray-600">
+                                                  Calories
+                                                </span>
+                                                <span className="font-medium">
+                                                  {
+                                                    recipe.nutritionInfo[0]
+                                                      .nutritionInfo.calorie
+                                                  }
+                                                </span>
+                                              </div>
+                                              <div className="flex justify-between">
+                                                <span className="text-gray-600">
+                                                  Fat
+                                                </span>
+                                                <span className="font-medium">
+                                                  {
+                                                    recipe.nutritionInfo[0]
+                                                      .nutritionInfo.fat
+                                                  }
+                                                </span>
+                                              </div>
+                                              <div className="flex justify-between">
+                                                <span className="text-gray-600">
+                                                  Carbs
+                                                </span>
+                                                <span className="font-medium">
+                                                  {
+                                                    recipe.nutritionInfo[0]
+                                                      .nutritionInfo.carbs
+                                                  }
+                                                </span>
+                                              </div>
+                                              <div className="flex justify-between">
+                                                <span className="text-gray-600">
+                                                  Protein
+                                                </span>
+                                                <span className="font-medium">
+                                                  {
+                                                    recipe.nutritionInfo[0]
+                                                      .nutritionInfo.protein
+                                                  }
+                                                </span>
+                                              </div>
+                                              <div className="flex justify-between">
+                                                <span className="text-gray-600">
+                                                  Sugar
+                                                </span>
+                                                <span className="font-medium">
+                                                  {
+                                                    recipe.nutritionInfo[0]
+                                                      .nutritionInfo.sugar
+                                                  }
+                                                </span>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <SheetFooter>
+                                        <SheetClose asChild>
+                                          <Button
+                                            variant="outline"
+                                            className="cursor-pointer"
+                                          >
+                                            Close
+                                          </Button>
+                                        </SheetClose>
+                                      </SheetFooter>
+                                    </ScrollArea>
+                                  </SheetContent>
+                                </Sheet>
+
+                                <Button
+                                  size="sm"
+                                  type="button"
+                                  className="bg-green-500 hover:bg-green-600 text-white"
+                                  onClick={() => handleApprove(recipe.recipeId)}
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-2" />
+                                  Approve
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  type="button"
+                                  className={clsx(
+                                    "border-red-200 text-red-600 hover:bg-red-50",
+                                    recipe.approveStatus === "R" && "hidden"
+                                  )}
+                                  onClick={() => handleReject(recipe.recipeId)}
+                                >
+                                  <XCircle className="h-4 w-4 mr-2" />
+                                  Reject
+                                </Button>
+                                {/* <Button size="sm" variant="ghost">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button> */}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
+
+                    {rejectedRecipes.length === 0 && (
+                      <div className="text-center py-12">
+                        <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                          Rejected Recipes
+                        </h3>
+                        <p className="text-gray-600">
+                          View rejected recipes and rejection reasons here.
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
             </Tabs>
 
-            <Card className="mt-8">
+            <Card className="mt-8 p-6">
               <CardHeader>
                 <CardTitle className="text-xl text-gray-800">
                   Quick Actions

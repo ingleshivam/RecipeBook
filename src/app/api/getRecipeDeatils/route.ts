@@ -9,9 +9,25 @@ export async function GET(request: Request) {
         user: true,
         images: true,
         tags: true,
-        instructions: true,
-        nutritionInfo: true,
-        ingredients: true,
+
+        ingredients: {
+          include: {
+            ingredient: true,
+          },
+        },
+        instructions: {
+          include: {
+            instruction: true,
+          },
+          orderBy: {
+            instructionId: "desc",
+          },
+        },
+        nutritionInfo: {
+          include: {
+            nutritionInfo: true,
+          },
+        },
       },
     });
     console.log("Response :", response);
@@ -42,6 +58,10 @@ export async function GET(request: Request) {
         )?.value,
         tags: item.tags,
         createdAt: item.createdAt,
+        user: item.user,
+        instructions: item.instructions,
+        nutritionInfo: item.nutritionInfo,
+        ingredients: item.ingredients,
       }));
     }
 

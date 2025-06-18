@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
+import clsx from "clsx";
 
 const NavButton = ({ buttonName }: { buttonName: string }) => {
   const router = useRouter();
@@ -27,11 +28,12 @@ const NavButton = ({ buttonName }: { buttonName: string }) => {
             ? ButtonsInfo.SignIn.varient
             : ButtonsInfo.SignUp.varient
         }
-        className={
+        className={clsx(
           buttonName === "SignIn"
             ? ButtonsInfo.SignIn.style
-            : ButtonsInfo.SignUp.style
-        }
+            : ButtonsInfo.SignUp.style,
+          "text-sm"
+        )}
         onClick={
           buttonName === "SignIn"
             ? () => router.push(ButtonsInfo.SignIn.redirectTo)

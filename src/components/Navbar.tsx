@@ -11,11 +11,11 @@ export default function Navbar() {
   const pathname = usePathname();
   return (
     <>
-      <header className="bg-white/80 backdrop-blur-sm border-b border-orange-100 sticky top-0 z-50 px-30">
+      <header className="bg-white/80 backdrop-blur-sm border-b border-orange-100 sticky top-0 z-50  md:px-30">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <ChefHat className="h-8 w-8 text-orange-500" />
-            <span className="text-2xl font-bold text-gray-800">
+            <span className="md:text-2xl font-bold text-gray-800">
               RecipeShare
             </span>
           </div>
@@ -140,7 +140,7 @@ const AdminNavbar = () => {
   const { status } = useSession();
   return (
     <>
-      <nav className="hidden md:flex items-center space-x-8">
+      <nav className=" md:flex items-center space-x-8">
         <div className=" flex gap-5">
           <AuthStatus />
           {status === "unauthenticated" && <NavButton buttonName="SignUp" />}

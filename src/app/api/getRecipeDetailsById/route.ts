@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { category, difficulty } from "@/data/dropdownData";
 import { getToken } from "next-auth/jwt";
+import prisma from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   const token = await getToken({ req: request });
@@ -110,6 +111,44 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { message: { error: "Internal server error !" } },
       { status: 500, statusText: "Internal server error !" }
+    );
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const { recipeId, status } = await request.json();
+    console.log("Recipe Id :", recipeId);
+    const response = await prisma.recipe.update({
+      where: { recipeId: recipeId },
+      data: { approveStatus: status },
+    });
+    return NextResponse.json(
+      {
+        message: `Profile ${
+          status == "A" ? "Approved" : "Rajected"
+        }  Successfully !`,
+      },
+      {
+        status: 200,
+        statusText: `Profile ${
+          status == "A" ? "Approved" : "Rajected"
+        }  Successfully !`,
+      }
+    );
+  } catch (error) {
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { message: error.message },
+        { status: 400, statusText: error.message }
+      );
+    }
+    return NextResponse.json(
+      { message: "Internal server error !" },
+      {
+        status: 500,
+        statusText: "Internal server error !",
+      }
     );
   }
 }
