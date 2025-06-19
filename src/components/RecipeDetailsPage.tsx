@@ -20,10 +20,14 @@ import useSWR from "swr";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { useSession } from "next-auth/react";
+import clsx from "clsx";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function RecipeDetailsPage({ id }: { id: number }) {
+  const { status } = useSession();
   const [isDataLoading, setIsDataLoading] = useState(false);
   const {
     data: recipe,
@@ -154,13 +158,21 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
     }
   };
 
+  const handleFavourite = async (recipeId: number) => {
+    console.log("Favourite profile : ", recipeId);
+    const response = await fetch("/api/favouriteRecipe", {
+      method: "POST",
+      body: JSON.stringify({ recipeId }),
+    });
+  };
+
   return (
     <>
       {recipeLoading ? (
         <div>Loading...</div>
       ) : (
         <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
-          <div className="container mx-auto px-34 py-8">
+          <div className="container mx-auto px-5 md:px-34 py-8">
             {/* Back Button */}
             <Link
               href="/recipe"
@@ -397,24 +409,65 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                 {/* Actions */}
                 <Card>
                   <CardContent className="p-6 space-y-4">
-                    <Button className="w-full bg-orange-500 hover:bg-orange-600">
-                      <Bookmark className="h-4 w-4 mr-2" />
-                      Save Recipe
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full border-orange-200 text-orange-600 hover:bg-orange-50"
-                    >
-                      <Share2 className="h-4 w-4 mr-2" />
-                      Share Recipe
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={handlePrint}
-                    >
-                      Print Recipe
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div>
+                          <Button
+                            className="w-full bg-orange-500 hover:bg-orange-600 cursor-pointer"
+                            disabled={status === "unauthenticated"}
+                            onClick={() => handleFavourite(id)}
+                          >
+                            <Bookmark className="h-4 w-4 mr-2" />
+                            Save Recipe
+                          </Button>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        className={clsx(status === "authenticated" && "hidden")}
+                      >
+                        <p>Login to save recipe</p>
+                      </TooltipContent>
+                    </Tooltip>
+
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div>
+                          <Button
+                            variant="outline"
+                            className="w-full border-orange-200 text-orange-600 hover:bg-orange-50 cursor-pointer"
+                            disabled={status === "unauthenticated"}
+                          >
+                            <Share2 className="h-4 w-4 mr-2" />
+                            Share Recipe
+                          </Button>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        className={clsx(status === "authenticated" && "hidden")}
+                      >
+                        <p>Login to share recipe</p>
+                      </TooltipContent>
+                    </Tooltip>
+
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div>
+                          <Button
+                            variant="outline"
+                            className="w-full cursor-pointer"
+                            onClick={handlePrint}
+                            disabled={status === "unauthenticated"}
+                          >
+                            Print Recipe
+                          </Button>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        className={clsx(status === "authenticated" && "hidden")}
+                      >
+                        <p>Login to print recipe</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </CardContent>
                 </Card>
 

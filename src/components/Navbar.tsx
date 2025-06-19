@@ -6,6 +6,8 @@ import NavButton from "./NavButton";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { Button } from "./ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import clsx from "clsx";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -101,14 +103,46 @@ const ViewRecipeNavBar = () => {
   return (
     <>
       <nav className="hidden md:flex items-center space-x-8">
-        <Button variant="ghost" size="sm">
-          <Heart className="h-4 w-4 mr-2" />
-          Save
-        </Button>
-        <Button variant="ghost" size="sm">
-          <Share2 className="h-4 w-4 mr-2" />
-          Share
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={status === "unauthenticated"}
+              >
+                <Heart className="h-4 w-4 mr-2" />
+                Save
+              </Button>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent
+            className={clsx(status === "authenticated" && "hidden")}
+          >
+            <p>Login to save recipe</p>
+          </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={status === "unauthenticated"}
+              >
+                <Share2 className="h-4 w-4 mr-2" />
+                Share
+              </Button>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent
+            className={clsx(status === "authenticated" && "hidden")}
+          >
+            <p>Login to share recipe</p>
+          </TooltipContent>
+        </Tooltip>
+
         <div className=" flex gap-5">
           <AuthStatus />
           {status === "unauthenticated" && <NavButton buttonName="SignUp" />}

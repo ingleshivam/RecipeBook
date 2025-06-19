@@ -7,5 +7,5 @@ export default withAuth({
 });
 
 export const config = {
-  matcher: ["/share-recipe"],
+  matcher: ["/share-recipe", "/admin"],
 };

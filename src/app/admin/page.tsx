@@ -148,7 +148,7 @@ export default function AdminPage() {
                     <div>
                       <p className="text-sm text-gray-500">Total Recipes</p>
                       <p className="text-2xl font-bold text-gray-800">
-                        {response.result.length}
+                        {response?.result?.length}
                       </p>
                     </div>
                     <div className="bg-blue-100 p-3 rounded-full">
@@ -167,7 +167,7 @@ export default function AdminPage() {
                         {
                           response.result.filter(
                             (item: any) => item.approvedStatus === "U"
-                          ).length
+                          )?.length
                         }
                       </p>
                     </div>
@@ -192,7 +192,7 @@ export default function AdminPage() {
                               approvedDate.toDateString() ===
                               today.toDateString()
                             );
-                          }).length
+                          })?.length
                         }
                       </p>
                     </div>
@@ -209,7 +209,7 @@ export default function AdminPage() {
                     <div>
                       <p className="text-sm text-gray-500">Total Users</p>
                       <p className="text-2xl font-bold text-gray-800">
-                        {userData.response.length}
+                        {userData?.response?.length}
                       </p>
                     </div>
                     <div className="bg-purple-100 p-3 rounded-full">
@@ -228,7 +228,7 @@ export default function AdminPage() {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <TabsList className="grid w-full sm:w-full sm:h-11 grid-cols-3">
                   <TabsTrigger value="pending">
-                    Pending ({pendingRecipes.length})
+                    Pending ({pendingRecipes?.length})
                   </TabsTrigger>
                   <TabsTrigger value="approved">Approved</TabsTrigger>
                   <TabsTrigger value="rejected">Rejected</TabsTrigger>
@@ -563,7 +563,7 @@ export default function AdminPage() {
                       ))}
                     </div>
 
-                    {pendingRecipes.length === 0 && (
+                    {pendingRecipes?.length === 0 && (
                       <div className="text-center py-12">
                         <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
                         <h3 className="text-lg font-semibold text-gray-800 mb-2">
@@ -909,7 +909,7 @@ export default function AdminPage() {
                       ))}
                     </div>
 
-                    {approvedRecipes.length === 0 && (
+                    {approvedRecipes?.length === 0 && (
                       <div className="text-center py-12">
                         <TrendingUp className="h-12 w-12 text-green-500 mx-auto mb-4" />
                         <h3 className="text-lg font-semibold text-gray-800 mb-2">
@@ -1254,7 +1254,7 @@ export default function AdminPage() {
                       ))}
                     </div>
 
-                    {rejectedRecipes.length === 0 && (
+                    {rejectedRecipes?.length === 0 && (
                       <div className="text-center py-12">
                         <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
                         <h3 className="text-lg font-semibold text-gray-800 mb-2">
