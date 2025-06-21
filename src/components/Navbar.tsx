@@ -66,8 +66,8 @@ const AllRecipeNavBar = () => {
 };
 
 const MainNavBar = () => {
-  const { status } = useSession();
-
+  const { data, status } = useSession();
+  console.log("Data :", data);
   return (
     <>
       <nav className="hidden md:flex items-center space-x-8">
@@ -83,12 +83,22 @@ const MainNavBar = () => {
         >
           How It Works
         </Link>
+
         <Link
           href="#about"
           className="text-gray-600 hover:text-orange-500 transition-colors"
         >
           About
         </Link>
+
+        {(data && (data.user as any))?.role === "A" && (
+          <Link
+            href="#about"
+            className="text-gray-600 hover:text-orange-500 transition-colors"
+          >
+            Dashboard
+          </Link>
+        )}
         <div className=" flex gap-5">
           <AuthStatus />
           {status === "unauthenticated" && <NavButton buttonName="SignUp" />}

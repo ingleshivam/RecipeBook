@@ -47,6 +47,7 @@ const handler = NextAuth({
           image: `https://ui-avatars.com/api/?name=${encodeURIComponent(
             `${user.firstName} ${user.lastName}`
           )}&background=random`,
+          role: user.role,
         };
       },
     }),
@@ -87,6 +88,7 @@ const handler = NextAuth({
     async session({ session, token }) {
       if (session.user) {
         session.user.id = (token as any).id;
+        (session.user as any).role = (token as any).role;
       }
 
       return session;
@@ -94,6 +96,7 @@ const handler = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.role = (user as any)?.role;
       }
       return token;
     },

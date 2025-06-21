@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
         firstName: data.firstName,
         lastName: data.lastName,
         passwordHash: passwordHash,
-        role: "A",
+        role: "U",
       },
     });
     return NextResponse.json(
