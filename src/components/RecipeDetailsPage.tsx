@@ -475,32 +475,36 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                 <Card>
                   <CardContent className="p-6">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                      More from {recipe.author}
+                      More from - {recipe?.result?.author}
                     </h3>
                     <div className="space-y-4">
-                      {recipe.allRecipesByUseId.map(
-                        (item: any, index: number) => (
-                          <div key={item.recipeId} className="flex space-x-3">
-                            <Image
-                              src={`${item.images[0].imageUrl}`}
-                              alt="Related recipe"
-                              width={50}
-                              height={50}
-                              className="rounded-full object-cover aspect-square"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-gray-800 truncate">
-                                <Link href={`/recipe/${item.recipeId}`}>
-                                  {item.title}
-                                </Link>
-                              </p>
-                              <p className="text-sm text-gray-500">
-                                {item.prepTime + item.cookingTime}
-                                min • 4.8 ⭐
-                              </p>
+                      {recipe.allRecipesByUseId?.length > 0 ? (
+                        recipe.allRecipesByUseId.map(
+                          (item: any, index: number) => (
+                            <div key={item.recipeId} className="flex space-x-3">
+                              <Image
+                                src={`${item.images[0].imageUrl}`}
+                                alt="Related recipe"
+                                width={50}
+                                height={50}
+                                className="rounded-full object-cover aspect-square"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-gray-800 truncate">
+                                  <Link href={`/recipe/${item.recipeId}`}>
+                                    {item.title}
+                                  </Link>
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                  {item.prepTime + item.cookingTime}
+                                  min • 4.8 ⭐
+                                </p>
+                              </div>
                             </div>
-                          </div>
+                          )
                         )
+                      ) : (
+                        <span>No More Recipes</span>
                       )}
                     </div>
                   </CardContent>

@@ -55,6 +55,7 @@ export async function GET(request: NextRequest) {
     const allRecipesByUseId = await prisma?.recipe.findMany({
       where: {
         userId: response?.user?.userId,
+        approveStatus: "A",
         NOT: {
           recipeId: Number(id),
         },

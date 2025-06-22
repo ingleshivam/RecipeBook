@@ -5,6 +5,9 @@ import prisma from "@/lib/prisma";
 export async function GET(request: Request) {
   try {
     const response = await prisma?.recipe.findMany({
+      where: {
+        approveStatus: "A",
+      },
       include: {
         user: true,
         images: true,

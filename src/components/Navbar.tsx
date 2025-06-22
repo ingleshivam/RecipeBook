@@ -93,7 +93,7 @@ const MainNavBar = () => {
 
         {(data && (data.user as any))?.role === "A" && (
           <Link
-            href="#about"
+            href="/admin"
             className="text-gray-600 hover:text-orange-500 transition-colors"
           >
             Dashboard

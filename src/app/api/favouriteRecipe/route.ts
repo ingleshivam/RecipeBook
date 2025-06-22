@@ -1,16 +1,16 @@
-import { getSession } from "next-auth/react";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getToken } from "next-auth/jwt";
 
 export async function POST(request: NextRequest) {
   const { recipeId } = await request.json();
+  const token = await getToken({ req: request });
   console.log("Recipe Id : ", recipeId);
-  const session = await getSession();
   try {
     const result = await prisma?.favorite.create({
       data: {
         recipeId: recipeId,
-        userId: Number(session?.user?.id),
+        userId: Number(token?.id),
       },
     });
 
