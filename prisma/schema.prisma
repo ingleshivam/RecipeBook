@@ -140,7 +140,7 @@ model Review {
 model Favorite {
   userId    Int
   recipeId  Int
-
+  isFavourite Int?
   user      User    @relation(fields: [userId], references: [userId])
   recipe    Recipe  @relation(fields: [recipeId], references: [recipeId])
 

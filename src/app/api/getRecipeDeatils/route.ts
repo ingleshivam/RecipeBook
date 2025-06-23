@@ -33,7 +33,6 @@ export async function GET(request: Request) {
         },
       },
     });
-    console.log("Response :", response);
     let result;
     if (response && response?.length > 0) {
       result = response.map((item) => ({

@@ -70,9 +70,6 @@ export default function AdminPage() {
   const rejectedRecipes =
     response?.result?.filter((item: any) => item.approveStatus == "R") || [];
 
-  console.log("Response :", response);
-  console.log("userData :", userData);
-
   const [recipeViewDetails, setRecipeViewDetails] = useState<any>([]);
   const [selectedTab, setSelectedTab] = useState("pending");
 
@@ -84,7 +81,6 @@ export default function AdminPage() {
     });
 
     if (response.ok) {
-      console.log("Status text : ", response.statusText);
       toast.success("Success", {
         description: response.statusText,
       });
@@ -101,7 +97,6 @@ export default function AdminPage() {
     });
 
     if (response.ok) {
-      console.log("Status text : ", response.statusText);
       toast.success("Success", {
         description: response.statusText,
       });

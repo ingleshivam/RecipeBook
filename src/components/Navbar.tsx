@@ -67,7 +67,6 @@ const AllRecipeNavBar = () => {
 
 const MainNavBar = () => {
   const { data, status } = useSession();
-  console.log("Data :", data);
   return (
     <>
       <nav className="hidden md:flex items-center space-x-8">

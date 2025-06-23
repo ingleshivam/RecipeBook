@@ -64,8 +64,6 @@ const handler = NextAuth({
           where: { email: user.email! },
         });
 
-        console.log("Existing user : ", existingUser);
-
         if (!existingUser) {
           const newUser = await prisma.user.create({
             data: {
@@ -78,7 +76,6 @@ const handler = NextAuth({
           });
           (user as any).id = newUser.userId.toString();
         } else {
-          console.log("existingUser.userId :", existingUser.userId);
           (user as any).id = existingUser.userId.toString();
         }
       }
@@ -90,17 +87,14 @@ const handler = NextAuth({
     },
     async session({ session, token }) {
       if (session.user) {
-        console.log("Session User Before:", session.user);
         session.user.id = (token as any).id;
         session.user.role = (token as any).role;
-        console.log("Session User After:", session.user);
       }
 
       return session;
     },
     async jwt({ token, user }) {
       if (user) {
-        console.log("JWT User :", user);
         token.id = user.id;
         token.role = (user as any)?.role;
       }

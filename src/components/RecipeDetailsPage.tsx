@@ -17,7 +17,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import useSWR from "swr";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useSession } from "next-auth/react";
@@ -29,10 +29,13 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function RecipeDetailsPage({ id }: { id: number }) {
   const { status } = useSession();
   const [isDataLoading, setIsDataLoading] = useState(false);
+  const [isFav, setIsFav] = useState(false);
+  console.log("Is fav : ", isFav);
   const {
     data: recipe,
     isLoading: recipeLoading,
     error: recipeError,
+    mutate: mutateData,
   } = useSWR(`/api/getRecipeDetailsById?id=${id}`, fetcher);
 
   const handlePrint = () => {
@@ -158,13 +161,19 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
     }
   };
 
-  const handleFavourite = async (recipeId: number) => {
-    console.log("Favourite profile : ", recipeId);
-    const response = await fetch("/api/favouriteRecipe", {
-      method: "POST",
-      body: JSON.stringify({ recipeId }),
-    });
-  };
+  useMemo(() => {
+    const handleFavourite = async () => {
+      const response = await fetch("/api/favouriteRecipe", {
+        method: "POST",
+        body: JSON.stringify({ id }),
+      });
+
+      if (response.ok) {
+        await mutateData();
+      }
+    };
+    handleFavourite();
+  }, [isFav]);
 
   return (
     <>
@@ -413,9 +422,14 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                       <TooltipTrigger asChild>
                         <div>
                           <Button
-                            className="w-full bg-orange-500 hover:bg-orange-600 cursor-pointer"
+                            className={clsx(
+                              "w-full  cursor-pointer",
+                              recipe?.result?.favourite[0]?.isFavourite === 1 &&
+                                "bg-pink-500  hover:bg-pink-400 hover:text-white text-white"
+                            )}
                             disabled={status === "unauthenticated"}
-                            onClick={() => handleFavourite(id)}
+                            onClick={() => setIsFav(!isFav)}
+                            variant={"outline"}
                           >
                             <Bookmark className="h-4 w-4 mr-2" />
                             Save Recipe

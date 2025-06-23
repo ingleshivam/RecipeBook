@@ -40,6 +40,15 @@ export async function GET(request: NextRequest) {
           },
         },
         user: true,
+        favorites: {
+          where: {
+            recipeId: Number(id),
+            userId: parseInt((token as any)?.id),
+          },
+          select: {
+            isFavourite: true,
+          },
+        },
       },
     });
 
@@ -95,6 +104,7 @@ export async function GET(request: NextRequest) {
         ingredients: response.ingredients,
         nutritionInfo: response.nutritionInfo,
         createdAt: response.createdAt,
+        favourite: response.favorites,
       };
     }
 
@@ -119,7 +129,6 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const { recipeId, status } = await request.json();
-    console.log("Recipe Id :", recipeId);
     const response = await prisma.recipe.update({
       where: { recipeId: recipeId },
       data: { approveStatus: status },

@@ -61,14 +61,6 @@ export default function ViewAllRecipes() {
 
   if (recipesError) return <div>Error loading recipes</div>;
 
-  console.log("API Response:", response);
-  console.log("Initial State:", {
-    searchTerm,
-    selectedCategory,
-    selectedDifficulty,
-    sortBy,
-  });
-
   const filteredAndSortedRecipes = useMemo(() => {
     if (!response?.result) return [];
 
@@ -131,7 +123,6 @@ export default function ViewAllRecipes() {
     setCurrentPage(1);
   };
 
-  console.log("Filtered recipes:", filteredAndSortedRecipes);
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
       <div className="container mx-auto px-34 py-8">
@@ -332,7 +323,7 @@ export default function ViewAllRecipes() {
                       <Link href={`/recipe/${recipe.recipeId}`}>
                         <Button
                           variant="ghost"
-                          className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                          className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 cursor-pointer"
                         >
                           View Recipe
                         </Button>
