@@ -16,21 +16,23 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useSession } from "next-auth/react";
 import clsx from "clsx";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import LoadingSpinner from "./LoadingSpinner";
+import HandleFavourite from "./HandleFavourite";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function RecipeDetailsPage({ id }: { id: number }) {
   const { status } = useSession();
   const [isDataLoading, setIsDataLoading] = useState(false);
-  const [isFav, setIsFav] = useState(false);
-  console.log("Is fav : ", isFav);
+  // const [isFav, setIsFav] = useState(false);
+  // console.log("Is fav : ", isFav);
   const {
     data: recipe,
     isLoading: recipeLoading,
@@ -161,19 +163,33 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
     }
   };
 
-  useMemo(() => {
-    const handleFavourite = async () => {
-      const response = await fetch("/api/favouriteRecipe", {
-        method: "POST",
-        body: JSON.stringify({ id }),
-      });
+  // const handleFavourite = async (recipeId: number) => {
+  //   try {
+  //     setIsFav(true);
+  //     const response = await fetch("/api/favouriteRecipe", {
+  //       method: "POST",
+  //       body: JSON.stringify({ recipeId }),
+  //     });
 
-      if (response.ok) {
-        await mutateData();
-      }
-    };
-    handleFavourite();
-  }, [isFav]);
+  //     const data = await response.json();
+
+  //     if (response.ok) {
+  //       await mutateData();
+  //       setIsFav(false);
+  //       toast.success("Success", {
+  //         description: data?.message,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     if (error instanceof Error) {
+  //       toast.error("Error", {
+  //         description: error.message,
+  //       });
+  //     }
+  //   } finally {
+  //     setIsFav(false);
+  //   }
+  // };
 
   return (
     <>
@@ -420,21 +436,32 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                   <CardContent className="p-6 space-y-4">
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <div>
+                        <HandleFavourite
+                          mutateData={mutateData}
+                          recipe={recipe}
+                          id={id}
+                        />
+                        {/* <div>
                           <Button
                             className={clsx(
                               "w-full  cursor-pointer",
                               recipe?.result?.favourite[0]?.isFavourite === 1 &&
                                 "bg-pink-500  hover:bg-pink-400 hover:text-white text-white"
                             )}
-                            disabled={status === "unauthenticated"}
-                            onClick={() => setIsFav(!isFav)}
+                            disabled={status === "unauthenticated" || isFav}
+                            onClick={() => handleFavourite(id)}
                             variant={"outline"}
                           >
-                            <Bookmark className="h-4 w-4 mr-2" />
-                            Save Recipe
+                            {isFav ? (
+                              <LoadingSpinner />
+                            ) : (
+                              <>
+                                <Bookmark className="h-4 w-4 mr-2" />
+                                Save Recipe
+                              </>
+                            )}
                           </Button>
-                        </div>
+                        </div> */}
                       </TooltipTrigger>
                       <TooltipContent
                         className={clsx(status === "authenticated" && "hidden")}

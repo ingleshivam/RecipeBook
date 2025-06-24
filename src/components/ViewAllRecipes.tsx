@@ -125,7 +125,7 @@ export default function ViewAllRecipes() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
-      <div className="container mx-auto px-34 py-8">
+      <div className="container mx-auto px-5 md:px-34 py-8">
         {/* Page Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-4">

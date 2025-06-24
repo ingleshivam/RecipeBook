@@ -3,22 +3,19 @@ import prisma from "@/lib/prisma";
 import { getToken } from "next-auth/jwt";
 
 export async function POST(request: NextRequest) {
-  const { id } = await request.json();
+  const { recipeId } = await request.json();
   const token = await getToken({ req: request });
-  console.log("Recipe id : ", id);
   try {
     const existingRecipeRecord = await prisma?.favorite.findUnique({
       where: {
         userId_recipeId: {
-          recipeId: id,
+          recipeId: recipeId,
           userId: parseInt((token as any)?.id),
         },
       },
     });
 
-    console.log("existingRecipeRecord : ", existingRecipeRecord);
-
-    let isFavourite = 0;
+    let isFavourite = 1;
     if (existingRecipeRecord) {
       isFavourite = existingRecipeRecord.isFavourite === 1 ? 0 : 1;
     }
@@ -26,7 +23,7 @@ export async function POST(request: NextRequest) {
     const result = await prisma?.favorite.upsert({
       where: {
         userId_recipeId: {
-          recipeId: id,
+          recipeId: recipeId,
           userId: Number(token?.id),
         },
       },
@@ -34,19 +31,29 @@ export async function POST(request: NextRequest) {
         isFavourite: isFavourite,
       },
       create: {
-        recipeId: id,
+        recipeId: recipeId,
         userId: parseInt((token as any)?.id),
+        isFavourite: isFavourite,
       },
     });
 
-    return NextResponse.json(
-      { message: "Recipe favourited successfully !" },
-      { status: 200 }
-    );
+    if (result.isFavourite === 1) {
+      return NextResponse.json(
+        { message: "Recipe favourited successfully !" },
+        { status: 200 }
+      );
+    } else {
+      return NextResponse.json(
+        { message: "Recipe Unfavourited successfully !" },
+        { status: 200 }
+      );
+    }
   } catch (error) {
     if (error instanceof Error) {
-      console.log("error : ", error);
-      return NextResponse.json({ message: error.message }, { status: 400 });
+      return NextResponse.json(
+        { message: "Failed to favourite recipe !" },
+        { status: 400 }
+      );
     }
   }
 }

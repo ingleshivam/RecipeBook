@@ -15,12 +15,14 @@ export default function Navbar() {
     <>
       <header className="bg-white/80 backdrop-blur-sm border-b border-orange-100 sticky top-0 z-50  md:px-30">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <ChefHat className="h-8 w-8 text-orange-500" />
-            <span className="md:text-2xl font-bold text-gray-800">
-              RecipeShare
-            </span>
-          </div>
+          <Link href={"/"}>
+            <div className="flex items-center space-x-2">
+              <ChefHat className="h-8 w-8 text-orange-500" />
+              <span className="md:text-2xl font-bold text-gray-800">
+                RecipeShare
+              </span>
+            </div>
+          </Link>
           {pathname === "/" && <MainNavBar />}
           {pathname === "/recipe" && <AllRecipeNavBar />}
           {pathname.startsWith("/recipe/") && <ViewRecipeNavBar />}
@@ -37,19 +39,7 @@ const AllRecipeNavBar = () => {
   const pathname = usePathname();
   return (
     <>
-      <nav className="hidden md:flex items-center space-x-8">
-        <Link
-          href="#recipes"
-          className="text-gray-600 hover:text-orange-500 transition-colors"
-        >
-          Home
-        </Link>
-        <Link
-          href="#how-it-works"
-          className="text-gray-600 hover:text-orange-500 transition-colors"
-        >
-          All Recipes
-        </Link>
+      <nav className="flex md:flex items-center space-x-8">
         <Link
           href="#about"
           className="text-gray-600 hover:text-orange-500 transition-colors"
@@ -111,8 +101,8 @@ const ViewRecipeNavBar = () => {
   const { status } = useSession();
   return (
     <>
-      <nav className="hidden md:flex items-center space-x-8">
-        <Tooltip>
+      <nav className="flex md:flex items-center space-x-8">
+        {/* <Tooltip>
           <TooltipTrigger asChild>
             <div>
               <Button
@@ -130,7 +120,7 @@ const ViewRecipeNavBar = () => {
           >
             <p>Login to save recipe</p>
           </TooltipContent>
-        </Tooltip>
+        </Tooltip> */}
 
         <Tooltip>
           <TooltipTrigger asChild>

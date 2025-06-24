@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/sonner";
 import Navbar from "@/components/Navbar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -31,8 +32,18 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          <Navbar />
-          {children} <Toaster richColors />
+          <div className="hidden md:block">
+            <Navbar />
+            {children} <Toaster richColors />
+          </div>
+          <div className="grid grid-rows-12 h-screen  md:hidden">
+            <ScrollArea className="row-span-11">
+              {children} <Toaster richColors />
+            </ScrollArea>
+            <div className="bg-red-500 row-span-1 py-5 w-full">
+              <span>Mobile Menu</span>
+            </div>
+          </div>
         </Providers>
       </body>
     </html>

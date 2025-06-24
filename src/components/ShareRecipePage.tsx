@@ -43,6 +43,7 @@ import useSWR from "swr";
 import { BlobData } from "@/types/blobData";
 import { useSession } from "next-auth/react";
 import { del } from "@vercel/blob";
+import clsx from "clsx";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function ShareRecipePage() {
@@ -106,6 +107,7 @@ export default function ShareRecipePage() {
   const [isSubmittingDraft, setIsSubmittingDraft] = useState(false);
   const [recipeFileName, setRecipeFileName] = useState("");
   const [isDraft, setIsDraft] = useState(false);
+  const [showReviewStatus, setShowReviewStatus] = useState(false);
 
   useEffect(() => {
     setValue("ingredients", ingredients);
@@ -241,6 +243,7 @@ export default function ShareRecipePage() {
       toast.success("Success", {
         description: data.message.success,
       });
+      setShowReviewStatus(true);
     } catch (error) {
       toast.error("Error", {
         description: "An unexpected error occurred",
@@ -253,7 +256,7 @@ export default function ShareRecipePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
-      <div className="container mx-auto px-4 py-8 px-35">
+      <div className="container mx-auto px-4 py-8 md:px-35">
         {/* Back Button */}
         <Link
           href="/"
@@ -276,7 +279,7 @@ export default function ShareRecipePage() {
         </div>
         <div>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 space-y-5 md:grid-cols-6 md:gap-4">
               {/* Recipe Image */}
               <Card className="col-span-2 py-6">
                 <CardHeader>
@@ -523,7 +526,7 @@ export default function ShareRecipePage() {
                 </CardContent>
               </Card>
             </div>
-            <div className="grid grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 space-y-5 md:grid-cols-6 md:gap-4">
               {/* Ingredients */}
               <Card className="col-span-2 py-6">
                 <CardHeader>
@@ -672,7 +675,7 @@ export default function ShareRecipePage() {
                 </CardContent>
               </Card>
             </div>
-            <div className="grid grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 space-y-5 md:grid-cols-6 md:gap-4">
               {/* Nutrition Information */}
               <Card className="col-span-2 py-6">
                 <CardHeader>
@@ -821,7 +824,12 @@ export default function ShareRecipePage() {
               </Button>
             </div>
 
-            <div className="text-center text-sm text-gray-500 bg-orange-50 p-4 rounded-lg">
+            <div
+              className={clsx(
+                "text-center text-sm text-gray-500 bg-orange-50 p-4 rounded-lg",
+                !showReviewStatus && "hidden"
+              )}
+            >
               <p className="font-medium mb-1">📝 Review Process</p>
               <p>
                 Your recipe will be reviewed by our team within 24-48 hours.

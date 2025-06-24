@@ -35,7 +35,7 @@ export default function RecipeLandingPage() {
     <>
       <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white ">
         {/* Hero Section */}
-        <section className="relative py-20 px-30 lg:py-32 overflow-hidden">
+        <section className="relative py-10 px-5 md:py-20 md:px-30 lg:py-32 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-orange-100/50 to-green-100/30"></div>
           <div className="container mx-auto px-4 relative z-10">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -97,7 +97,10 @@ export default function RecipeLandingPage() {
         </section>
 
         {/* How It Works Section */}
-        <section id="how-it-works" className="py-20 px-30 bg-white">
+        <section
+          id="how-it-works"
+          className="py-10 px-5 md:py-20 lg:px-30 bg-white"
+        >
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
@@ -154,7 +157,7 @@ export default function RecipeLandingPage() {
         {/* Featured Recipes Section */}
         <section
           id="recipes"
-          className="py-20 px-30 bg-gradient-to-b from-orange-50/50 to-white"
+          className="py-10 px-5 md:py-20 md:px-30 bg-gradient-to-b from-orange-50/50 to-white"
         >
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
@@ -267,7 +270,7 @@ export default function RecipeLandingPage() {
         </section>
 
         {/* Footer */}
-        <footer className="bg-gray-800 px-30 text-white py-16">
+        <footer className="bg-gray-800 md:px-30 text-white py-16">
           <div className="container mx-auto px-4">
             {/* <div className="grid md:grid-cols-4 gap-8">
               <div className="space-y-4">
