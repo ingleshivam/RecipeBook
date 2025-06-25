@@ -6,6 +6,9 @@ import { Toaster } from "@/components/ui/sonner";
 import Navbar from "@/components/Navbar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+import { Button } from "@/components/ui/button";
+import MobileMenu from "@/components/MobileMenu";
+
 const geistSans = Geist({
   subsets: ["latin"],
   variable: "--font-geist-sans",
@@ -40,9 +43,7 @@ export default function RootLayout({
             <ScrollArea className="row-span-11">
               {children} <Toaster richColors />
             </ScrollArea>
-            <div className="bg-red-500 row-span-1 py-5 w-full">
-              <span>Mobile Menu</span>
-            </div>
+            <MobileMenu />
           </div>
         </Providers>
       </body>

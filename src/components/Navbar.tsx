@@ -28,6 +28,7 @@ export default function Navbar() {
           {pathname.startsWith("/recipe/") && <ViewRecipeNavBar />}
           {pathname === "/share-recipe" && <ShareRecipeNavBar />}
           {pathname === "/admin" && <AdminNavbar />}
+          {pathname === "/favourite-recipe" && <FavouriteRecipeNavBar />}
         </div>
       </header>
     </>
@@ -174,6 +175,20 @@ const AdminNavbar = () => {
   return (
     <>
       <nav className=" md:flex items-center space-x-8">
+        <div className=" flex gap-5">
+          <AuthStatus />
+          {status === "unauthenticated" && <NavButton buttonName="SignUp" />}
+        </div>
+      </nav>
+    </>
+  );
+};
+
+const FavouriteRecipeNavBar = () => {
+  const { status } = useSession();
+  return (
+    <>
+      <nav className="flex md:flex items-center space-x-8">
         <div className=" flex gap-5">
           <AuthStatus />
           {status === "unauthenticated" && <NavButton buttonName="SignUp" />}
