@@ -43,7 +43,7 @@ export default function RootLayout({
             <ScrollArea className="row-span-11">
               {children} <Toaster richColors />
             </ScrollArea>
-            <div className="row-span-1">
+            <div className="fixed bottom-0 w-full row-span-1">
               <MobileMenu />
             </div>
           </div>
