@@ -19,6 +19,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
+import LoadingSpinner from "./LoadingSpinner";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function RecipeLandingPage() {
@@ -30,7 +31,12 @@ export default function RecipeLandingPage() {
     error: recipeError,
   } = useSWR("/api/getRecipeDeatils", fetcher);
 
-  if (recipeLaoding) return <div>Loading...</div>;
+  if (recipeLaoding)
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <span className="loader"></span>
+      </div>
+    );
   return (
     <>
       <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white ">

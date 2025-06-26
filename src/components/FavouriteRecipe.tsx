@@ -16,7 +16,12 @@ export default function FavouriteRecipe() {
     isLoading: recipeLaoding,
     error: recipeError,
   } = useSWR("/api/getRecipeDeatils", fetcher);
-  if (recipeLaoding) return <div>Loading...</div>;
+  if (recipeLaoding)
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <span className="loader"></span>
+      </div>
+    );
 
   return (
     <section
