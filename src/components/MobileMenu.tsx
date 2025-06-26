@@ -50,7 +50,7 @@ export default function MobileMenu() {
         <Heart
           className="w-7 h-7"
           color={isOnFavouriteRecipe ? "#EE4D28" : "#000"}
-          onClick={() => router.push("//favourite-recipe")}
+          onClick={() => router.push("/favourite-recipe")}
         />
       </NavIconWrapper>
       <NavIconWrapper>
