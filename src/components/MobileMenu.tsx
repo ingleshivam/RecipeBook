@@ -21,42 +21,42 @@ export default function MobileMenu() {
   const isOnSingleRecipe = path.startsWith("/recipe");
   const isOnFavouriteRecipe = path === "/favourite-recipe";
   return (
-    <div className="bg-white  border-t-1 border-slate-500 shadow-xl/30  row-span-1  w-full">
-      <div className="grid grid-cols-5 h-full">
-        <NavIconWrapper>
-          <House
-            className="w-7 h-7"
-            color={isHome ? "#EE4D28" : "#000"}
-            onClick={() => router.push("/")}
-          />
-        </NavIconWrapper>
-        <NavIconWrapper>
-          <Search
-            className="w-7 h-7"
-            color={isOnAllRecipe || isOnSingleRecipe ? "#EE4D28" : "#000"}
-            onClick={() => router.push("/recipe")}
-          />
-        </NavIconWrapper>
-        <NavIconWrapper>
-          <CirclePlus
-            className="w-15 h-15"
-            strokeWidth={1.5}
-            color="white"
-            fill="#EE4D28"
-            onClick={() => router.push("/share-recipe")}
-          />
-        </NavIconWrapper>
-        <NavIconWrapper>
-          <Heart
-            className="w-7 h-7"
-            color={isOnFavouriteRecipe ? "#EE4D28" : "#000"}
-            onClick={() => router.push("//favourite-recipe")}
-          />
-        </NavIconWrapper>
-        <NavIconWrapper>
-          <MessageSquareText className="w-7 h-7" />
-        </NavIconWrapper>
-      </div>
+    // <div className="fixed bottom-0 bg-red-500 h-auto border-t-1 border-slate-500 shadow-xl/30  row-span-1  w-full">
+    <div className="grid grid-cols-5 h-full border-t-1 border-slate-500 shadow-xl/30">
+      <NavIconWrapper>
+        <House
+          className="w-7 h-7"
+          color={isHome ? "#EE4D28" : "#000"}
+          onClick={() => router.push("/")}
+        />
+      </NavIconWrapper>
+      <NavIconWrapper>
+        <Search
+          className="w-7 h-7"
+          color={isOnAllRecipe || isOnSingleRecipe ? "#EE4D28" : "#000"}
+          onClick={() => router.push("/recipe")}
+        />
+      </NavIconWrapper>
+      <NavIconWrapper>
+        <CirclePlus
+          className="w-15 h-15"
+          strokeWidth={1.5}
+          color="white"
+          fill="#EE4D28"
+          onClick={() => router.push("/share-recipe")}
+        />
+      </NavIconWrapper>
+      <NavIconWrapper>
+        <Heart
+          className="w-7 h-7"
+          color={isOnFavouriteRecipe ? "#EE4D28" : "#000"}
+          onClick={() => router.push("//favourite-recipe")}
+        />
+      </NavIconWrapper>
+      <NavIconWrapper>
+        <MessageSquareText className="w-7 h-7" />
+      </NavIconWrapper>
     </div>
+    // </div>
   );
 }

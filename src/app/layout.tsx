@@ -39,11 +39,13 @@ export default function RootLayout({
             <Navbar />
             {children} <Toaster richColors />
           </div>
-          <div className="grid grid-rows-12 h-screen  md:hidden">
+          <div className="grid grid-rows-12 h-screen   md:hidden">
             <ScrollArea className="row-span-11">
               {children} <Toaster richColors />
             </ScrollArea>
-            <MobileMenu />
+            <div className="row-span-1">
+              <MobileMenu />
+            </div>
           </div>
         </Providers>
       </body>
