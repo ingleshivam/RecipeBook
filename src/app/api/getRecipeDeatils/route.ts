@@ -1,8 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { category, difficulty } from "@/data/dropdownData";
 import prisma from "@/lib/prisma";
+import { getToken } from "next-auth/jwt";
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  const token = await getToken({ req: request });
+
   try {
     const response = await prisma?.recipe.findMany({
       where: {
@@ -29,6 +32,12 @@ export async function GET(request: Request) {
         nutritionInfo: {
           include: {
             nutritionInfo: true,
+          },
+        },
+        favorites: {
+          where: {
+            isFavourite: 1,
+            userId: parseInt((token as any)?.id),
           },
         },
       },
@@ -64,6 +73,7 @@ export async function GET(request: Request) {
         instructions: item.instructions,
         nutritionInfo: item.nutritionInfo,
         ingredients: item.ingredients,
+        favourite: item.favorites,
       }));
     }
 

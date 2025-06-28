@@ -59,13 +59,16 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  const token = await getToken({ req: request });
+
   try {
     const response = await prisma?.recipe.findMany({
       where: {
         favorites: {
           some: {
             isFavourite: 1,
+            userId: parseInt((token as any)?.id),
           },
         },
       },

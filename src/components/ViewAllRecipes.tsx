@@ -39,6 +39,7 @@ import {
   sortOptions,
 } from "../../public/dropdownData.js";
 import ViewAllRecipesSkeleton from "./skeleton/ViewAllRecipeSkeleton";
+import HandleFavourite from "./HandleFavourite";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -57,10 +58,11 @@ export default function ViewAllRecipes() {
     data: response,
     isLoading: recipesLoading,
     error: recipesError,
+    mutate: mutateData,
   } = useSWR("/api/getRecipeDeatils", fetcher);
 
   if (recipesError) return <div>Error loading recipes</div>;
-
+  console.log("response : ", response);
   const filteredAndSortedRecipes = useMemo(() => {
     if (!response?.result) return [];
 
@@ -261,13 +263,7 @@ export default function ViewAllRecipes() {
                     <Star className="h-4 w-4 text-yellow-500 fill-current" />
                     <span className="text-sm font-medium">{recipe.rating}</span>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm hover:bg-white p-2"
-                  >
-                    <Heart className="h-4 w-4 text-gray-600" />
-                  </Button>
+                  <HandleFavourite recipe={recipe} mutateData={mutateData} />
                 </div>
                 <CardContent
                   className={`p-6 ${viewMode === "list" ? "flex-1" : ""}`}

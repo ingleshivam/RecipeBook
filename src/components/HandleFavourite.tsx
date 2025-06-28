@@ -19,6 +19,9 @@ export default function HandleFavourite({
   console.log("Recipe in handlefav : ", recipe);
   const [isFav, setIsFav] = useState(false);
   const pathname = usePathname();
+  const isUserOnThisPage =
+    pathname === "/favourite-recipe" || pathname === "/recipe";
+  console.log("is user on this page : ", isUserOnThisPage);
   const isFavouriteRecipe =
     recipe?.result?.favourite?.[0]?.isFavourite === 1 ||
     recipe?.favourite?.[0]?.isFavourite === 1;
@@ -51,18 +54,25 @@ export default function HandleFavourite({
   };
   return (
     <div>
-      {pathname === "/favourite-recipe" ? (
+      {isUserOnThisPage ? (
         <Button
           variant="ghost"
           size="sm"
+          disabled={status === "unauthenticated" || isFav}
           className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm hover:bg-white p-2 cursor-pointer"
           onClick={() => handleFavourite(recipe.recipeId)}
         >
-          <Heart
-            className="h-4 w-4 text-gray-600"
-            fill={isFavouriteRecipe ? "red" : "white"}
-            color={isFavouriteRecipe ? "red" : "black"}
-          />
+          {isFav ? (
+            <LoadingSpinner />
+          ) : (
+            <>
+              <Heart
+                className="h-4 w-4 text-gray-600"
+                fill={isFavouriteRecipe ? "red" : "white"}
+                color={isFavouriteRecipe ? "red" : "black"}
+              />
+            </>
+          )}
         </Button>
       ) : (
         <Button

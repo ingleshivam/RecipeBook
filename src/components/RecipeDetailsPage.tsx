@@ -25,6 +25,7 @@ import clsx from "clsx";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import LoadingSpinner from "./LoadingSpinner";
 import HandleFavourite from "./HandleFavourite";
+import RatingComponent from "./RatingComponent";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -161,6 +162,10 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
       printWindow.print();
       printWindow.close();
     }
+  };
+
+  const handleRating = (rating: number) => {
+    console.log("Rating :", rating);
   };
 
   // const handleFavourite = async (recipeId: number) => {
@@ -548,6 +553,15 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                         <span>No More Recipes</span>
                       )}
                     </div>
+                  </CardContent>
+                </Card>
+                {/* Rating Card */}
+                <Card>
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                      Rate this recipe
+                    </h3>
+                    <RatingComponent onRatingChange={handleRating} />
                   </CardContent>
                 </Card>
               </div>
