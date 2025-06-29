@@ -26,20 +26,29 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import LoadingSpinner from "./LoadingSpinner";
 import HandleFavourite from "./HandleFavourite";
 import RatingComponent from "./RatingComponent";
+import ShareRecipe from "./ShareRecipe";
+import { usePathname } from "next/navigation";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "./ui/accordion";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function RecipeDetailsPage({ id }: { id: number }) {
   const { status } = useSession();
   const [isDataLoading, setIsDataLoading] = useState(false);
-  // const [isFav, setIsFav] = useState(false);
-  // console.log("Is fav : ", isFav);
+  const pathname = usePathname();
   const {
     data: recipe,
     isLoading: recipeLoading,
     error: recipeError,
     mutate: mutateData,
   } = useSWR(`/api/getRecipeDetailsById?id=${id}`, fetcher);
+
+  console.log("Recipe Data :  ", recipe);
 
   const handlePrint = () => {
     if (!recipe) return;
@@ -227,9 +236,11 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                     />
                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center space-x-1">
                       <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                      <span className="font-medium">{recipe.rating || 0}</span>
+                      <span className="font-medium">
+                        {recipe?.result?.reviewRating || 0}
+                      </span>
                       <span className="text-gray-500">
-                        ({recipe.reviews || ""})
+                        ({recipe?.result?.totalReviewCount?.recipeId || ""})
                       </span>
                     </div>
                   </div>
@@ -438,54 +449,42 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
 
                 {/* Actions */}
                 <Card>
-                  <CardContent className="p-6 space-y-4">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <HandleFavourite
-                          mutateData={mutateData}
-                          recipe={recipe}
-                          id={id}
-                        />
-                        {/* <div>
-                          <Button
-                            className={clsx(
-                              "w-full  cursor-pointer",
-                              recipe?.result?.favourite[0]?.isFavourite === 1 &&
-                                "bg-pink-500  hover:bg-pink-400 hover:text-white text-white"
-                            )}
-                            disabled={status === "unauthenticated" || isFav}
-                            onClick={() => handleFavourite(id)}
-                            variant={"outline"}
-                          >
-                            {isFav ? (
-                              <LoadingSpinner />
-                            ) : (
-                              <>
-                                <Bookmark className="h-4 w-4 mr-2" />
-                                Save Recipe
-                              </>
-                            )}
-                          </Button>
-                        </div> */}
-                      </TooltipTrigger>
-                      <TooltipContent
-                        className={clsx(status === "authenticated" && "hidden")}
-                      >
-                        <p>Login to save recipe</p>
-                      </TooltipContent>
-                    </Tooltip>
+                  <CardContent className="p-6 ">
+                    <HandleFavourite
+                      mutateData={mutateData}
+                      recipe={recipe}
+                      id={id}
+                    />
 
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div>
-                          <Button
-                            variant="outline"
-                            className="w-full border-orange-200 text-orange-600 hover:bg-orange-50 cursor-pointer"
-                            disabled={status === "unauthenticated"}
+                          <Accordion
+                            type="single"
+                            collapsible
+                            className="w-full"
                           >
-                            <Share2 className="h-4 w-4 mr-2" />
-                            Share Recipe
-                          </Button>
+                            <AccordionItem value="item-1">
+                              <AccordionTrigger>
+                                <Button
+                                  variant="outline"
+                                  className="w-full border-orange-200 text-orange-600 hover:bg-orange-50 cursor-pointer"
+                                  disabled={status === "unauthenticated"}
+                                >
+                                  <Share2 className="h-4 w-4 mr-2" />
+                                  Share Recipe
+                                </Button>{" "}
+                              </AccordionTrigger>
+                              <AccordionContent className="flex flex-col gap-4 text-balance">
+                                <div>
+                                  <ShareRecipe
+                                    link={pathname}
+                                    name={recipe.result.title}
+                                  />
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
                         </div>
                       </TooltipTrigger>
                       <TooltipContent
@@ -556,14 +555,8 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                   </CardContent>
                 </Card>
                 {/* Rating Card */}
-                <Card>
-                  <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                      Rate this recipe
-                    </h3>
-                    <RatingComponent onRatingChange={handleRating} />
-                  </CardContent>
-                </Card>
+
+                <RatingComponent recipeId={id} />
               </div>
             </div>
           </div>

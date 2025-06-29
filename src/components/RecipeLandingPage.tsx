@@ -37,6 +37,8 @@ export default function RecipeLandingPage() {
         <span className="loader"></span>
       </div>
     );
+
+  console.log("recipeData : ", recipeData);
   return (
     <>
       <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white ">
@@ -176,8 +178,8 @@ export default function RecipeLandingPage() {
               </p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {recipeData.result
-                .filter((item: any) => item.approveStatus === "A")
+              {recipeData?.result
+                ?.filter((item: any) => item.approveStatus === "A")
                 .map((recipe: any, index: number) => (
                   <Card
                     key={index}

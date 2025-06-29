@@ -42,7 +42,6 @@ import ViewAllRecipesSkeleton from "./skeleton/ViewAllRecipeSkeleton";
 import HandleFavourite from "./HandleFavourite";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
 export default function ViewAllRecipes() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("0");

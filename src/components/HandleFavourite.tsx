@@ -6,6 +6,8 @@ import clsx from "clsx";
 import LoadingSpinner from "./LoadingSpinner";
 import { Bookmark, Heart } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export default function HandleFavourite({
   mutateData,
@@ -16,12 +18,11 @@ export default function HandleFavourite({
   recipe: any;
   id?: number;
 }) {
-  console.log("Recipe in handlefav : ", recipe);
+  const { status } = useSession();
   const [isFav, setIsFav] = useState(false);
   const pathname = usePathname();
   const isUserOnThisPage =
     pathname === "/favourite-recipe" || pathname === "/recipe";
-  console.log("is user on this page : ", isUserOnThisPage);
   const isFavouriteRecipe =
     recipe?.result?.favourite?.[0]?.isFavourite === 1 ||
     recipe?.favourite?.[0]?.isFavourite === 1;
@@ -75,25 +76,36 @@ export default function HandleFavourite({
           )}
         </Button>
       ) : (
-        <Button
-          className={clsx(
-            "w-full  cursor-pointer",
-            isFavouriteRecipe &&
-              "bg-pink-500  hover:bg-pink-400 hover:text-white text-white"
-          )}
-          disabled={status === "unauthenticated" || isFav}
-          onClick={() => handleFavourite(id ?? 0)}
-          variant={"outline"}
-        >
-          {isFav ? (
-            <LoadingSpinner />
-          ) : (
-            <>
-              <Bookmark className="h-4 w-4 mr-2" />
-              Save Recipe
-            </>
-          )}
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div>
+              <Button
+                className={clsx(
+                  "w-full  cursor-pointer",
+                  isFavouriteRecipe &&
+                    "bg-pink-500  hover:bg-pink-400 hover:text-white text-white"
+                )}
+                disabled={status === "unauthenticated" || isFav}
+                onClick={() => handleFavourite(id ?? 0)}
+                variant={"outline"}
+              >
+                {isFav ? (
+                  <LoadingSpinner />
+                ) : (
+                  <>
+                    <Bookmark className="h-4 w-4 mr-2" />
+                    Save Recipe
+                  </>
+                )}
+              </Button>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent
+            className={clsx(status === "authenticated" && "hidden")}
+          >
+            <p>Login to save recipe</p>
+          </TooltipContent>
+        </Tooltip>
       )}
     </div>
   );

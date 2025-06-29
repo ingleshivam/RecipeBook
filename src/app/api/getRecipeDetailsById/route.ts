@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(url);
   const id = searchParams.get("id");
   try {
-    const response = await prisma?.recipe.findUnique({
+    const response = (await prisma?.recipe.findUnique({
       where: {
         recipeId: Number(id),
       },
@@ -43,14 +43,19 @@ export async function GET(request: NextRequest) {
         favorites: {
           where: {
             recipeId: Number(id),
-            userId: parseInt((token as any)?.id),
+            userId: parseInt((token as any)?.id) || -1,
           },
           select: {
             isFavourite: true,
           },
         },
+        reviews: {
+          where: {
+            recipeId: Number(id),
+          },
+        },
       },
-    });
+    })) as any;
 
     const recipeCount = await prisma?.recipe.aggregate({
       where: {
@@ -61,7 +66,25 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const allRecipesByUseId = await prisma?.recipe.findMany({
+    const reviewCount = await prisma?.review.aggregate({
+      where: {
+        recipeId: Number(id),
+      },
+      _count: {
+        recipeId: true,
+      },
+    });
+
+    // Calculate average rating from reviews
+    const ratings =
+      response?.reviews?.map((review: any) => review.rating) || [];
+    const averageRating =
+      ratings.length > 0
+        ? ratings.reduce((sum: number, rating: number) => sum + rating, 0) /
+          ratings.length
+        : 0;
+
+    const allRecipesByUseId = (await prisma?.recipe.findMany({
       where: {
         userId: response?.user?.userId,
         approveStatus: "A",
@@ -72,9 +95,10 @@ export async function GET(request: NextRequest) {
       include: {
         images: true,
       },
-    });
+    })) as any;
 
     const count = recipeCount?._count;
+    const totalReviewCount = reviewCount?._count;
 
     let result;
     if (response) {
@@ -82,10 +106,10 @@ export async function GET(request: NextRequest) {
         recipeId: response.recipeId,
         title: response.title,
         description: response.description,
-        image: response.images[0].imageUrl,
+        image: response.images?.[0]?.imageUrl,
         author: response.user?.firstName + " " + response.user?.lastName,
-        // rating: 4.9,
-        // reviews: 127,
+        rating: parseFloat(averageRating.toFixed(1)),
+        reviews: ratings.length,
         prepTime: response.prepTime,
         cookTime: response.cookingTime,
         totalTime:
@@ -105,6 +129,8 @@ export async function GET(request: NextRequest) {
         nutritionInfo: response.nutritionInfo,
         createdAt: response.createdAt,
         favourite: response.favorites,
+        totalReviewCount: totalReviewCount,
+        reviewRating: parseFloat(averageRating.toFixed(1)),
       };
     }
 
@@ -116,12 +142,12 @@ export async function GET(request: NextRequest) {
     if (error instanceof Error) {
       return NextResponse.json(
         { message: { error: error.message } },
-        { status: 400, statusText: error.message }
+        { status: 400 }
       );
     }
     return NextResponse.json(
       { message: { error: "Internal server error !" } },
-      { status: 500, statusText: "Internal server error !" }
+      { status: 500 }
     );
   }
 }
@@ -148,16 +174,12 @@ export async function PUT(request: NextRequest) {
     );
   } catch (error) {
     if (error instanceof Error) {
-      return NextResponse.json(
-        { message: error.message },
-        { status: 400, statusText: error.message }
-      );
+      return NextResponse.json({ message: error.message }, { status: 400 });
     }
     return NextResponse.json(
       { message: "Internal server error !" },
       {
         status: 500,
-        statusText: "Internal server error !",
       }
     );
   }

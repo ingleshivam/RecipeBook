@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const token = await getToken({ req: request });
 
   try {
-    const response = await prisma?.recipe.findMany({
+    const response = (await prisma?.recipe.findMany({
       where: {
         approveStatus: "A",
       },
@@ -15,7 +15,6 @@ export async function GET(request: NextRequest) {
         user: true,
         images: true,
         tags: true,
-
         ingredients: {
           include: {
             ingredient: true,
@@ -37,44 +36,60 @@ export async function GET(request: NextRequest) {
         favorites: {
           where: {
             isFavourite: 1,
-            userId: parseInt((token as any)?.id),
+            userId: parseInt((token as any)?.id) || -1,
+          },
+        },
+        reviews: {
+          select: {
+            rating: true,
           },
         },
       },
-    });
+    })) as any;
+
     let result;
     if (response && response?.length > 0) {
-      result = response.map((item) => ({
-        recipeId: item.recipeId,
-        title: item.title,
-        description: item.description,
-        image: item.images[0].imageUrl,
-        author: item.user?.firstName + " " + item.user?.lastName,
-        // rating: 4.9,
-        // reviews: 127,
-        approveStatus: item.approveStatus,
-        approvedDate: item.approvedDate,
-        prepTime: item.prepTime,
-        cookTime: item.cookingTime,
-        totalTime:
-          item.prepTime && item.cookingTime
-            ? item.prepTime + item.cookingTime
-            : 0,
-        servings: item.servingSize,
-        difficulty: difficulty.find(
-          (val: any) => parseInt(val.value) === item.difficulty
-        )?.value,
-        category: category.find(
-          (val: any) => parseInt(val.value) === item.categoryId
-        )?.value,
-        tags: item.tags,
-        createdAt: item.createdAt,
-        user: item.user,
-        instructions: item.instructions,
-        nutritionInfo: item.nutritionInfo,
-        ingredients: item.ingredients,
-        favourite: item.favorites,
-      }));
+      result = response.map((item: any) => {
+        // Calculate average rating from reviews
+        const ratings = item.reviews?.map((review: any) => review.rating) || [];
+        const averageRating =
+          ratings.length > 0
+            ? ratings.reduce((sum: number, rating: number) => sum + rating, 0) /
+              ratings.length
+            : 0;
+
+        return {
+          recipeId: item.recipeId,
+          title: item.title,
+          description: item.description,
+          image: item.images?.[0]?.imageUrl,
+          author: item.user?.firstName + " " + item.user?.lastName,
+          rating: parseFloat(averageRating.toFixed(1)),
+          reviews: ratings.length,
+          approveStatus: item.approveStatus,
+          approvedDate: item.approvedDate,
+          prepTime: item.prepTime,
+          cookTime: item.cookingTime,
+          totalTime:
+            item.prepTime && item.cookingTime
+              ? item.prepTime + item.cookingTime
+              : 0,
+          servings: item.servingSize,
+          difficulty: difficulty.find(
+            (val: any) => parseInt(val.value) === item.difficulty
+          )?.value,
+          category: category.find(
+            (val: any) => parseInt(val.value) === item.categoryId
+          )?.value,
+          tags: item.tags,
+          createdAt: item.createdAt,
+          user: item.user,
+          instructions: item.instructions,
+          nutritionInfo: item.nutritionInfo,
+          ingredients: item.ingredients,
+          favourite: item.favorites,
+        };
+      });
     }
 
     return NextResponse.json({ result }, { status: 200 });
