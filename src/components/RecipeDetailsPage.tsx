@@ -173,38 +173,6 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
     }
   };
 
-  const handleRating = (rating: number) => {
-    console.log("Rating :", rating);
-  };
-
-  // const handleFavourite = async (recipeId: number) => {
-  //   try {
-  //     setIsFav(true);
-  //     const response = await fetch("/api/favouriteRecipe", {
-  //       method: "POST",
-  //       body: JSON.stringify({ recipeId }),
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (response.ok) {
-  //       await mutateData();
-  //       setIsFav(false);
-  //       toast.success("Success", {
-  //         description: data?.message,
-  //       });
-  //     }
-  //   } catch (error) {
-  //     if (error instanceof Error) {
-  //       toast.error("Error", {
-  //         description: error.message,
-  //       });
-  //     }
-  //   } finally {
-  //     setIsFav(false);
-  //   }
-  // };
-
   return (
     <>
       {recipeLoading ? (

@@ -82,12 +82,12 @@ export default function ShareRecipePage() {
       .array(z.string().min(1, "Instruction is required"))
       .min(1, "At least one instruction is required"),
     tips: z.string().optional(),
-    calorie: z.string().optional(),
-    fat: z.string().optional(),
-    carbs: z.string().optional(),
-    protein: z.string().optional(),
-    sugar: z.string().optional(),
-    fiber: z.string().optional(),
+    calorie: z.string().min(1, "Calorie is required"),
+    fat: z.string().min(1, "Fat is required"),
+    carbs: z.string().min(1, "Carbs is required"),
+    protein: z.string().min(1, "Protein is required"),
+    sugar: z.string().min(1, "Sugar is required"),
+    fiber: z.string().min(1, "Fiber is required"),
   });
 
   type IRecipeSchema = z.infer<typeof RecipeSchema>;
@@ -693,36 +693,78 @@ export default function ShareRecipePage() {
                       <div className="flex gap-2 mb-2 flex-wrap">
                         <Input placeholder="180" {...register("calorie")} />
                       </div>
+                      <Label>
+                        {errors.calorie && (
+                          <p className="text-sm text-red-500">
+                            {errors.calorie?.message}
+                          </p>
+                        )}
+                      </Label>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-gray-700">Fat</Label>
                       <div className="flex gap-2 mb-2 flex-wrap">
                         <Input placeholder="8gm" {...register("fat")} />
                       </div>
+                      <Label>
+                        {errors.fat && (
+                          <p className="text-sm text-red-500">
+                            {errors.fat?.message}
+                          </p>
+                        )}
+                      </Label>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-gray-700">Carbs</Label>
                       <div className="flex gap-2 mb-2 flex-wrap">
                         <Input placeholder="26gm" {...register("carbs")} />
                       </div>
+                      <Label>
+                        {errors.carbs && (
+                          <p className="text-sm text-red-500">
+                            {errors.carbs?.message}
+                          </p>
+                        )}
+                      </Label>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-gray-700">Protein</Label>
                       <div className="flex gap-2 mb-2 flex-wrap">
                         <Input placeholder="2gm" {...register("protein")} />
                       </div>
+                      <Label>
+                        {errors.protein && (
+                          <p className="text-sm text-red-500">
+                            {errors.protein?.message}
+                          </p>
+                        )}
+                      </Label>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-gray-700">Sugar</Label>
                       <div className="flex gap-2 mb-2 flex-wrap">
                         <Input placeholder="18gm" {...register("sugar")} />
                       </div>
+                      <Label>
+                        {errors.sugar && (
+                          <p className="text-sm text-red-500">
+                            {errors.sugar?.message}
+                          </p>
+                        )}
+                      </Label>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-gray-700">Fiber</Label>
                       <div className="flex gap-2 mb-2 flex-wrap">
                         <Input placeholder="3gm" {...register("fiber")} />
                       </div>
+                      <Label>
+                        {errors.fiber && (
+                          <p className="text-sm text-red-500">
+                            {errors.fiber?.message}
+                          </p>
+                        )}
+                      </Label>
                     </div>
                   </div>
                 </CardContent>

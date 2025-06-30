@@ -87,7 +87,13 @@ export async function POST(request: Request) {
       },
     });
     return NextResponse.json(
-      { message: { success: "Data is stored successfully !", error: "" } },
+      {
+        message: {
+          success: "Data is stored successfully !",
+          error: "",
+          data: response,
+        },
+      },
       { status: 200 }
     );
   } catch (error) {
