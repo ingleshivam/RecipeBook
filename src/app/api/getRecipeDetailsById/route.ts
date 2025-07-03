@@ -78,11 +78,15 @@ export async function GET(request: NextRequest) {
     // Calculate average rating from reviews
     const ratings =
       response?.reviews?.map((review: any) => review.rating) || [];
+
+    console.log("Rating : ", ratings);
     const averageRating =
       ratings.length > 0
         ? ratings.reduce((sum: number, rating: number) => sum + rating, 0) /
           ratings.length
         : 0;
+
+    console.log("Average Rating :", averageRating);
 
     const allRecipesByUseId = (await prisma?.recipe.findMany({
       where: {

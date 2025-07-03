@@ -53,7 +53,7 @@ export default function AdminPage() {
     isLoading: responseLoading,
     error: responseError,
     mutate: mutateData,
-  } = useSWR("/api/getRecipeDeatils", fetcher);
+  } = useSWR("/api/getAllRecipeDetails", fetcher);
 
   const {
     data: userData,
@@ -159,11 +159,7 @@ export default function AdminPage() {
                     <div>
                       <p className="text-sm text-gray-500">Pending Reviews</p>
                       <p className="text-2xl font-bold text-orange-600">
-                        {
-                          response.result.filter(
-                            (item: any) => item.approvedStatus === "U"
-                          )?.length
-                        }
+                        {pendingRecipes.length}
                       </p>
                     </div>
                     <div className="bg-orange-100 p-3 rounded-full">
@@ -245,7 +241,7 @@ export default function AdminPage() {
                     <div className="space-y-6">
                       {pendingRecipes?.map((recipe: any, index: number) => (
                         <div
-                          key={recipe.recipeId + index}
+                          key={recipe.recipeId + index * 3}
                           className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
                         >
                           <div className="flex flex-col lg:flex-row gap-6">
@@ -267,7 +263,7 @@ export default function AdminPage() {
                                   <h3 className="text-xl font-semibold text-gray-800 mb-2">
                                     {recipe.title}
                                   </h3>
-                                  <p className="text-gray-600 mb-3">
+                                  <p className="text-gray-600 mb-3 break-all">
                                     {recipe.description}
                                   </p>
                                   <div className="flex flex-wrap gap-2 mb-3">
@@ -610,7 +606,7 @@ export default function AdminPage() {
                                   <h3 className="text-xl font-semibold text-gray-800 mb-2">
                                     {recipe.title}
                                   </h3>
-                                  <p className="text-gray-600 mb-3">
+                                  <p className="text-gray-600 mb-3 break-all">
                                     {recipe.description}
                                   </p>
                                   <div className="flex flex-wrap gap-2 mb-3">
@@ -955,7 +951,7 @@ export default function AdminPage() {
                                   <h3 className="text-xl font-semibold text-gray-800 mb-2">
                                     {recipe.title}
                                   </h3>
-                                  <p className="text-gray-600 mb-3">
+                                  <p className="text-gray-600 mb-3 break-all">
                                     {recipe.description}
                                   </p>
                                   <div className="flex flex-wrap gap-2 mb-3">

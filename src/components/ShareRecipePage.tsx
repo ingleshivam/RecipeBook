@@ -1,5 +1,14 @@
 "use client";
-
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import type React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -102,7 +111,7 @@ export default function ShareRecipePage() {
   const [instructions, setInstructions] = useState([""]);
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
-  //   const [isLoading, setIsLoading] = useState(false);
+  const [approveStatus, setApproveStatus] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [isSubmittingDraft, setIsSubmittingDraft] = useState(false);
   const [recipeFileName, setRecipeFileName] = useState("");
@@ -192,8 +201,11 @@ export default function ShareRecipePage() {
     }
 
     try {
-      setIsSubmittingDraft(true);
-      setIsSubmittingDraft(true);
+      if (isDraft) {
+        setIsSubmittingDraft(true);
+      } else {
+        setIsSubmittingReview(true);
+      }
       const formData = new FormData();
       formData.append("file", values.recipeFile);
 
@@ -229,7 +241,6 @@ export default function ShareRecipePage() {
         toast.error("Error", {
           description: data.message.error,
         });
-        return;
       }
 
       reset();
@@ -239,6 +250,11 @@ export default function ShareRecipePage() {
       setNewTag("");
       setRecipeFileName("");
       setIsDraft(false);
+      setApproveStatus(data?.message?.approveStatus);
+      console.log(
+        "data?.message?.approveStatus : ",
+        data?.message?.approveStatus
+      );
 
       toast.success("Success", {
         description: data.message.success,
@@ -250,7 +266,7 @@ export default function ShareRecipePage() {
       });
     } finally {
       setIsSubmittingDraft(false);
-      setIsSubmittingDraft(false);
+      setIsSubmittingReview(false);
     }
   };
 
@@ -839,6 +855,9 @@ export default function ShareRecipePage() {
                 size="lg"
                 className="border-orange-200 text-orange-600 hover:bg-orange-50"
                 disabled={isSubmittingDraft || isSubmittingReview}
+                onClick={() => {
+                  setIsDraft(true);
+                }}
               >
                 {isSubmittingDraft ? (
                   "Submitting..."
@@ -866,19 +885,35 @@ export default function ShareRecipePage() {
               </Button>
             </div>
 
-            <div
-              className={clsx(
-                "text-center text-sm text-gray-500 bg-orange-50 p-4 rounded-lg",
-                !showReviewStatus && "hidden"
-              )}
-            >
-              <p className="font-medium mb-1">📝 Review Process</p>
-              <p>
-                Your recipe will be reviewed by our team within 24-48 hours.
-                You'll receive an email notification once it's approved and
-                published.
-              </p>
-            </div>
+            <Dialog open={showReviewStatus} onOpenChange={setShowReviewStatus}>
+              <DialogTrigger asChild className="hidden">
+                <Button variant="outline">Open Dialog</Button>
+              </DialogTrigger>
+              <DialogContent
+                className="sm:max-w-[425px]"
+                onInteractOutside={(e) => e.preventDefault()}
+              >
+                <DialogHeader>
+                  <DialogTitle>
+                    {approveStatus === "U"
+                      ? "📝 Review Process"
+                      : "Saved as Draft"}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {approveStatus === "U"
+                      ? `Your recipe will be reviewed by our team within 24-48
+                      hours. You'll receive an email notification once it's
+                      approved and published.`
+                      : `Draft saved! You can continue editing your recipe anytime.`}
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="outline">Close</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </form>
         </div>
       </div>

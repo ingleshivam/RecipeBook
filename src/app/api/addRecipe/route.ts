@@ -4,7 +4,6 @@ import prisma from "@/lib/prisma";
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-
     const ingredientPromises = data.ingredients.map(async (val: any) => {
       const existingIngredient = await prisma.ingredient.findUnique({
         where: {
@@ -91,7 +90,7 @@ export async function POST(request: Request) {
         message: {
           success: "Data is stored successfully !",
           error: "",
-          data: response,
+          approveStatus: response.approveStatus,
         },
       },
       { status: 200 }
