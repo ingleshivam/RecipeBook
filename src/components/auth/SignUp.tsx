@@ -20,6 +20,8 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { sendMail } from "@/lib/sendMail";
 
 export default function SignUp() {
   const router = useRouter();
@@ -61,7 +63,6 @@ export default function SignUp() {
   const onSubmit = async (values: IUserSchema) => {
     try {
       setIsLoading(true);
-
       const response = await fetch("/api/signupUser", {
         method: "POST",
         headers: {
@@ -71,11 +72,52 @@ export default function SignUp() {
       });
 
       const responseData = await response.json();
-
+      console.log("responseData : ", responseData);
       if (!response.ok) {
-        throw new Error(responseData.message || "Something went wrong");
+        toast.error("Error Occured !", {
+          description: "Error occurred during signup !",
+        });
+        // throw new Error(responseData.message || "Something went wrong");
+        return;
       }
-      router.push("/auth/signin");
+
+      const email = responseData?.data?.email;
+      console.log("Email : ", email);
+
+      const name =
+        responseData?.data?.firstName + " " + responseData?.data?.lastName;
+      console.log("Name : ", name);
+      const res = await sendMail({ sendTo: email, name: name });
+      console.log("res : ", res);
+
+      const otp = res?.otp;
+      console.log("otp : ", otp);
+
+      const userId = responseData?.data?.userId;
+      console.log("userId : ", userId);
+
+      if (res?.status === 200) {
+        const insertOtpResponse = await fetch("/api/insertOtp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ otp, userId }),
+        });
+
+        const insertOtpData = await insertOtpResponse.json();
+        if (insertOtpResponse.ok) {
+          router.push("/auth/verify");
+        } else {
+          toast.error("Error Occurred !", {
+            description: "Failed to insert otp record !",
+          });
+        }
+      } else {
+        toast.error("Error Occurred !", {
+          description: "Failed to send otp on registered email",
+        });
+      }
     } catch (error) {
       console.error("Detailed error:", error);
       if (error instanceof Error) {

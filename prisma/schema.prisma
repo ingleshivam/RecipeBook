@@ -21,12 +21,24 @@ model User {
   firstName   String?
   lastName    String?
   role        String?
+  isVerified  Int?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   recipes     Recipe[]
   reviews     Review[]
-  favorites   Favorite[]  
+  favorites   Favorite[]
+  userOtps    userOtp[]
 }
+
+ model userOtp {
+  id  Int @id @default(autoincrement())
+  otp String
+  isUsed Int
+  generatedTimestamp DateTime
+  expirationTimestamp DateTime
+  userId Int
+  user User @relation(fields: [userId], references: [userId])
+ }
 
 model NutritionInfo {
   nutritionId Int      @id @default(autoincrement())

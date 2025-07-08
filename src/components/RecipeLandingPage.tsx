@@ -20,6 +20,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import LoadingSpinner from "./LoadingSpinner";
+import { sendMail } from "@/lib/sendMail";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function RecipeLandingPage() {
@@ -39,6 +40,7 @@ export default function RecipeLandingPage() {
     );
 
   console.log("recipeData : ", recipeData);
+
   return (
     <>
       <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white ">
