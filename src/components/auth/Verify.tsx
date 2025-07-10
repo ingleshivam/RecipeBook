@@ -106,8 +106,20 @@ export default function VerifyOTPPage() {
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000));
+      const response = await fetch(`/api/insertOtp?email=${email}`, {
+        method: "GET",
+      });
 
-      if (otpString === "123456") {
+      const otpRecord = await response.json();
+
+      console.log("OTP RECORD : ", otpRecord);
+
+      if (otpString === otpRecord?.data?.otp) {
+        const otp = otpRecord?.data?.otp;
+        const response = await fetch("/api/insertOtp", {
+          method: "PUT",
+          body: JSON.stringify({ otp, email }),
+        });
         setSuccess(true);
         setTimeout(() => {
           router.push("/");

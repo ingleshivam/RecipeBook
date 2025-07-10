@@ -1,5 +1,10 @@
 import Verify from "@/components/auth/Verify";
+import { Suspense } from "react";
 
 export default function Page() {
-  return <Verify />;
+  return (
+    <Suspense fallback={"Loading..."}>
+      <Verify />;
+    </Suspense>
+  );
 }

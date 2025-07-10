@@ -1,12 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-
 }
 
 datasource db {
@@ -15,156 +8,149 @@ datasource db {
 }
 
 model User {
-  userId          Int       @id @default(autoincrement())
-  email       String    @unique
+  userId       Int        @id @default(autoincrement())
+  email        String     @unique
   passwordHash String
-  firstName   String?
-  lastName    String?
-  role        String?
-  isVerified  Int?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  recipes     Recipe[]
-  reviews     Review[]
-  favorites   Favorite[]
-  userOtps    userOtp[]
+  firstName    String?
+  lastName     String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  role         String?
+  isVerified   Int?
+  favorites    Favorite[]
+  recipes      Recipe[]
+  reviews      Review[]
+  userOtps     userOtp[]
 }
 
- model userOtp {
-  id  Int @id @default(autoincrement())
-  otp String
-  isUsed Int
-  generatedTimestamp DateTime
+model userOtp {
+  id                  Int      @id @default(autoincrement())
+  otp                 String   @unique
+  isUsed              Int
+  generatedTimestamp  DateTime
   expirationTimestamp DateTime
-  userId Int
-  user User @relation(fields: [userId], references: [userId])
- }
+  userId              Int
+  user                User     @relation(fields: [userId], references: [userId])
+}
 
 model NutritionInfo {
-  nutritionId Int      @id @default(autoincrement())
-  calorie    String?
-  fat        String?
-  carbs      String?
-  protein    String?
-  sugar      String?
-  fiber      String?
+  nutritionId          Int                   @id @default(autoincrement())
+  calorie              String?
+  fat                  String?
+  carbs                String?
+  protein              String?
+  sugar                String?
+  fiber                String?
   recipeNutritionInfos RecipeNutritionInfo[]
 }
 
-
-
 model Recipe {
-  recipeId          Int       @id @default(autoincrement())
-  title       String
-  description String?
-  cookingTime Int?
-  servingSize Int?
-  prepTime Int?
-  difficulty Int?
-  approveStatus String
+  recipeId       Int                   @id @default(autoincrement())
+  title          String
+  description    String?
+  cookingTime    Int?
+  servingSize    Int?
+  categoryId     Int
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  userId         Int?
+  approveStatus  String
+  approvedDate   DateTime?
+  difficulty     Int?
   isSavedAsDraft Int
-  categoryId  Int
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  approvedDate DateTime?
-  userId      Int?
-  user        User?     @relation(fields: [userId], references: [userId])
-  nutritionInfo RecipeNutritionInfo[]
-  ingredients RecipeIngredient[]
-  instructions RecipeInstructions[]
-  tags        RecipeTag[]
-  reviews     Review[]
-  favorites   Favorite[]
-  images      Image[]
+  prepTime       Int?
+  favorites      Favorite[]
+  images         Image[]
+  user           User?                 @relation(fields: [userId], references: [userId])
+  ingredients    RecipeIngredient[]
+  instructions   RecipeInstructions[]
+  nutritionInfo  RecipeNutritionInfo[]
+  tags           RecipeTag[]
+  reviews        Review[]
 }
 
- model Instructions {
-  instructionId Int @id @default(autoincrement())
-  description String
+model Instructions {
+  instructionId      Int                  @id @default(autoincrement())
+  description        String
   recipeInstructions RecipeInstructions[]
- } 
- 
+}
+
 model Ingredient {
-  ingredientId          Int       @id @default(autoincrement())
-  name        String    @unique
-  description String?
+  ingredientId      Int                @id @default(autoincrement())
+  name              String             @unique
+  description       String?
   recipeIngredients RecipeIngredient[]
 }
 
 model RecipeIngredient {
-  recipeId    Int
+  recipeId     Int
   ingredientId Int
-  quantity    String
-
-  recipe      Recipe     @relation(fields: [recipeId], references: [recipeId])
-  ingredient  Ingredient @relation(fields: [ingredientId], references: [ingredientId])
+  quantity     String
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [ingredientId])
+  recipe       Recipe     @relation(fields: [recipeId], references: [recipeId])
 
   @@id([recipeId, ingredientId])
 }
 
-model RecipeNutritionInfo{
-  recipeId Int
-  nutritionId Int
-
-  recipe Recipe @relation(fields : [recipeId], references: [recipeId])
-  nutritionInfo NutritionInfo @relation(fields : [nutritionId], references: [nutritionId])
+model RecipeNutritionInfo {
+  recipeId      Int
+  nutritionId   Int
+  nutritionInfo NutritionInfo @relation(fields: [nutritionId], references: [nutritionId])
+  recipe        Recipe        @relation(fields: [recipeId], references: [recipeId])
 
   @@id([recipeId, nutritionId])
 }
 
-model RecipeInstructions{
-  recipeId Int
+model RecipeInstructions {
+  recipeId      Int
   instructionId Int
-
-  recipe Recipe @relation(fields : [recipeId], references : [recipeId])
-  instruction Instructions @relation(fields :[instructionId], references : [instructionId])
+  instruction   Instructions @relation(fields: [instructionId], references: [instructionId])
+  recipe        Recipe       @relation(fields: [recipeId], references: [recipeId])
 
   @@id([recipeId, instructionId])
 }
 
 model Tag {
-  tagId          Int       @id @default(autoincrement())
-  name        String    @unique
-  recipes     RecipeTag[]
+  tagId   Int         @id @default(autoincrement())
+  name    String      @unique
+  recipes RecipeTag[]
 }
 
 model RecipeTag {
   recipeId Int
   tagId    Int
-
-  recipe   Recipe  @relation(fields: [recipeId], references: [recipeId])
-  tag      Tag     @relation(fields: [tagId], references: [tagId])
+  recipe   Recipe @relation(fields: [recipeId], references: [recipeId])
+  tag      Tag    @relation(fields: [tagId], references: [tagId])
 
   @@id([recipeId, tagId])
 }
 
 model Review {
-  reviewId          Int       @id @default(autoincrement())
-  rating      Int
-  reviewText  String?
-  createdAt   DateTime  @default(now())
-  userId      Int
-  recipeId    Int
-  user        User      @relation(fields: [userId], references: [userId])
-  recipe      Recipe    @relation(fields: [recipeId], references: [recipeId])
+  reviewId   Int      @id @default(autoincrement())
+  rating     Int
+  reviewText String?
+  createdAt  DateTime @default(now())
+  userId     Int
+  recipeId   Int
+  recipe     Recipe   @relation(fields: [recipeId], references: [recipeId])
+  user       User     @relation(fields: [userId], references: [userId])
 }
 
 model Favorite {
-  userId    Int
-  recipeId  Int
+  userId      Int
+  recipeId    Int
   isFavourite Int?
-  user      User    @relation(fields: [userId], references: [userId])
-  recipe    Recipe  @relation(fields: [recipeId], references: [recipeId])
+  recipe      Recipe @relation(fields: [recipeId], references: [recipeId])
+  user        User   @relation(fields: [userId], references: [userId])
 
   @@id([userId, recipeId])
-} 
-
-model Image {
-  imageId           Int       @id @default(autoincrement())
-  imageUrl     String
-  description  String?
-  createdAt    DateTime  @default(now())
-  recipeId     Int?
-  recipe       Recipe?   @relation(fields: [recipeId], references: [recipeId])
 }
 
+model Image {
+  imageId     Int      @id @default(autoincrement())
+  imageUrl    String
+  description String?
+  createdAt   DateTime @default(now())
+  recipeId    Int?
+  recipe      Recipe?  @relation(fields: [recipeId], references: [recipeId])
+}

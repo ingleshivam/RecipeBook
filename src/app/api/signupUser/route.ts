@@ -9,6 +9,32 @@ export async function POST(request: NextRequest) {
     const passwordHash = await hashPassword(data.password);
     console.log("passwordHash : ", passwordHash);
 
+    const userExistsAndNotVerified = await prisma?.user.findUnique({
+      where: {
+        email: data?.email,
+        isVerified: 0,
+      },
+    });
+
+    const userExistaAndVerified = await prisma?.user.findUnique({
+      where: {
+        email: data?.email,
+        isVerified: 1,
+      },
+    });
+
+    if (userExistsAndNotVerified) {
+      return NextResponse.json(
+        { message: "User Already Exists !", data: userExistsAndNotVerified },
+        { status: 201 }
+      );
+    } else if (userExistaAndVerified) {
+      return NextResponse.json(
+        { message: "User Already Exists !", data: userExistaAndVerified },
+        { status: 409 }
+      );
+    }
+
     const response = await prisma.user.create({
       data: {
         email: data.email,

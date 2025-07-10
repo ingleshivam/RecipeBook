@@ -13,7 +13,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { ChefHat, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import {
+  ChefHat,
+  Mail,
+  Lock,
+  User,
+  Eye,
+  EyeOff,
+  ReceiptIndianRupeeIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { z } from "zod";
@@ -72,8 +80,13 @@ export default function SignUp() {
       });
 
       const responseData = await response.json();
-      console.log("responseData : ", responseData);
       if (!response.ok) {
+        if (response.status === 409) {
+          toast.warning("Warning", {
+            description: "The user is already exists !",
+          });
+          return;
+        }
         toast.error("Error Occured !", {
           description: "Error occurred during signup !",
         });
@@ -82,19 +95,14 @@ export default function SignUp() {
       }
 
       const email = responseData?.data?.email;
-      console.log("Email : ", email);
 
       const name =
         responseData?.data?.firstName + " " + responseData?.data?.lastName;
-      console.log("Name : ", name);
       const res = await sendMail({ sendTo: email, name: name });
-      console.log("res : ", res);
 
       const otp = res?.otp;
-      console.log("otp : ", otp);
 
       const userId = responseData?.data?.userId;
-      console.log("userId : ", userId);
 
       if (res?.status === 200) {
         const insertOtpResponse = await fetch("/api/insertOtp", {
@@ -107,7 +115,7 @@ export default function SignUp() {
 
         const insertOtpData = await insertOtpResponse.json();
         if (insertOtpResponse.ok) {
-          router.push("/auth/verify");
+          router.push(`/auth/verify?email=${email}`);
         } else {
           toast.error("Error Occurred !", {
             description: "Failed to insert otp record !",

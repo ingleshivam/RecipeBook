@@ -52,7 +52,7 @@ export default function generateMailTemplate(
                 <p>If you did not request this code, you can safely ignore this email.</p>
 
                 <div class="footer">
-                    &copy; 2025 Your Company Name. All rights reserved.
+                    &copy; 2025 Recipe Share. All rights reserved.
                 </div>
                 </div>
             </body>
