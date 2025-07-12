@@ -31,12 +31,35 @@ export default function VerifyOTPPage() {
   const [success, setSuccess] = useState(false);
   const [timeLeft, setTimeLeft] = useState(600);
   const [canResend, setCanResend] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState(-1);
+  const [mail, setMail] = useState("");
+  const [errorOccurred, isErrorOccurred] = useState(false);
+  console.log("verificationStatus : ", verificationStatus);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const email = searchParams.get("email") || "your email";
+  const verification = searchParams.get("verification") || -1;
+
+  useEffect(() => {
+    const callApi = async () => {
+      const encdecResponse = await fetch(
+        `/api/encdecData?decryptMessage=${email}&verification=${verification}`
+      );
+      const encdecData = await encdecResponse.json();
+      console.log("encdecResponse.status : ", encdecResponse.status);
+      if (encdecResponse.status === 401) {
+        isErrorOccurred(true);
+      }
+      setMail(encdecData?.data?.decryptedMessage?.msg);
+      setVerificationStatus(
+        parseInt(encdecData?.data?.decryptedVerificaionMessage?.msg)
+      );
+    };
+    callApi();
+  }, [email, verification]);
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -185,6 +208,14 @@ export default function VerifyOTPPage() {
     );
   }
 
+  if (errorOccurred) {
+    return (
+      <div>
+        <>Token Expired !</>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-green-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -200,15 +231,24 @@ export default function VerifyOTPPage() {
 
         <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm py-6">
           <CardHeader className="space-y-1 text-center pb-6">
-            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Mail className="h-8 w-8 text-orange-500" />
-            </div>
+            {verificationStatus === 0 ? (
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Mail className="h-8 w-8 text-orange-500" />
+              </div>
+            ) : (
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="h-8 w-8 text-green-600" />
+              </div>
+            )}
+
             <CardTitle className="text-2xl font-bold text-gray-800">
-              Verify Your Email
+              {verificationStatus === 0
+                ? "Check Your Email"
+                : "Verify Your Email"}
             </CardTitle>
             <CardDescription className="text-gray-600 px-2">
               We've sent a 6-digit verification code to{" "}
-              <span className="font-medium text-gray-800">{email}</span>
+              <span className="font-medium text-gray-800">{mail}</span>
             </CardDescription>
           </CardHeader>
 

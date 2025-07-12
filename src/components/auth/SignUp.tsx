@@ -346,7 +346,7 @@ export default function SignUp() {
                 </span>
               </div>
             </div>
-
+            {/* 
             <div className="grid grid-cols-2 gap-4">
               <Button
                 variant="outline"
@@ -385,7 +385,7 @@ export default function SignUp() {
                 </svg>
                 Facebook
               </Button>
-            </div>
+            </div> */}
 
             <div className="text-center text-sm text-gray-600">
               Already have an account?{" "}

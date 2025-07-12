@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,6 +22,8 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { sendMail } from "@/lib/sendMail";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -45,10 +46,48 @@ export default function ForgotPassword() {
     }
 
     try {
-      // Simulate API call - replace with actual forgot password logic
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const response = await fetch(`/api/getUserDetails?email=${email}`);
+      const data = await response.json();
+      // console.log("Is user found : ", data?.response);
+      if (!data?.response) {
+        toast.error("Error", {
+          description: data?.message,
+        });
+      } else {
+        const fullName = data?.response?.firstName + data?.response?.lastName;
+        const res = await sendMail({ sendTo: email, name: fullName });
+        const otp = res?.otp;
+        const userId = data?.response?.userId;
+        if (res?.status === 200) {
+          const insertOtpResponse = await fetch("/api/insertOtp", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ otp, userId }),
+          });
 
-      // For demo purposes, always show success
+          const insertOtpData = await insertOtpResponse.json();
+          if (insertOtpResponse.ok) {
+            const encdecResponse = await fetch(
+              `/api/encdecData?encryptMessage=${email}&verification=${0}`
+            );
+            const encdecData = await encdecResponse.json();
+            router.push(
+              `/auth/verify?email=${encdecData?.data?.encodedMessage}&verification=${encdecData?.data?.encodedVerificationMessage}`
+            );
+          } else {
+            toast.error("Error Occurred !", {
+              description: "Failed to insert otp record !",
+            });
+          }
+        } else {
+          toast.error("Error Occurred !", {
+            description: "Failed to send otp on registered email",
+          });
+        }
+      }
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       setIsEmailSent(true);
     } catch (error) {
       setError("Something went wrong. Please try again.");
@@ -214,7 +253,7 @@ export default function ForgotPassword() {
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     id="email"
-                    type="email"
+                    type="text"
                     placeholder="Enter your email address"
                     value={email}
                     onChange={(e) => {
@@ -246,12 +285,12 @@ export default function ForgotPassword() {
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
                     <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    <span>Sending Reset Link...</span>
+                    <span>Sending OTP...</span>
                   </div>
                 ) : (
                   <div className="flex items-center space-x-2">
                     <Send className="h-4 w-4" />
-                    <span>Send Reset Link</span>
+                    <span>Send OTP</span>
                   </div>
                 )}
               </Button>
@@ -268,10 +307,9 @@ export default function ForgotPassword() {
                     What happens next?
                   </p>
                   <ul className="text-xs text-blue-700 space-y-1">
-                    <li>• You'll receive an email with a secure reset link</li>
-                    <li>• The link expires in 15 minutes for security</li>
-                    <li>• Click the link to create a new password</li>
-                    <li>• You'll be automatically signed in</li>
+                    <li>• You'll receive an otp on email</li>
+                    <li>• The otp will expires in 10 minutes for security</li>
+                    <li>• Ente the otp to create a new password</li>
                   </ul>
                 </div>
               </div>
