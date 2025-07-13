@@ -58,12 +58,12 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const { otp, email } = await request.json();
-
+  const { otp, email, mail } = await request.json();
+  console.log("OTP is : ", otp + " " + "Email is : ", email || mail?.current);
   try {
-    const userExists = await prisma?.user?.update({
+    await prisma?.user?.update({
       where: {
-        email: email,
+        email: email || mail?.current,
       },
       data: {
         isVerified: 1,

@@ -31,10 +31,13 @@ export default function VerifyOTPPage() {
   const [success, setSuccess] = useState(false);
   const [timeLeft, setTimeLeft] = useState(600);
   const [canResend, setCanResend] = useState(false);
-  const [verificationStatus, setVerificationStatus] = useState(-1);
-  const [mail, setMail] = useState("");
+  // const [verificationStatus, setVerificationStatus] = useState(-1);
+  // const [mail, setMail] = useState("");
+
+  const verificationStatus = useRef(-1);
+  const mail = useRef("");
+
   const [errorOccurred, isErrorOccurred] = useState(false);
-  console.log("verificationStatus : ", verificationStatus);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const router = useRouter();
@@ -49,17 +52,15 @@ export default function VerifyOTPPage() {
         `/api/encdecData?decryptMessage=${email}&verification=${verification}`
       );
       const encdecData = await encdecResponse.json();
-      console.log("encdecResponse.status : ", encdecResponse.status);
       if (encdecResponse.status === 401) {
         isErrorOccurred(true);
       }
-      setMail(encdecData?.data?.decryptedMessage?.msg);
-      setVerificationStatus(
-        parseInt(encdecData?.data?.decryptedVerificaionMessage?.msg)
-      );
+      mail.current = encdecData?.data?.decryptedMessage?.msg;
+      verificationStatus.current =
+        encdecData?.data?.decryptedVerificaionMessage?.msg;
     };
     callApi();
-  }, [email, verification]);
+  }, []);
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -129,20 +130,21 @@ export default function VerifyOTPPage() {
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000));
-      const response = await fetch(`/api/insertOtp?email=${email}`, {
+      const response = await fetch(`/api/insertOtp?email=${mail}`, {
         method: "GET",
       });
 
       const otpRecord = await response.json();
 
-      console.log("OTP RECORD : ", otpRecord);
-
       if (otpString === otpRecord?.data?.otp) {
         const otp = otpRecord?.data?.otp;
         const response = await fetch("/api/insertOtp", {
           method: "PUT",
-          body: JSON.stringify({ otp, email }),
+          body: JSON.stringify({ otp, mail }),
         });
+        if (verificationStatus.current === 0) {
+          router.push("/auth/change-password");
+        }
         setSuccess(true);
         setTimeout(() => {
           router.push("/");
@@ -231,24 +233,24 @@ export default function VerifyOTPPage() {
 
         <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm py-6">
           <CardHeader className="space-y-1 text-center pb-6">
-            {verificationStatus === 0 ? (
-              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Mail className="h-8 w-8 text-orange-500" />
-              </div>
-            ) : (
+            {verificationStatus.current === 0 ? (
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <CheckCircle className="h-8 w-8 text-green-600" />
+              </div>
+            ) : (
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Mail className="h-8 w-8 text-orange-500" />
               </div>
             )}
 
             <CardTitle className="text-2xl font-bold text-gray-800">
-              {verificationStatus === 0
+              {verificationStatus.current === 0
                 ? "Check Your Email"
                 : "Verify Your Email"}
             </CardTitle>
             <CardDescription className="text-gray-600 px-2">
               We've sent a 6-digit verification code to{" "}
-              <span className="font-medium text-gray-800">{mail}</span>
+              <span className="font-medium text-gray-800">{mail.current}</span>
             </CardDescription>
           </CardHeader>
 
