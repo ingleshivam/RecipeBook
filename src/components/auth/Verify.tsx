@@ -22,20 +22,24 @@ import {
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-
+import useSWR from "swr";
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function VerifyOTPPage() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(600);
+  // const [timeLeft, setTimeLeft] = useState(600);
   const [canResend, setCanResend] = useState(false);
   // const [verificationStatus, setVerificationStatus] = useState(-1);
   // const [mail, setMail] = useState("");
 
   const verificationStatus = useRef(-1);
   const mail = useRef("");
+
+  console.log("Verification Status : ", verificationStatus);
+  console.log("Mail : ", mail);
 
   const [errorOccurred, isErrorOccurred] = useState(false);
 
@@ -46,36 +50,19 @@ export default function VerifyOTPPage() {
   const email = searchParams.get("email") || "your email";
   const verification = searchParams.get("verification") || -1;
 
-  useEffect(() => {
-    const callApi = async () => {
-      const encdecResponse = await fetch(
-        `/api/encdecData?decryptMessage=${email}&verification=${verification}`
-      );
-      const encdecData = await encdecResponse.json();
-      if (encdecResponse.status === 401) {
-        isErrorOccurred(true);
-      }
-      mail.current = encdecData?.data?.decryptedMessage?.msg;
-      verificationStatus.current =
-        encdecData?.data?.decryptedVerificaionMessage?.msg;
-    };
-    callApi();
-  }, []);
+  const {
+    data: encDecData,
+    isLoading: encDecLoading,
+    error: encDecError,
+  } = useSWR(
+    `/api/encdecData?decryptMessage=${email}&verification=${verification}`,
+    fetcher
+  );
 
-  useEffect(() => {
-    if (timeLeft > 0) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timer);
-    } else {
-      setCanResend(true);
-    }
-  }, [timeLeft]);
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
+  mail.current = encDecData?.data?.decryptedMessage?.msg;
+  verificationStatus.current = parseInt(
+    encDecData?.data?.decryptedVerificaionMessage?.msg
+  );
 
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) return;
@@ -135,9 +122,25 @@ export default function VerifyOTPPage() {
       });
 
       const otpRecord = await response.json();
+      const record = otpRecord?.data;
 
-      if (otpString === otpRecord?.data?.otp) {
-        const otp = otpRecord?.data?.otp;
+      // Check for expiration
+      const now = new Date();
+      const expiration = new Date(record?.expirationTimestamp);
+
+      console.log(
+        "record?.expirationTimestamp : ",
+        record?.expirationTimestamp
+      );
+      console.log("Expiration  : ", expiration);
+      if (now > expiration || mail.current === undefined) {
+        setError("OTP is expired. Please request a new one.");
+        return;
+      }
+
+      // Check for match
+      if (otpString === record?.otp) {
+        const otp = record?.otp;
         const response = await fetch("/api/insertOtp", {
           method: "PUT",
           body: JSON.stringify({ otp, mail }),
@@ -166,7 +169,7 @@ export default function VerifyOTPPage() {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      setTimeLeft(600);
+      // setTimeLeft(600);
       setCanResend(false);
       setOtp(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
@@ -210,12 +213,8 @@ export default function VerifyOTPPage() {
     );
   }
 
-  if (errorOccurred) {
-    return (
-      <div>
-        <>Token Expired !</>
-      </div>
-    );
+  if (encDecLoading) {
+    return "Loading...";
   }
 
   return (
@@ -302,15 +301,19 @@ export default function VerifyOTPPage() {
 
               {/* Timer */}
               <div className="text-center">
-                {timeLeft > 0 ? (
+                {errorOccurred ? (
                   <p className="text-sm text-gray-500">
-                    Code expires in{" "}
                     <span className="font-medium text-orange-600">
-                      {formatTime(timeLeft)}
+                      TOKEN EXPIRED
                     </span>
                   </p>
                 ) : (
-                  <p className="text-sm text-red-600">Code has expired</p>
+                  <p className="text-sm text-gray-500">
+                    Code expires in{" "}
+                    <span className="font-medium text-orange-600">
+                      10 mins.
+                    </span>
+                  </p>
                 )}
               </div>
 
