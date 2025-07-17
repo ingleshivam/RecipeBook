@@ -5,38 +5,21 @@ export async function GET(request: NextRequest) {
   const url = request.url;
   const { searchParams } = new URL(url);
   const encryptMessage = searchParams.get("encryptMessage");
-  const verificationMessage = searchParams.get("verification");
   const decryptMessage = searchParams.get("decryptMessage");
 
   const secret_key = process.env.SECRET_KEY || "";
 
-  if (encryptMessage && verificationMessage) {
+  if (encryptMessage) {
     const encodedMessage = jwt.sign({ msg: encryptMessage }, secret_key, {
       expiresIn: "10m",
     });
 
-    const encodedVerificationMessage = jwt.sign(
-      { msg: verificationMessage },
-      secret_key,
-      { expiresIn: "10m" }
-    );
-
-    return NextResponse.json(
-      { data: { encodedMessage, encodedVerificationMessage } },
-      { status: 200 }
-    );
-  } else if (decryptMessage && verificationMessage) {
+    return NextResponse.json({ data: { encodedMessage } }, { status: 200 });
+  } else if (decryptMessage) {
     try {
       const decryptedMessage = jwt.verify(decryptMessage, secret_key);
-      const decryptedVerificaionMessage = jwt.verify(
-        verificationMessage,
-        secret_key
-      );
 
-      return NextResponse.json(
-        { data: { decryptedMessage, decryptedVerificaionMessage } },
-        { status: 200 }
-      );
+      return NextResponse.json({ data: { decryptedMessage } }, { status: 200 });
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
         return NextResponse.json(

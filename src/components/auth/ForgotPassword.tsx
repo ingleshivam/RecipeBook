@@ -55,7 +55,11 @@ export default function ForgotPassword() {
         });
       } else {
         const fullName = data?.response?.firstName + data?.response?.lastName;
-        const res = await sendMail({ sendTo: email, name: fullName });
+        const res = await sendMail({
+          sendTo: email,
+          name: fullName,
+          usage: "change_password",
+        });
         const otp = res?.otp;
         const userId = data?.response?.userId;
         if (res?.status === 200) {
@@ -69,13 +73,8 @@ export default function ForgotPassword() {
 
           const insertOtpData = await insertOtpResponse.json();
           if (insertOtpResponse.ok) {
-            const encdecResponse = await fetch(
-              `/api/encdecData?encryptMessage=${email}&verification=${0}`
-            );
-            const encdecData = await encdecResponse.json();
-            router.push(
-              `/auth/verify?email=${encdecData?.data?.encodedMessage}&verification=${encdecData?.data?.encodedVerificationMessage}`
-            );
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            setIsEmailSent(true);
           } else {
             toast.error("Error Occurred !", {
               description: "Failed to insert otp record !",
@@ -147,7 +146,7 @@ export default function ForgotPassword() {
                 </div>
                 <p className="text-sm text-gray-500 leading-relaxed">
                   Click the link in the email to reset your password. The link
-                  will expire in 15 minutes for security.
+                  will expire in 10 minutes for security.
                 </p>
               </div>
 

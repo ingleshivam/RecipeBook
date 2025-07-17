@@ -128,11 +128,6 @@ export default function VerifyOTPPage() {
       const now = new Date();
       const expiration = new Date(record?.expirationTimestamp);
 
-      console.log(
-        "record?.expirationTimestamp : ",
-        record?.expirationTimestamp
-      );
-      console.log("Expiration  : ", expiration);
       if (now > expiration || mail.current === undefined) {
         setError("OTP is expired. Please request a new one.");
         return;
@@ -146,12 +141,9 @@ export default function VerifyOTPPage() {
           body: JSON.stringify({ otp, mail }),
         });
         if (verificationStatus.current === 0) {
-          router.push("/auth/change-password");
+          router.push(`/auth/change-password?email=${mail.current}`);
+          return;
         }
-        setSuccess(true);
-        setTimeout(() => {
-          router.push("/");
-        }, 2000);
       } else {
         setError("Invalid OTP. Please check your email and try again.");
       }

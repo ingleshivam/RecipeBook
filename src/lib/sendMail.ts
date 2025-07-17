@@ -21,9 +21,11 @@ const transporter = nodemailer.createTransport({
 export async function sendMail({
   sendTo,
   name,
+  usage,
 }: {
   sendTo: string;
   name?: string;
+  usage: string;
 }) {
   try {
     const isVerified = await transporter.verify();
@@ -37,13 +39,23 @@ export async function sendMail({
     return;
   }
 
+  let link;
+  if (usage === "change_password") {
+    console.log("In the change password section");
+    const encdecResponse = await fetch(
+      `${process.env.NEXTAUTH_URL}api/encdecData?encryptMessage=${otp}`
+    );
+    const encdecData = await encdecResponse.json();
+    link = `${process.env.NEXTAUTH_URL}auth/change-password?secret=${encdecData?.data?.encodedMessage}`;
+  }
+
   try {
     const info = await transporter.sendMail({
       from: "shivam.personalprojects@gmail.com",
       to: sendTo || SITE_MAIL_RECIEVER,
       subject: "Login Verification",
       text: "Login Verification",
-      html: generateMailTemplate("login", otp, name),
+      html: generateMailTemplate(usage, otp, name, link),
     });
     console.log("Message Sent", info.messageId);
     console.log("Mail sent to", SITE_MAIL_RECIEVER);
