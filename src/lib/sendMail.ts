@@ -25,7 +25,7 @@ export async function sendMail({
 }: {
   sendTo: string;
   name?: string;
-  usage: string;
+  usage?: string;
 }) {
   try {
     const isVerified = await transporter.verify();
@@ -46,7 +46,7 @@ export async function sendMail({
       `${process.env.NEXTAUTH_URL}api/encdecData?encryptMessage=${otp}`
     );
     const encdecData = await encdecResponse.json();
-    link = `${process.env.NEXTAUTH_URL}auth/change-password?secret=${encdecData?.data?.encodedMessage}`;
+    link = `${process.env.NEXTAUTH_URL}auth/change-password?token=${encdecData?.data?.encodedMessage}`;
   }
 
   try {
@@ -55,7 +55,7 @@ export async function sendMail({
       to: sendTo || SITE_MAIL_RECIEVER,
       subject: "Login Verification",
       text: "Login Verification",
-      html: generateMailTemplate(usage, otp, name, link),
+      html: generateMailTemplate(usage || "", otp, name, link),
     });
     console.log("Message Sent", info.messageId);
     console.log("Mail sent to", SITE_MAIL_RECIEVER);

@@ -256,7 +256,7 @@ export default function ChangePassword() {
           </p>
         </div>
 
-        <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
+        <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm py-4">
           <CardHeader className="space-y-1 text-center">
             <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Shield className="h-8 w-8 text-orange-500" />

@@ -54,7 +54,8 @@ export default function ForgotPassword() {
           description: data?.message,
         });
       } else {
-        const fullName = data?.response?.firstName + data?.response?.lastName;
+        const fullName =
+          data?.response?.firstName + " " + data?.response?.lastName;
         const res = await sendMail({
           sendTo: email,
           name: fullName,

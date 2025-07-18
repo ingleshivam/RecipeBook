@@ -20,7 +20,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import LoadingSpinner from "./LoadingSpinner";
-import { sendMail } from "@/lib/sendMail";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function RecipeLandingPage() {

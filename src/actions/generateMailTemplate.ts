@@ -41,7 +41,7 @@ export default function generateMailTemplate(
             </head>
             <body>
                 <div class="container">
-                <h2>Hello &nbsp; ${name}👋,</h2>
+                <h2>Hello ${name}👋,</h2>
                 <p>
                     Your One-Time Password (OTP) for login/verification is:
                 </p>
@@ -103,7 +103,7 @@ export default function generateMailTemplate(
             </head>
             <body>
                 <div class="container">
-                <h2>Hello &nbsp; ${name}👋,</h2>
+                <h2>Hello ${name}👋,</h2>
                 <p>
                     Your One-Time Password (OTP) for change password is:
                 </p>
@@ -111,7 +111,7 @@ export default function generateMailTemplate(
                 <div class="otp-code">${otp}</div>
 
                 <a class="reset-link" href="${link}">
-                    ${link}
+                    Reset Password Link
                 </a>
 
                 <p>This OTP is valid for the next 10 minutes. Please do not share it with anyone.</p>
