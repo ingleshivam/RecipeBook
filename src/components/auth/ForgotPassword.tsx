@@ -48,11 +48,11 @@ export default function ForgotPassword() {
     try {
       const response = await fetch(`/api/getUserDetails?email=${email}`);
       const data = await response.json();
-      // console.log("Is user found : ", data?.response);
       if (!data?.response) {
         toast.error("Error", {
           description: data?.message,
         });
+        return;
       } else {
         const fullName =
           data?.response?.firstName + " " + data?.response?.lastName;

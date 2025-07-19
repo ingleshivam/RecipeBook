@@ -28,6 +28,7 @@ import {
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
 interface PasswordStrength {
   score: number;
@@ -60,6 +61,9 @@ export default function ChangePassword() {
   const resetToken = searchParams.get("token");
   const isPasswordReset = !!resetToken;
 
+  const email = searchParams.get("email");
+  const isEmail = !!email;
+  console.log("isPasswordReset :", isPasswordReset);
   // Password strength checker
   const checkPasswordStrength = (password: string): PasswordStrength => {
     if (!password) {
@@ -182,22 +186,72 @@ export default function ChangePassword() {
 
     setIsLoading(true);
     setErrors({});
-
+    console.log("This point is called !");
     try {
-      // Simulate API call - replace with actual change password logic
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const decryptData = await fetch(
+        `/api/encdecData?decryptMessage=${resetToken}`
+      );
 
-      // For demo purposes, simulate success
-      setIsSuccess(true);
+      const data = await decryptData.json();
 
-      // Redirect after success
-      setTimeout(() => {
-        if (isPasswordReset) {
-          router.push("/auth/signin?message=password-reset-success");
-        } else {
-          router.push("/profile?message=password-changed");
+      if (!decryptData.ok) {
+        toast.error("Error", { description: data?.message });
+        return;
+      }
+
+      const getOtpDataByEmail = await fetch(`/api/insertOtp?email=${email}`, {
+        method: "GET",
+      });
+
+      const otpRecord = await getOtpDataByEmail.json();
+      const record = otpRecord?.data;
+
+      const now = new Date();
+      const expiration = new Date(record?.expirationTimestamp);
+
+      if (now > expiration) {
+        setErrors({ response: "OTP is expired. Please request a new one." });
+        return;
+      }
+
+      if (
+        parseInt(data?.data?.decryptedMessage?.msg) === parseInt(record?.otp)
+      ) {
+        const otp = record?.otp;
+        const response = await fetch("/api/insertOtp", {
+          method: "PUT",
+          body: JSON.stringify({ otp, email }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          toast.error("Error", {
+            description: data?.message,
+          });
+          return;
         }
-      }, 3000);
+
+        const updateUser = await fetch("/api/signupUser", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, newPassword }),
+        });
+
+        setIsSuccess(true);
+
+        setTimeout(() => {
+          if (isPasswordReset) {
+            router.push("/auth/signin");
+          }
+        }, 3000);
+      } else {
+        setErrors({
+          response: "Invalid OTP. Please check your email and try again.",
+        });
+      }
     } catch (error) {
       setErrors({
         general: isPasswordReset
@@ -546,6 +600,12 @@ export default function ChangePassword() {
                 )}
               </Button>
             </form>
+            {errors.response && (
+              <div className="flex items-center space-x-2 text-red-600">
+                <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                <span className="text-sm">{errors.response}</span>
+              </div>
+            )}
 
             {/* Security Tips */}
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">

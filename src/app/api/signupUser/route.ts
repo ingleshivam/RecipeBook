@@ -2,6 +2,33 @@ import { hashPassword } from "@/actions/hashPassword";
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
+export async function PUT(request: NextRequest) {
+  try {
+    const { email, newPassword } = await request.json();
+    const passwordHash = await hashPassword(newPassword);
+
+    const updateUser = await prisma?.user.update({
+      where: {
+        email: email,
+      },
+      data: {
+        passwordHash: passwordHash,
+      },
+    });
+
+    console.log("updateUser :", updateUser);
+    return NextResponse.json(
+      { message: "Password updated  successfully" },
+      { status: 201 }
+    );
+  } catch (error) {
+    return NextResponse.json(
+      { message: "Password updation failed !" },
+      { status: 400 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();

@@ -4,6 +4,18 @@ import prisma from "@/lib/prisma";
 export async function POST(request: NextRequest) {
   const { otp, userId } = await request.json();
 
+  const isOTPExists = await prisma?.userOtp.findUnique({
+    where: {
+      otp: String(otp),
+    },
+  });
+
+  console.log("isOTPExist : ", isOTPExists);
+
+  if (isOTPExists) {
+    return NextResponse.json({ message: "" }, { status: 200 });
+  }
+
   try {
     await prisma?.userOtp.create({
       data: {
