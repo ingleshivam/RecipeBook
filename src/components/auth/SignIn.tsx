@@ -97,6 +97,8 @@ export default function SignIn() {
                     "No account found with this email."}
                   {error === "Email and password required" &&
                     "Please enter both email and password."}
+                  {error === "User is not verified !" &&
+                    "User is not verified !"}
                 </span>
               </div>
             )}

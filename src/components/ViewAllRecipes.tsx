@@ -28,6 +28,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  ListFilter,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -125,7 +126,7 @@ export default function ViewAllRecipes() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white pb-5 md:pb-0">
       <div className="container mx-auto px-5 md:px-34 py-8">
         {/* Page Header */}
         <div className="text-center mb-8">
@@ -151,8 +152,8 @@ export default function ViewAllRecipes() {
             />
           </Card>
 
-          <div className="grid grid-cols-3 gap-8">
-            <Card className="rounded-md">
+          <div className="flex gap-3 justify-between md:grid md:grid-cols-3 md:gap-8">
+            <Card className="rounded-md w-full">
               <Select
                 value={selectedCategory}
                 onValueChange={(value) => setSelectedCategory(value)}
@@ -173,7 +174,7 @@ export default function ViewAllRecipes() {
               </Select>
             </Card>
 
-            <Card className="rounded-md">
+            <Card className="rounded-md w-full">
               <Select
                 value={selectedDifficulty}
                 onValueChange={(value) => setSelectedDifficulty(value)}
@@ -193,13 +194,19 @@ export default function ViewAllRecipes() {
                 </SelectContent>
               </Select>
             </Card>
-            <Card className="rounded-md">
+
+            <Card className="rounded-md w-fit md:w-full">
               <Select
                 value={sortBy}
                 onValueChange={(value) => setSortBy(value)}
               >
                 <SelectTrigger className="w-full py-5">
-                  <SelectValue placeholder="Select a fruit" />
+                  <span className="hidden md:block">
+                    <SelectValue placeholder="Select a filter" />
+                  </span>
+                  <span className="md:hidden">
+                    <ListFilter />
+                  </span>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -222,11 +229,12 @@ export default function ViewAllRecipes() {
             <div className="max-w-md mx-auto">
               <Search className="h-16 w-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                Loading recipes...
+                {/* Loading recipes... */}
+                No recipes found
               </h3>
-              <p className="text-gray-600 mb-6">
+              {/* <p className="text-gray-600 mb-6">
                 Please wait while we fetch the recipes.
-              </p>
+              </p> */}
             </div>
           </div>
         ) : paginatedRecipes.length > 0 ? (

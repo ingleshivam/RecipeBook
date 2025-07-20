@@ -42,7 +42,7 @@ export default function RecipeLandingPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white ">
+      <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white pb-5 md:pb-0">
         {/* Hero Section */}
         <section className="relative py-10 px-5 md:py-20 md:px-30 lg:py-32 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-orange-100/50 to-green-100/30"></div>
@@ -279,7 +279,7 @@ export default function RecipeLandingPage() {
         </section>
 
         {/* Footer */}
-        <footer className="bg-gray-800 md:px-30 text-white py-16">
+        <footer className="bg-gray-800 md:px-30 text-white py-5 md:py-16">
           <div className="container mx-auto px-4">
             {/* <div className="grid md:grid-cols-4 gap-8">
               <div className="space-y-4">

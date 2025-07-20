@@ -30,16 +30,7 @@ export default function VerifyOTPPage() {
   const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  // const [timeLeft, setTimeLeft] = useState(600);
   const [canResend, setCanResend] = useState(false);
-  // const [verificationStatus, setVerificationStatus] = useState(-1);
-  // const [mail, setMail] = useState("");
-
-  const verificationStatus = useRef(-1);
-  const mail = useRef("");
-
-  console.log("Verification Status : ", verificationStatus);
-  console.log("Mail : ", mail);
 
   const [errorOccurred, isErrorOccurred] = useState(false);
 
@@ -48,21 +39,6 @@ export default function VerifyOTPPage() {
   const searchParams = useSearchParams();
 
   const email = searchParams.get("email") || "your email";
-  const verification = searchParams.get("verification") || -1;
-
-  const {
-    data: encDecData,
-    isLoading: encDecLoading,
-    error: encDecError,
-  } = useSWR(
-    `/api/encdecData?decryptMessage=${email}&verification=${verification}`,
-    fetcher
-  );
-
-  mail.current = encDecData?.data?.decryptedMessage?.msg;
-  verificationStatus.current = parseInt(
-    encDecData?.data?.decryptedVerificaionMessage?.msg
-  );
 
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) return;
@@ -117,7 +93,7 @@ export default function VerifyOTPPage() {
 
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000));
-      const response = await fetch(`/api/insertOtp?email=${mail}`, {
+      const response = await fetch(`/api/insertOtp?email=${email}`, {
         method: "GET",
       });
 
@@ -128,7 +104,7 @@ export default function VerifyOTPPage() {
       const now = new Date();
       const expiration = new Date(record?.expirationTimestamp);
 
-      if (now > expiration || mail.current === undefined) {
+      if (now > expiration) {
         setError("OTP is expired. Please request a new one.");
         return;
       }
@@ -138,11 +114,11 @@ export default function VerifyOTPPage() {
         const otp = record?.otp;
         const response = await fetch("/api/insertOtp", {
           method: "PUT",
-          body: JSON.stringify({ otp, mail }),
+          body: JSON.stringify({ otp, email }),
         });
-        if (verificationStatus.current === 0) {
-          router.push(`/auth/change-password?email=${mail.current}`);
-          return;
+
+        if (response.ok) {
+          router.push("/");
         }
       } else {
         setError("Invalid OTP. Please check your email and try again.");
@@ -205,10 +181,6 @@ export default function VerifyOTPPage() {
     );
   }
 
-  if (encDecLoading) {
-    return "Loading...";
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-green-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -224,24 +196,16 @@ export default function VerifyOTPPage() {
 
         <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm py-6">
           <CardHeader className="space-y-1 text-center pb-6">
-            {verificationStatus.current === 0 ? (
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle className="h-8 w-8 text-green-600" />
-              </div>
-            ) : (
-              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Mail className="h-8 w-8 text-orange-500" />
-              </div>
-            )}
+            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Mail className="h-8 w-8 text-orange-500" />
+            </div>
 
             <CardTitle className="text-2xl font-bold text-gray-800">
-              {verificationStatus.current === 0
-                ? "Check Your Email"
-                : "Verify Your Email"}
+              Verify Your Email
             </CardTitle>
             <CardDescription className="text-gray-600 px-2">
               We've sent a 6-digit verification code to{" "}
-              <span className="font-medium text-gray-800">{mail.current}</span>
+              <span className="font-medium text-gray-800">{email}</span>
             </CardDescription>
           </CardHeader>
 

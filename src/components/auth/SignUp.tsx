@@ -98,7 +98,7 @@ export default function SignUp() {
 
       const name =
         responseData?.data?.firstName + " " + responseData?.data?.lastName;
-      const res = await sendMail({ sendTo: email, name: name });
+      const res = await sendMail({ sendTo: email, name: name, usage: "login" });
 
       const otp = res?.otp;
 

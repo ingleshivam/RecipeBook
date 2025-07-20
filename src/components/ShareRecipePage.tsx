@@ -271,7 +271,7 @@ export default function ShareRecipePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white pb-5 md:pb-0">
       <div className="container mx-auto px-4 py-8 md:px-35">
         {/* Back Button */}
         <Link

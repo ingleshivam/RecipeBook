@@ -30,7 +30,7 @@ export default function FavouriteRecipe() {
   console.log("Recipe data : ", recipeData);
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
+      <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white pb-5 md:pb-0">
         <div className="container mx-auto px-5 md:px-34 py-8">
           <Link
             href="/recipe"

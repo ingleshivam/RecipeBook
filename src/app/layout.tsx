@@ -40,10 +40,17 @@ export default function RootLayout({
             {children} <Toaster richColors />
           </div>
           <div className="grid grid-rows-12 h-screen  md:hidden">
-            <ScrollArea className="row-span-11">
+            {/* <ScrollArea className="row-span-11 ">
               {children} <Toaster richColors />
             </ScrollArea>
             <div className="row-span-1">
+              {" "}
+              <MobileMenu />
+            </div> */}
+            <div className=" row-span-11">
+              {children} <Toaster richColors />
+            </div>
+            <div className="bg-white row-span-1 fixed bottom-0 left-0 w-full z-50">
               <MobileMenu />
             </div>
           </div>

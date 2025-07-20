@@ -36,8 +36,14 @@ const handler = NextAuth({
           user.passwordHash
         );
 
+        const isUserVerified = user?.isVerified;
+
         if (!isPasswordValid) {
           throw new Error("Invalid password");
+        }
+
+        if (!isUserVerified) {
+          throw new Error("User is not verified !");
         }
 
         return {
