@@ -4,48 +4,98 @@ import prisma from "@/lib/prisma";
 import { getToken } from "next-auth/jwt";
 
 export async function GET(request: NextRequest) {
+  const url = request.url;
+  const { searchParams } = new URL(url);
+  const type = searchParams.get("type");
   const token = await getToken({ req: request });
 
   try {
-    const response = (await prisma?.recipe.findMany({
-      where: {
-        approveStatus: "A",
-      },
-      include: {
-        user: true,
-        images: true,
-        tags: true,
-        ingredients: {
-          include: {
-            ingredient: true,
+    let response;
+    if (type === "featuredSection") {
+      response = (await prisma?.recipe.findMany({
+        where: {
+          approveStatus: "A",
+        },
+        include: {
+          user: true,
+          images: true,
+          tags: true,
+          ingredients: {
+            include: {
+              ingredient: true,
+            },
+          },
+          instructions: {
+            include: {
+              instruction: true,
+            },
+            orderBy: {
+              instructionId: "desc",
+            },
+          },
+          nutritionInfo: {
+            include: {
+              nutritionInfo: true,
+            },
+          },
+          favorites: {
+            where: {
+              isFavourite: 1,
+              userId: parseInt((token as any)?.id) || -1,
+            },
+          },
+          reviews: {
+            select: {
+              rating: true,
+            },
           },
         },
-        instructions: {
-          include: {
-            instruction: true,
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: 6,
+      })) as any;
+    } else {
+      response = (await prisma?.recipe.findMany({
+        where: {
+          approveStatus: "A",
+        },
+        include: {
+          user: true,
+          images: true,
+          tags: true,
+          ingredients: {
+            include: {
+              ingredient: true,
+            },
           },
-          orderBy: {
-            instructionId: "desc",
+          instructions: {
+            include: {
+              instruction: true,
+            },
+            orderBy: {
+              instructionId: "desc",
+            },
+          },
+          nutritionInfo: {
+            include: {
+              nutritionInfo: true,
+            },
+          },
+          favorites: {
+            where: {
+              isFavourite: 1,
+              userId: parseInt((token as any)?.id) || -1,
+            },
+          },
+          reviews: {
+            select: {
+              rating: true,
+            },
           },
         },
-        nutritionInfo: {
-          include: {
-            nutritionInfo: true,
-          },
-        },
-        favorites: {
-          where: {
-            isFavourite: 1,
-            userId: parseInt((token as any)?.id) || -1,
-          },
-        },
-        reviews: {
-          select: {
-            rating: true,
-          },
-        },
-      },
-    })) as any;
+      })) as any;
+    }
 
     let result;
     if (response && response?.length > 0) {

@@ -29,7 +29,7 @@ export default function RecipeLandingPage() {
     data: recipeData,
     isLoading: recipeLaoding,
     error: recipeError,
-  } = useSWR("/api/getRecipeDeatils", fetcher);
+  } = useSWR("/api/getRecipeDeatils?type=featuredSection", fetcher);
 
   if (recipeLaoding)
     return (
@@ -188,7 +188,7 @@ export default function RecipeLandingPage() {
                   >
                     <div className="relative overflow-hidden rounded-t-lg">
                       <Image
-                        src={recipe.image || "/placeholder.svg"}
+                        src={recipe.image}
                         alt={recipe.title}
                         width={400}
                         height={300}

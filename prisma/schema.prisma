@@ -148,7 +148,7 @@ model Favorite {
 
 model Image {
   imageId     Int      @id @default(autoincrement())
-  imageUrl    String
+  imageUrl    String?
   description String?
   createdAt   DateTime @default(now())
   recipeId    Int?

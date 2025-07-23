@@ -1287,7 +1287,9 @@ export default function AdminPage() {
             </Card>
           </>
         ) : (
-          "Loading..."
+          <div className="flex items-center justify-center h-screen">
+            <span className="loader"></span>
+          </div>
         )}
       </div>
     </div>

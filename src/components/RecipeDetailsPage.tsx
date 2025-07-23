@@ -176,7 +176,9 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
   return (
     <>
       {recipeLoading ? (
-        <div>Loading...</div>
+        <div className="flex items-center justify-center h-screen">
+          <span className="loader"></span>
+        </div>
       ) : (
         <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white pb-5 md:pb-0">
           <div className="container mx-auto px-5 md:px-34 py-8">
