@@ -1,12 +1,13 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { groq } from "@ai-sdk/groq";
 import { generateText } from "ai";
+import Groq from "groq-sdk";
 
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-  const { data } = await req.json();
-
+  const { AI_DATA } = await req.json();
+  console.log("AI_DATA : ", AI_DATA);
   const prompt = `
     You are a helpful assistant that extracts relevant tags from recipe data. 
 
@@ -21,7 +22,7 @@ export async function POST(req: Request) {
     - Cooking attributes (e.g. quick, easy, under 20 minutes, one-pot)
 
     Only include relevant tags. Do NOT generate duplicates. All tags must be in lowercase.
-
+    Only return the array of tags. Do NOT include the paragraphs or leading or trailing phrases.
     ### Example Input:
 
     Title: Tofu Stir-Fry  
@@ -36,16 +37,30 @@ export async function POST(req: Request) {
 
     Now generate tags for the following recipe:
 
-    {{recipe_data}}
+    {{AI_DATA}}
 
     Tags:
 
   `;
 
-  const { text } = await generateText({
-    model: groq("llama-3.3-70b-versatile"),
-    prompt: "What is your name ?",
+  const groq = new Groq();
+  const response = await groq.chat.completions.create({
+    model: "moonshotai/kimi-k2-instruct",
+    messages: [
+      {
+        role: "system",
+        content: prompt,
+      },
+      {
+        role: "user",
+        content: JSON.stringify(AI_DATA),
+      },
+    ],
   });
-
-  console.log("Returned Text : ", text);
+  const result = JSON.parse(response.choices[0].message.content || "{}");
+  console.log("Result Text : ", result);
+  console.log("Type of Result Text : ", typeof result);
+  console.log("Is Array Result Text : ", Array.isArray(result));
+  console.log("Is Array Result Text - : ", Array.isArray({ result }));
+  return NextResponse.json({ result }, { status: 200 });
 }

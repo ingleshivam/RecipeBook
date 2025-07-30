@@ -162,12 +162,39 @@ export async function PUT(request: NextRequest) {
     const response = await prisma.recipe.update({
       where: { recipeId: recipeId },
       data: { approveStatus: status },
+      include: {
+        images: true,
+        ingredients: {
+          include: {
+            ingredient: true,
+          },
+        },
+        instructions: {
+          include: {
+            instruction: true,
+          },
+          orderBy: {
+            instructionId: "desc",
+          },
+        },
+        nutritionInfo: {
+          include: {
+            nutritionInfo: true,
+          },
+        },
+        tags: {
+          include: {
+            tag: true,
+          },
+        },
+      },
     });
     return NextResponse.json(
       {
         message: `Profile ${
           status == "A" ? "Approved" : "Rajected"
         }  Successfully !`,
+        response,
       },
       {
         status: 200,

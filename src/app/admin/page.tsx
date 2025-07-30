@@ -80,6 +80,41 @@ export default function AdminPage() {
       body: JSON.stringify({ recipeId, status }),
     });
 
+    const data = await response.json();
+    console.log("Recipe Data : ", data);
+    const AI_DATA = {
+      title: data.response.title,
+      description: data.response.description,
+      cookingTime: data.response.cookingTime,
+      servingSize: data.response.servingSize,
+      ingredients: data.response.ingredients.map((i: any) => i.ingredient.name),
+      instructions: data.response.instructions.map(
+        (i: any) => i.instruction.description
+      ),
+      nutritionInfo: {
+        calorie: data.response.nutritionInfo[0]?.nutritionInfo.calorie,
+        fat: data.response.nutritionInfo[0]?.nutritionInfo.fat,
+        carbs: data.response.nutritionInfo[0]?.nutritionInfo.carbs,
+        protein: data.response.nutritionInfo[0]?.nutritionInfo.protein,
+        sugar: data.response.nutritionInfo[0]?.nutritionInfo.sugar,
+        fiber: data.response.nutritionInfo[0]?.nutritionInfo.fiber,
+      },
+      tags: data.response.tags.map((t: any) => t.tag.name),
+    };
+
+    console.log(AI_DATA);
+
+    const AI_RESPONSE = await fetch("/api/chat", {
+      method: "POST",
+      body: JSON.stringify({ AI_DATA }),
+    });
+
+    const AI_RESPONSE_DATA = await AI_RESPONSE.json();
+
+    if (AI_RESPONSE.ok) {
+      console.log("AI_RESPONSE_DATA : ", AI_RESPONSE_DATA?.result);
+    }
+
     if (response.ok) {
       toast.success("Success", {
         description: response.statusText,
