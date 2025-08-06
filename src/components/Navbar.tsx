@@ -81,6 +81,13 @@ const MainNavBar = () => {
           About
         </Link>
 
+        <Link
+          href="/ai"
+          className="text-gray-600 hover:text-orange-500 transition-colors"
+        >
+          Ai
+        </Link>
+
         {(data && (data.user as any))?.role === "A" && (
           <Link
             href="/admin"

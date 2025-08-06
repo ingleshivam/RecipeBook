@@ -52,7 +52,6 @@ export async function sendMail({
 
   let link;
   if (usage === "change_password") {
-    console.log("In the change password section");
     const encdecResponse = await fetch(
       `${process.env.NEXTAUTH_URL}api/encdecData?encryptMessage=${otp}`
     );
@@ -68,8 +67,7 @@ export async function sendMail({
       text: "Login Verification",
       html: generateMailTemplate(usage || "", otp, name, link),
     });
-    console.log("Message Sent", info.messageId);
-    console.log("Mail sent to", SITE_MAIL_RECIEVER);
+
     return { status: 200, otp: otp };
   } catch (error) {
     return { status: 400 };

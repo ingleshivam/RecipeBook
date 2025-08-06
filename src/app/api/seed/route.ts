@@ -363,7 +363,6 @@ export async function GET() {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Seeding error:", error);
     return NextResponse.json(
       { error: "Failed to seed data." },
       { status: 500 }

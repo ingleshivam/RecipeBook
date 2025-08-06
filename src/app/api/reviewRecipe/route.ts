@@ -13,8 +13,6 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  console.log("Existing record : ", existingRecipeRecord);
-
   if (existingRecipeRecord) {
     try {
       const result = await prisma?.review.update({

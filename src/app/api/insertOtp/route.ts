@@ -10,8 +10,6 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  console.log("isOTPExist : ", isOTPExists);
-
   if (isOTPExists) {
     return NextResponse.json({ message: "" }, { status: 200 });
   }
@@ -29,7 +27,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ message: "" }, { status: 200 });
   } catch (error) {
-    console.log("Error : ", error);
     return NextResponse.json({ message: "" }, { status: 400 });
   }
 }
@@ -71,7 +68,7 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   const { otp, email, mail } = await request.json();
-  console.log("OTP is : ", otp + " " + "Email is : ", email || mail?.current);
+
   try {
     await prisma?.user?.update({
       where: {

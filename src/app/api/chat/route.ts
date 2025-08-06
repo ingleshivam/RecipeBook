@@ -1,13 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { groq } from "@ai-sdk/groq";
-import { generateText } from "ai";
+import { NextResponse } from "next/server";
 import Groq from "groq-sdk";
 
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
   const { AI_DATA } = await req.json();
-  console.log("AI_DATA : ", AI_DATA);
+
   const prompt = `
     You are a helpful assistant that extracts relevant tags from recipe data. 
 
@@ -44,8 +42,9 @@ export async function POST(req: Request) {
   `;
 
   const groq = new Groq();
+
   const response = await groq.chat.completions.create({
-    model: "moonshotai/kimi-k2-instruct",
+    model: process.env.GENERATE_TAGS_GROQ_MODEL as string,
     messages: [
       {
         role: "system",
@@ -56,11 +55,25 @@ export async function POST(req: Request) {
         content: JSON.stringify(AI_DATA),
       },
     ],
+    response_format: {
+      type: "json_schema",
+      json_schema: {
+        name: "recipeTags",
+        schema: {
+          type: "object",
+          properties: {
+            tags: { type: "array" },
+            key_features: {
+              type: "array",
+              items: { type: "string" },
+            },
+          },
+          additionalProperties: false,
+        },
+      },
+    },
   });
   const result = JSON.parse(response.choices[0].message.content || "{}");
-  console.log("Result Text : ", result);
-  console.log("Type of Result Text : ", typeof result);
-  console.log("Is Array Result Text : ", Array.isArray(result));
-  console.log("Is Array Result Text - : ", Array.isArray({ result }));
+
   return NextResponse.json({ result }, { status: 200 });
 }

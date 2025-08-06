@@ -45,6 +45,12 @@ import { category, difficulty } from "../../../public/dropdownData";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import clsx from "clsx";
+import {
+  getRecipeFromQdrant,
+  initializeCollection,
+  storeRecipeInQdrant,
+} from "@/actions/qdrant";
+import { main } from "@/actions/chabot/main";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function AdminPage() {
@@ -81,7 +87,6 @@ export default function AdminPage() {
     });
 
     const data = await response.json();
-    console.log("Recipe Data : ", data);
     const AI_DATA = {
       title: data.response.title,
       description: data.response.description,
@@ -99,10 +104,13 @@ export default function AdminPage() {
         sugar: data.response.nutritionInfo[0]?.nutritionInfo.sugar,
         fiber: data.response.nutritionInfo[0]?.nutritionInfo.fiber,
       },
-      tags: data.response.tags.map((t: any) => t.tag.name),
     };
 
-    console.log(AI_DATA);
+    if (response.ok) {
+      toast.success("Success", {
+        description: response.statusText,
+      });
+    }
 
     const AI_RESPONSE = await fetch("/api/chat", {
       method: "POST",
@@ -111,13 +119,43 @@ export default function AdminPage() {
 
     const AI_RESPONSE_DATA = await AI_RESPONSE.json();
 
-    if (AI_RESPONSE.ok) {
-      console.log("AI_RESPONSE_DATA : ", AI_RESPONSE_DATA?.result);
-    }
+    const combineTagsAndFeatures = (data: any) => {
+      const tags = data.result?.tags || [];
+      const keyFeatures = data.result?.key_features || [];
+      const combinedSet = new Set([...tags, ...keyFeatures]);
+      const combinedArray = Array.from(combinedSet);
 
-    if (response.ok) {
+      return {
+        ...data,
+        result: {
+          ...data.result,
+          combined_tags_and_features: combinedArray,
+        },
+      };
+    };
+    const processedData = combineTagsAndFeatures(AI_RESPONSE_DATA);
+
+    if (AI_RESPONSE.ok) {
       toast.success("Success", {
-        description: response.statusText,
+        description: "AI tags are generated successfully",
+      });
+
+      const tagsText =
+        processedData.result.combined_tags_and_features.join(",");
+      await initializeCollection();
+      const status = await storeRecipeInQdrant(
+        recipeId,
+        tagsText,
+        processedData.result.combined_tags_and_features
+      );
+    } else {
+      const status = "U";
+      await fetch("/api/getRecipeDetailsById", {
+        method: "PUT",
+        body: JSON.stringify({ recipeId, status }),
+      });
+      toast.error("Error", {
+        description: "AI tags generation failed !",
       });
     }
 

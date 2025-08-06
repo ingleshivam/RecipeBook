@@ -54,7 +54,6 @@ export default function SignIn() {
         callbackUrl: "/",
       });
     } catch (error) {
-      console.error("Sign in error:", error);
     } finally {
       setIsLoading(false);
     }

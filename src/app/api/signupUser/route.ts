@@ -16,7 +16,6 @@ export async function PUT(request: NextRequest) {
       },
     });
 
-    console.log("updateUser :", updateUser);
     return NextResponse.json(
       { message: "Password updated  successfully" },
       { status: 201 }
@@ -32,9 +31,8 @@ export async function PUT(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
-    console.log("Data : ", data);
+
     const passwordHash = await hashPassword(data.password);
-    console.log("passwordHash : ", passwordHash);
 
     const userExistsAndNotVerified = await prisma?.user.findUnique({
       where: {
@@ -78,7 +76,6 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     if (error instanceof Error) {
-      console.log("Error : ", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
     return NextResponse.json(

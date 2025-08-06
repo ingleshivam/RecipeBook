@@ -62,7 +62,7 @@ export default function ViewAllRecipes() {
   } = useSWR("/api/getRecipeDeatils", fetcher);
 
   if (recipesError) return <div>Error loading recipes</div>;
-  console.log("response : ", response);
+
   const filteredAndSortedRecipes = useMemo(() => {
     if (!response?.result) return [];
 

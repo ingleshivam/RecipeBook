@@ -251,10 +251,6 @@ export default function ShareRecipePage() {
       setRecipeFileName("");
       setIsDraft(false);
       setApproveStatus(data?.message?.approveStatus);
-      console.log(
-        "data?.message?.approveStatus : ",
-        data?.message?.approveStatus
-      );
 
       toast.success("Success", {
         description: data.message.success,

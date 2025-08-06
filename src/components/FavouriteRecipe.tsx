@@ -27,7 +27,7 @@ export default function FavouriteRecipe() {
         <span className="loader"></span>
       </div>
     );
-  console.log("Recipe data : ", recipeData);
+
   return (
     <>
       <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white pb-5 md:pb-0">

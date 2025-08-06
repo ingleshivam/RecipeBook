@@ -48,8 +48,6 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
     mutate: mutateData,
   } = useSWR(`/api/getRecipeDetailsById?id=${id}`, fetcher);
 
-  console.log("Recipe Data :  ", recipe);
-
   const handlePrint = () => {
     if (!recipe) return;
 

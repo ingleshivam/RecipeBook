@@ -38,8 +38,6 @@ export default function RecipeLandingPage() {
       </div>
     );
 
-  console.log("recipeData : ", recipeData);
-
   return (
     <>
       <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white pb-5 md:pb-0">

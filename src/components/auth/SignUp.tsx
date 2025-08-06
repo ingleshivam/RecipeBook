@@ -127,10 +127,7 @@ export default function SignUp() {
         });
       }
     } catch (error) {
-      console.error("Detailed error:", error);
       if (error instanceof Error) {
-        console.error("Error message:", error.message);
-        console.error("Error stack:", error.stack);
       }
     } finally {
       setIsLoading(false);

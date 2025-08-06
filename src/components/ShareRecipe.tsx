@@ -18,7 +18,6 @@ export default function ShareRecipe({
       ? `http://localhost:3000${link}`
       : `https://recipe-book-five-theta.vercel.app/${link}`;
 
-  console.log("Transfomed link : ", transformedLink);
   return (
     <div className="flex gap-5 mx-auto  w-fit">
       <FacebookShareButton

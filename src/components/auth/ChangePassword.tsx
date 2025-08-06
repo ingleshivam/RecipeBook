@@ -63,7 +63,7 @@ export default function ChangePassword() {
 
   const email = searchParams.get("email");
   const isEmail = !!email;
-  console.log("isPasswordReset :", isPasswordReset);
+
   // Password strength checker
   const checkPasswordStrength = (password: string): PasswordStrength => {
     if (!password) {
@@ -186,7 +186,7 @@ export default function ChangePassword() {
 
     setIsLoading(true);
     setErrors({});
-    console.log("This point is called !");
+
     try {
       const decryptData = await fetch(
         `/api/encdecData?decryptMessage=${resetToken}`
