@@ -5,9 +5,22 @@ import { AuthStatus } from "./auth/AuthStatus";
 import NavButton from "./NavButton";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
-import { Button } from "./ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 import clsx from "clsx";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { ChatSection } from "./ChatSectionUI";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -81,13 +94,6 @@ const MainNavBar = () => {
           About
         </Link>
 
-        <Link
-          href="/ai"
-          className="text-gray-600 hover:text-orange-500 transition-colors"
-        >
-          Ai
-        </Link>
-
         {(data && (data.user as any))?.role === "A" && (
           <Link
             href="/admin"
@@ -96,6 +102,9 @@ const MainNavBar = () => {
             Dashboard
           </Link>
         )}
+
+        <AskAIComponent />
+
         <div className=" flex gap-5">
           <AuthStatus />
           {status === "unauthenticated" && <NavButton buttonName="SignUp" />}
@@ -202,5 +211,30 @@ const FavouriteRecipeNavBar = () => {
         </div>
       </nav>
     </>
+  );
+};
+
+const AskAIComponent = () => {
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button className="relative overflow-hidden bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:from-purple-700 hover:via-pink-700 hover:to-orange-600 text-white font-semibold px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg border-0 before:absolute before:inset-0 before:bg-gradient-to-r before:from-purple-400 before:via-pink-400 before:to-orange-400 before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-20 before:animate-pulse">
+          <span className="relative z-10">Ask AI</span>
+        </Button>
+      </SheetTrigger>
+      <SheetContent
+        onInteractOutside={(e) => e.preventDefault()}
+        className="!w-[30%] !max-w-none"
+      >
+        <SheetHeader>
+          <SheetTitle></SheetTitle>
+          <SheetDescription></SheetDescription>
+        </SheetHeader>
+        <div className="px-2">
+          <ChatSection />
+        </div>
+        <SheetFooter></SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 };

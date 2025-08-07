@@ -14,6 +14,80 @@ import "@llamaindex/chat-ui/styles/pdf.css";
 import "@llamaindex/chat-ui/styles/editor.css";
 import { useState, useRef, useEffect } from "react";
 import { main } from "@/actions/chabot/main";
+import { useRouter } from "next/navigation";
+
+// Recipe card skeleton component
+const RecipeCardSkeleton = () => {
+  return (
+    <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow animate-pulse w-full">
+      <div className="relative">
+        <div className="w-full h-48 bg-gray-200"></div>
+        <div className="absolute top-2 right-2 bg-white rounded-full px-2 py-1 text-xs font-semibold text-gray-700">
+          ⭐ --
+        </div>
+      </div>
+      <div className="p-4">
+        <div className="h-6 bg-gray-200 rounded mb-2"></div>
+        <div className="h-4 bg-gray-200 rounded mb-3"></div>
+        <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+          <div className="h-3 bg-gray-200 rounded w-16"></div>
+          <div className="h-3 bg-gray-200 rounded w-12"></div>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="h-5 bg-gray-200 rounded w-16"></div>
+          <div className="h-5 bg-gray-200 rounded w-16"></div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Recipe card component
+const RecipeCard = ({ recipe }: { recipe: any }) => {
+  const router = useRouter();
+
+  const handleCardClick = () => {
+    window.open(`/recipe/${recipe.recipeId}`, "_blank");
+  };
+
+  return (
+    <div
+      className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer w-full"
+      onClick={handleCardClick}
+    >
+      <div className="relative">
+        <img
+          src={recipe.image || "/recipesImages/fallback_image.png"}
+          alt={recipe.title}
+          className="w-full h-48 object-cover"
+        />
+        <div className="absolute top-2 right-2 bg-white rounded-full px-2 py-1 text-xs font-semibold text-gray-700">
+          ⭐ {recipe.rating || 0}
+        </div>
+      </div>
+      <div className="p-4">
+        <h3 className="font-semibold text-lg text-gray-800 mb-2 line-clamp-2">
+          {recipe.title}
+        </h3>
+        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+          {recipe.description}
+        </p>
+        <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+          <span>👤 {recipe.author}</span>
+          <span>⏱️ {recipe.totalTime || 0} min</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+            {recipe.category}
+          </span>
+          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+            {recipe.difficulty}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const initialMessages: Message[] = [
   {
@@ -32,7 +106,7 @@ export function ChatSection() {
   }, [handler.messages]);
 
   return (
-    <div className="flex flex-col h-[80vh] max-h-[80vh] bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+    <div className="flex flex-col h-[90vh] max-h-[90vh] bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-200">
       <ChatSectionUI handler={handler}>
         <div className="flex flex-col h-full">
           {/* Chat header */}
@@ -111,9 +185,68 @@ export function ChatSection() {
 function CustomChatMessages() {
   const { messages, isLoading, append } = useChatUI();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [recipeCards, setRecipeCards] = useState<{ [key: number]: any }>({});
+  const [loadingRecipes, setLoadingRecipes] = useState<number[]>([]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Function to extract recipe IDs from chatbot response
+  const extractRecipeIds = (content: string): number[] => {
+    // Look for numbers in the response that could be recipe IDs
+    // This will match standalone numbers that are likely recipe IDs
+    const numbers = content.match(/\b\d+\b/g);
+    if (numbers) {
+      // Filter out very small numbers (likely not recipe IDs) and very large numbers
+      return numbers
+        .map((num) => parseInt(num))
+        .filter((id) => id > 0 && id < 10000); // Assuming recipe IDs are reasonable numbers
+    }
+    return [];
+  };
+
+  // Function to fetch recipe details
+  const fetchRecipeDetails = async (recipeId: number) => {
+    setLoadingRecipes((prev) => [...prev, recipeId]);
+    try {
+      const response = await fetch(`/api/getRecipeDetailsById?id=${recipeId}`);
+      if (response.ok) {
+        const data = await response.json();
+        return data.result;
+      }
+    } catch (error) {
+      console.error(`Error fetching recipe ${recipeId}:`, error);
+    } finally {
+      setLoadingRecipes((prev) => prev.filter((id) => id !== recipeId));
+    }
+    return null;
+  };
+
+  // Process messages to extract recipe IDs and fetch details
+  useEffect(() => {
+    const processMessages = async () => {
+      const newRecipeCards: { [key: number]: any } = { ...recipeCards };
+
+      for (const message of messages) {
+        if (message.role === "assistant") {
+          const recipeIds = extractRecipeIds(message.content);
+
+          for (const recipeId of recipeIds) {
+            if (!newRecipeCards[recipeId]) {
+              const recipeDetails = await fetchRecipeDetails(recipeId);
+              if (recipeDetails) {
+                newRecipeCards[recipeId] = recipeDetails;
+              }
+            }
+          }
+        }
+      }
+
+      setRecipeCards(newRecipeCards);
+    };
+
+    processMessages();
   }, [messages]);
 
   return (
@@ -142,27 +275,94 @@ function CustomChatMessages() {
                     message.role === "user" ? "flex-row-reverse" : "flex-row"
                   } items-end gap-3`}
                 >
-                  <ChatMessage.Avatar>
-                    {message.role === "assistant" ? (
+                  {message.role === "assistant" ? (
+                    <ChatMessage.Avatar>
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
                         R
                       </div>
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 text-white flex items-center justify-center font-medium">
-                        U
-                      </div>
-                    )}
-                  </ChatMessage.Avatar>
+                    </ChatMessage.Avatar>
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 text-white flex items-center justify-center font-medium">
+                      U
+                    </div>
+                  )}
                   <ChatMessage.Content
                     isLoading={isLoading}
                     append={append}
-                    className={`rounded-xl px-4 py-3 ${
+                    className={`rounded-xl px-3 py-2 ${
                       message.role === "assistant"
-                        ? "bg-white border border-gray-200 text-gray-800"
-                        : "bg-gray-900 text-white"
+                        ? "bg-white border border-gray-200 text-gray-800 w-full"
+                        : "bg-gray-900 text-white max-w-xs"
                     }`}
                   >
-                    <ChatMessage.Content.Markdown />
+                    {/* Display recipe cards for assistant messages */}
+                    {message.role === "assistant" &&
+                      (() => {
+                        const recipeIds = extractRecipeIds(message.content);
+                        const hasRecipeIds = recipeIds.length > 0;
+
+                        // Only show recipe section if this specific message contains recipe IDs
+                        if (hasRecipeIds) {
+                          const hasRecipeCards =
+                            Object.values(recipeCards).length > 0;
+                          const isLoading = loadingRecipes.length > 0;
+
+                          return (
+                            <div className="mt-4 w-64">
+                              {/* Show loading skeletons for recipes being fetched */}
+                              {isLoading && (
+                                <div className="grid grid-cols-1 gap-4 w-full">
+                                  {loadingRecipes.map((recipeId) => (
+                                    <RecipeCardSkeleton
+                                      key={`loading-${recipeId}`}
+                                    />
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* Show actual recipe cards */}
+                              {hasRecipeCards && (
+                                <div className="grid grid-cols-1 gap-4 w-full">
+                                  {Object.values(recipeCards).map(
+                                    (recipe: any, idx: number) => (
+                                      <RecipeCard
+                                        key={recipe.recipeId || idx}
+                                        recipe={recipe}
+                                      />
+                                    )
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Show message when no recipes found but we were looking for them */}
+                              {!isLoading && !hasRecipeCards && (
+                                <div className="text-center py-4 text-gray-500">
+                                  <p>
+                                    No recipes found. Try asking about different
+                                    ingredients or cuisines!
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
+
+                    {/* Only show markdown content if there are no recipe IDs */}
+                    {message.role === "assistant" &&
+                      (() => {
+                        const recipeIds = extractRecipeIds(message.content);
+                        if (recipeIds.length === 0) {
+                          return <ChatMessage.Content.Markdown />;
+                        }
+                        return null;
+                      })()}
+
+                    {/* Show user message content */}
+                    {message.role === "user" && (
+                      <div className="text-white">{message.content}</div>
+                    )}
                   </ChatMessage.Content>
                 </div>
               </ChatMessage>

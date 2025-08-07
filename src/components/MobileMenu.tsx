@@ -20,6 +20,8 @@ export default function MobileMenu() {
   const isOnAllRecipe = path === "/recipe";
   const isOnSingleRecipe = path.startsWith("/recipe");
   const isOnFavouriteRecipe = path === "/favourite-recipe";
+  const isOnAskAI = path === "/ai";
+
   return (
     // <div className="fixed bottom-0 bg-red-500 h-auto border-t-1 border-slate-500 shadow-xl/30  row-span-1  w-full">
     <div className="grid grid-cols-5 h-full border-t-1 border-slate-500 shadow-xl/30">
@@ -54,7 +56,11 @@ export default function MobileMenu() {
         />
       </NavIconWrapper>
       <NavIconWrapper>
-        <MessageSquareText className="w-7 h-7" />
+        <MessageSquareText
+          className="w-7 h-7"
+          color={isOnAskAI ? "#EE4D28" : "#000"}
+          onClick={() => router.push("/ai")}
+        />
       </NavIconWrapper>
     </div>
     // </div>
