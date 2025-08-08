@@ -24,7 +24,7 @@ export default function MobileMenu() {
 
   return (
     // <div className="fixed bottom-0 bg-red-500 h-auto border-t-1 border-slate-500 shadow-xl/30  row-span-1  w-full">
-    <div className="grid grid-cols-5 h-full border-t-1 border-slate-500 shadow-xl/30">
+    <div className="grid grid-cols-5 h-full border-t-1 border-slate-300 shadow-xl/30">
       <NavIconWrapper>
         <House
           className="w-7 h-7"

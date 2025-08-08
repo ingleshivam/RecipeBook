@@ -15,6 +15,13 @@ import "@llamaindex/chat-ui/styles/editor.css";
 import { useState, useRef, useEffect } from "react";
 import { main } from "@/actions/chabot/main";
 import { useRouter } from "next/navigation";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 // Recipe card skeleton component
 const RecipeCardSkeleton = () => {
@@ -66,7 +73,7 @@ const RecipeCard = ({ recipe }: { recipe: any }) => {
         </div>
       </div>
       <div className="p-4">
-        <h3 className="font-semibold text-lg text-gray-800 mb-2 line-clamp-2">
+        <h3 className="font-semibold text-sm text-gray-800 mb-2 line-clamp-2">
           {recipe.title}
         </h3>
         <p className="text-gray-600 text-sm mb-3 line-clamp-2">
@@ -85,6 +92,68 @@ const RecipeCard = ({ recipe }: { recipe: any }) => {
           </span>
         </div>
       </div>
+    </div>
+  );
+};
+
+// Recipe carousel component
+const RecipeCarousel = ({
+  recipes,
+  isLoading,
+}: {
+  recipes: any[];
+  isLoading: boolean;
+}) => {
+  if (isLoading) {
+    return (
+      <div className="w-full">
+        <div className="flex justify-center">
+          <RecipeCardSkeleton />
+        </div>
+      </div>
+    );
+  }
+
+  if (recipes.length === 0) {
+    return (
+      <div className="text-center py-4 text-gray-500">
+        <p>
+          No recipes found. Try asking about different ingredients or cuisines!
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full">
+      <Carousel
+        opts={{
+          align: "center",
+          loop: true,
+          slidesToScroll: 1,
+          containScroll: "trimSnaps",
+        }}
+        className="w-full max-w-sm mx-auto relative"
+      >
+        <CarouselContent className="-ml-2 md:-ml-4">
+          {recipes.map((recipe: any, index: number) => (
+            <CarouselItem
+              key={recipe.recipeId || index}
+              className="pl-2 md:pl-4 basis-full"
+            >
+              <div className="p-1">
+                <RecipeCard recipe={recipe} />
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        {recipes.length > 1 && (
+          <>
+            <CarouselPrevious className="left-2 bg-white/80 hover:bg-white border-gray-300 shadow-md" />
+            <CarouselNext className="right-2 bg-white/80 hover:bg-white border-gray-300 shadow-md" />
+          </>
+        )}
+      </Carousel>
     </div>
   );
 };
@@ -151,29 +220,33 @@ export function ChatSection() {
           )}
 
           {/* Chat input */}
-          <div className="p-4 border-t border-gray-200 bg-gray-50">
-            <ChatInput className="bg-white rounded-lg">
-              <ChatInput.Form className="flex items-center gap-2">
-                <ChatInput.Field
-                  className="flex-1 px-4 py-3 rounded-lg border-0 focus:outline-none bg-white"
-                  placeholder="Type your recipe question..."
-                />
-                <ChatInput.Submit className="bg-black text-white p-2 rounded-lg hover:bg-gray-800 transition-all">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </ChatInput.Submit>
-              </ChatInput.Form>
-            </ChatInput>
+          <div className="p-4 border-t border-gray-200">
+            {/* <div className="relative p-[2px] rounded-lg bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 animate-gradient"> */}
+            <div className="w-full h-full bg-white rounded-lg relative z-10">
+              <ChatInput className="relative p-[2px]  bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 animate-gradient">
+                <ChatInput.Form className="flex items-center gap-2 w-full h-full">
+                  <ChatInput.Field
+                    className="flex-1 px-4 py-3 border-0 focus:outline-none focus:ring-0 focus:border-0 bg-white rounded-none chat-input-override"
+                    placeholder="Type your recipe question..."
+                  />
+                  <ChatInput.Submit className="bg-black text-white p-2 rounded-lg hover:bg-gray-800 transition-all">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </ChatInput.Submit>
+                </ChatInput.Form>
+              </ChatInput>
+            </div>
+            {/* </div> */}
           </div>
         </div>
         <div ref={messagesEndRef} />
@@ -251,7 +324,7 @@ function CustomChatMessages() {
 
   return (
     <ChatMessages>
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+      <div className="flex-1 overflow-y-auto  space-y-4 ">
         <AnimatePresence initial={false}>
           {messages.map((message, index) => (
             <motion.div
@@ -289,7 +362,7 @@ function CustomChatMessages() {
                   <ChatMessage.Content
                     isLoading={isLoading}
                     append={append}
-                    className={`rounded-xl px-3 py-2 ${
+                    className={`rounded-xl px-2 py-2 ${
                       message.role === "assistant"
                         ? "bg-white border border-gray-200 text-gray-800 w-full"
                         : "bg-gray-900 text-white max-w-xs"
@@ -301,48 +374,17 @@ function CustomChatMessages() {
                         const recipeIds = extractRecipeIds(message.content);
                         const hasRecipeIds = recipeIds.length > 0;
 
-                        // Only show recipe section if this specific message contains recipe IDs
                         if (hasRecipeIds) {
                           const hasRecipeCards =
                             Object.values(recipeCards).length > 0;
                           const isLoading = loadingRecipes.length > 0;
 
                           return (
-                            <div className="mt-4 w-64">
-                              {/* Show loading skeletons for recipes being fetched */}
-                              {isLoading && (
-                                <div className="grid grid-cols-1 gap-4 w-full">
-                                  {loadingRecipes.map((recipeId) => (
-                                    <RecipeCardSkeleton
-                                      key={`loading-${recipeId}`}
-                                    />
-                                  ))}
-                                </div>
-                              )}
-
-                              {/* Show actual recipe cards */}
-                              {hasRecipeCards && (
-                                <div className="grid grid-cols-1 gap-4 w-full">
-                                  {Object.values(recipeCards).map(
-                                    (recipe: any, idx: number) => (
-                                      <RecipeCard
-                                        key={recipe.recipeId || idx}
-                                        recipe={recipe}
-                                      />
-                                    )
-                                  )}
-                                </div>
-                              )}
-
-                              {/* Show message when no recipes found but we were looking for them */}
-                              {!isLoading && !hasRecipeCards && (
-                                <div className="text-center py-4 text-gray-500">
-                                  <p>
-                                    No recipes found. Try asking about different
-                                    ingredients or cuisines!
-                                  </p>
-                                </div>
-                              )}
+                            <div className="w-[200px]">
+                              <RecipeCarousel
+                                recipes={Object.values(recipeCards)}
+                                isLoading={isLoading}
+                              />
                             </div>
                           );
                         }

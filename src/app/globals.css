@@ -327,9 +327,58 @@ input::-webkit-inner-spin-button {
 }
 
 .line-clamp-3 {
-  overflow: hidden;
   display: -webkit-box;
-  -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 300% 300%;
+  animation: gradient 2s ease infinite;
+}
+
+/* Override ChatInput default styles */
+.chat-input-override {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.chat-input-override:focus {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  ring: none !important;
+}
+
+/* More specific overrides for ChatInput components */
+.chat-input-override input,
+.chat-input-override textarea {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.chat-input-override input:focus,
+.chat-input-override textarea:focus {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  ring: none !important;
 }
     
