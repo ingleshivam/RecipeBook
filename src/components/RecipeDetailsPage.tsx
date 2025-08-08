@@ -179,51 +179,51 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
         </div>
       ) : (
         <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white pb-5 md:pb-0">
-          <div className="container mx-auto px-5 md:px-34 py-8">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
             {/* Back Button */}
             <Link
               href="/recipe"
-              className="inline-flex items-center text-orange-600 hover:text-orange-700 mb-6"
+              className="inline-flex items-center text-orange-600 hover:text-orange-700 mb-4 sm:mb-6 text-sm sm:text-base"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Recipes
             </Link>
 
-            <div className="grid lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
               {/* Main Content */}
-              <div className="lg:col-span-2 space-y-8">
+              <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
                 {/* Recipe Header */}
-                <div className="space-y-6">
-                  <div className="relative rounded-2xl overflow-hidden">
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="relative rounded-xl sm:rounded-2xl overflow-hidden">
                     <Image
                       src={recipe.result.image || "/placeholder.svg"}
                       alt={recipe.result.title}
                       width={800}
                       height={600}
-                      className="w-full h-96 object-cover"
+                      className="w-full h-48 sm:h-64 md:h-80 lg:h-96 object-cover"
                     />
-                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center space-x-1">
-                      <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                      <span className="font-medium">
+                    <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 sm:px-3 sm:py-1 flex items-center space-x-1">
+                      <Star className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-500 fill-current" />
+                      <span className="font-medium text-sm sm:text-base">
                         {recipe?.result?.reviewRating || 0}
                       </span>
-                      <span className="text-gray-500">
+                      <span className="text-gray-500 text-xs sm:text-sm">
                         ({recipe?.result?.totalReviewCount?.recipeId || ""})
                       </span>
                     </div>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     <div className="flex flex-wrap gap-2">
                       <Badge
                         variant="secondary"
-                        className="bg-orange-100 text-orange-700"
+                        className="bg-orange-100 text-orange-700 text-xs sm:text-sm"
                       >
                         {recipe.result.category}
                       </Badge>
                       <Badge
                         variant="outline"
-                        className="border-green-200 text-green-700"
+                        className="border-green-200 text-green-700 text-xs sm:text-sm"
                       >
                         {recipe.result.difficulty}
                       </Badge>
@@ -231,36 +231,36 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                         <Badge
                           key={tag + index}
                           variant="outline"
-                          className="text-gray-600"
+                          className="text-gray-600 text-xs sm:text-sm"
                         >
                           {tag.tag.name}
                         </Badge>
                       ))}
                     </div>
 
-                    <h1 className="text-3xl lg:text-4xl font-bold text-gray-800">
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 leading-tight">
                       {recipe.result.title}
                     </h1>
-                    <p className="text-lg text-gray-600 leading-relaxed">
+                    <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
                       {recipe.result.description}
                     </p>
 
                     {/* Author Info */}
-                    <div className="flex items-center space-x-4 p-4 bg-white rounded-lg border border-orange-100">
+                    <div className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-white rounded-lg border border-orange-100">
                       <Image
                         src={
                           "https://ui-avatars.com/api/?name=Shivam+Ingle&rounded=true"
                         }
                         alt={recipe.result.author}
-                        width={50}
-                        height={50}
-                        className="rounded-full"
+                        width={40}
+                        height={40}
+                        className="rounded-full w-10 h-10 sm:w-12 sm:h-12"
                       />
                       <div>
-                        <p className="font-semibold text-gray-800">
+                        <p className="font-semibold text-gray-800 text-sm sm:text-base">
                           {recipe.result.author}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-xs sm:text-sm text-gray-500">
                           {recipe.count.recipeId} recipes shared
                         </p>
                       </div>
@@ -270,33 +270,41 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
 
                 {/* Recipe Times & Servings */}
                 <Card>
-                  <CardContent className="p-6">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                       <div className="text-center">
-                        <Timer className="h-6 w-6 text-orange-500 mx-auto mb-2" />
-                        <p className="text-sm text-gray-500">Prep Time</p>
-                        <p className="font-semibold">
+                        <Timer className="h-5 w-5 sm:h-6 sm:w-6 text-orange-500 mx-auto mb-1 sm:mb-2" />
+                        <p className="text-xs sm:text-sm text-gray-500">
+                          Prep Time
+                        </p>
+                        <p className="font-semibold text-sm sm:text-base">
                           {recipe.result.prepTime}
                         </p>
                       </div>
                       <div className="text-center">
-                        <Clock className="h-6 w-6 text-orange-500 mx-auto mb-2" />
-                        <p className="text-sm text-gray-500">Cook Time</p>
-                        <p className="font-semibold">
+                        <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-orange-500 mx-auto mb-1 sm:mb-2" />
+                        <p className="text-xs sm:text-sm text-gray-500">
+                          Cook Time
+                        </p>
+                        <p className="font-semibold text-sm sm:text-base">
                           {recipe.result.cookTime}
                         </p>
                       </div>
                       <div className="text-center">
-                        <Users className="h-6 w-6 text-orange-500 mx-auto mb-2" />
-                        <p className="text-sm text-gray-500">Servings</p>
-                        <p className="font-semibold">
+                        <Users className="h-5 w-5 sm:h-6 sm:w-6 text-orange-500 mx-auto mb-1 sm:mb-2" />
+                        <p className="text-xs sm:text-sm text-gray-500">
+                          Servings
+                        </p>
+                        <p className="font-semibold text-sm sm:text-base">
                           {recipe.result.servings}
                         </p>
                       </div>
                       <div className="text-center">
-                        <Utensils className="h-6 w-6 text-orange-500 mx-auto mb-2" />
-                        <p className="text-sm text-gray-500">Total Time</p>
-                        <p className="font-semibold">
+                        <Utensils className="h-5 w-5 sm:h-6 sm:w-6 text-orange-500 mx-auto mb-1 sm:mb-2" />
+                        <p className="text-xs sm:text-sm text-gray-500">
+                          Total Time
+                        </p>
+                        <p className="font-semibold text-sm sm:text-base">
                           {recipe.result.totalTime}
                         </p>
                       </div>
@@ -306,22 +314,22 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
 
                 {/* Ingredients */}
                 <Card>
-                  <CardContent className="p-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                  <CardContent className="p-4 sm:p-6">
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">
                       Ingredients
                     </h2>
-                    <ul className="space-y-3">
+                    <ul className="space-y-2 sm:space-y-3">
                       {recipe.result.ingredients.map(
                         (ingredient: any, index: number) => (
                           <li
                             key={index}
-                            className="flex items-center space-x-3"
+                            className="flex items-center space-x-2 sm:space-x-3"
                           >
                             <div className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0"></div>
-                            <span className="font-medium text-orange-600 min-w-20">
+                            <span className="font-medium text-orange-600 min-w-16 sm:min-w-20 text-sm sm:text-base">
                               {ingredient.quantity}
                             </span>
-                            <span className="text-gray-700">
+                            <span className="text-gray-700 text-sm sm:text-base">
                               {ingredient.ingredient.name}
                             </span>
                           </li>
@@ -333,18 +341,21 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
 
                 {/* Instructions */}
                 <Card>
-                  <CardContent className="p-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                  <CardContent className="p-4 sm:p-6">
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">
                       Instructions
                     </h2>
-                    <ol className="space-y-4">
+                    <ol className="space-y-3 sm:space-y-4">
                       {recipe.result.instructions.map(
                         (item: any, index: number) => (
-                          <li key={index} className="flex space-x-4">
-                            <div className="flex-shrink-0 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-semibold">
+                          <li
+                            key={index}
+                            className="flex space-x-3 sm:space-x-4"
+                          >
+                            <div className="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm">
                               {index + 1}
                             </div>
-                            <p className="text-gray-700 leading-relaxed pt-1">
+                            <p className="text-gray-700 leading-relaxed pt-0 sm:pt-1 text-sm sm:text-base">
                               {item.instruction.description}
                             </p>
                           </li>
@@ -353,61 +364,54 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                     </ol>
                   </CardContent>
                 </Card>
-
-                {/* Tips */}
-                {/* <Card>
-                  <CardContent className="p-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                      Chef's Tips
-                    </h2>
-                    <ul className="space-y-3">
-                      {recipe.tips.map((tip: any, index: number) => (
-                        <li key={index} className="flex items-start space-x-3">
-                          <ChefHat className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
-                          <p className="text-gray-700 leading-relaxed">{tip}</p>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card> */}
               </div>
 
               {/* Sidebar */}
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* Nutrition Info */}
                 <Card>
-                  <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  <CardContent className="p-4 sm:p-6">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">
                       Nutrition
                     </h3>
-                    <div className="space-y-3">
+                    <div className="space-y-2 sm:space-y-3">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Calories</span>
-                        <span className="font-medium">
+                        <span className="text-gray-600 text-sm sm:text-base">
+                          Calories
+                        </span>
+                        <span className="font-medium text-sm sm:text-base">
                           {recipe.result.nutritionInfo[0].nutritionInfo.calorie}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Fat</span>
-                        <span className="font-medium">
+                        <span className="text-gray-600 text-sm sm:text-base">
+                          Fat
+                        </span>
+                        <span className="font-medium text-sm sm:text-base">
                           {recipe.result.nutritionInfo[0].nutritionInfo.fat}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Carbs</span>
-                        <span className="font-medium">
+                        <span className="text-gray-600 text-sm sm:text-base">
+                          Carbs
+                        </span>
+                        <span className="font-medium text-sm sm:text-base">
                           {recipe.result.nutritionInfo[0].nutritionInfo.carbs}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Protein</span>
-                        <span className="font-medium">
+                        <span className="text-gray-600 text-sm sm:text-base">
+                          Protein
+                        </span>
+                        <span className="font-medium text-sm sm:text-base">
                           {recipe.result.nutritionInfo[0].nutritionInfo.protein}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Sugar</span>
-                        <span className="font-medium">
+                        <span className="text-gray-600 text-sm sm:text-base">
+                          Sugar
+                        </span>
+                        <span className="font-medium text-sm sm:text-base">
                           {recipe.result.nutritionInfo[0].nutritionInfo.sugar}
                         </span>
                       </div>
@@ -417,7 +421,7 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
 
                 {/* Actions */}
                 <Card>
-                  <CardContent className="p-6 ">
+                  <CardContent className="p-4 sm:p-6">
                     <HandleFavourite
                       mutateData={mutateData}
                       recipe={recipe}
@@ -436,7 +440,7 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                               <AccordionTrigger>
                                 <Button
                                   variant="outline"
-                                  className="w-full border-orange-200 text-orange-600 hover:bg-orange-50 cursor-pointer"
+                                  className="w-full border-orange-200 text-orange-600 hover:bg-orange-50 cursor-pointer text-sm sm:text-base"
                                   disabled={status === "unauthenticated"}
                                 >
                                   <Share2 className="h-4 w-4 mr-2" />
@@ -467,7 +471,7 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                         <div>
                           <Button
                             variant="outline"
-                            className="w-full cursor-pointer"
+                            className="w-full cursor-pointer text-sm sm:text-base"
                             onClick={handlePrint}
                             disabled={status === "unauthenticated"}
                           >
@@ -486,29 +490,32 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
 
                 {/* Related Recipes */}
                 <Card>
-                  <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  <CardContent className="p-4 sm:p-6">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">
                       More from - {recipe?.result?.author}
                     </h3>
-                    <div className="space-y-4">
+                    <div className="space-y-3 sm:space-y-4">
                       {recipe.allRecipesByUseId?.length > 0 ? (
                         recipe.allRecipesByUseId.map(
                           (item: any, index: number) => (
-                            <div key={item.recipeId} className="flex space-x-3">
+                            <div
+                              key={item.recipeId}
+                              className="flex space-x-2 sm:space-x-3"
+                            >
                               <Image
                                 src={`${item.images[0].imageUrl}`}
                                 alt="Related recipe"
-                                width={50}
-                                height={50}
-                                className="rounded-full object-cover aspect-square"
+                                width={40}
+                                height={40}
+                                className="rounded-full object-cover aspect-square w-10 h-10 sm:w-12 sm:h-12"
                               />
                               <div className="flex-1 min-w-0">
-                                <p className="font-medium text-gray-800 truncate">
+                                <p className="font-medium text-gray-800 truncate text-sm sm:text-base">
                                   <Link href={`/recipe/${item.recipeId}`}>
                                     {item.title}
                                   </Link>
                                 </p>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-xs sm:text-sm text-gray-500">
                                   {item.prepTime + item.cookingTime}
                                   min • 4.8 ⭐
                                 </p>
@@ -517,7 +524,9 @@ export default function RecipeDetailsPage({ id }: { id: number }) {
                           )
                         )
                       ) : (
-                        <span>No More Recipes</span>
+                        <span className="text-sm sm:text-base">
+                          No More Recipes
+                        </span>
                       )}
                     </div>
                   </CardContent>
