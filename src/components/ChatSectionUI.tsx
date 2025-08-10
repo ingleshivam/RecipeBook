@@ -430,17 +430,17 @@ function useMockChat(initMessages: Message[]): ChatHandler {
     setMessages((prev) => [...prev, message]);
 
     try {
-      const res = await main(message.content);
+      const { recipeIds } = await main(message.content);
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
           content:
-            res?.join(",") ||
+            recipeIds?.join(",") ||
             "I couldn't find an answer to that. Could you try asking differently?",
         },
       ]);
-      return res?.response ?? null;
+      return null;
     } catch (error) {
       setMessages((prev) => [
         ...prev,

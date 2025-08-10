@@ -9,7 +9,6 @@ export function initSettings() {
   });
 
   Settings.embedModel = new HuggingFaceEmbedding({
-    modelType:
-      process.env.EMBEDDING_MODEL ?? "sentence-transformers/all-MiniLM-L6-v2",
+    modelType: "BAAI/bge-large-en-v1.5",
   });
 }

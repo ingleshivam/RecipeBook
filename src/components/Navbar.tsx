@@ -215,26 +215,44 @@ const FavouriteRecipeNavBar = () => {
 };
 
 const AskAIComponent = () => {
+  const { status } = useSession();
+
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button className="relative overflow-hidden bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:from-purple-700 hover:via-pink-700 hover:to-orange-600 text-white font-semibold px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg border-0 before:absolute before:inset-0 before:bg-gradient-to-r before:from-purple-400 before:via-pink-400 before:to-orange-400 before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-20 before:animate-pulse">
-          <span className="relative z-10">Ask AI</span>
-        </Button>
-      </SheetTrigger>
-      <SheetContent
-        onInteractOutside={(e) => e.preventDefault()}
-        className="!w-[30%] !max-w-none"
-      >
-        <SheetHeader>
-          <SheetTitle></SheetTitle>
-          <SheetDescription></SheetDescription>
-        </SheetHeader>
-        <div className="px-2">
-          <ChatSection />
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="inline-block">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                disabled={status === "unauthenticated"}
+                className={clsx(
+                  "relative overflow-hidden bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:from-purple-700 hover:via-pink-700 hover:to-orange-600 text-white font-semibold px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg border-0 before:absolute before:inset-0 before:bg-gradient-to-r before:from-purple-400 before:via-pink-400 before:to-orange-400 before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-20 before:animate-pulse",
+                  status === "unauthenticated" &&
+                    "opacity-50 cursor-not-allowed hover:scale-100 hover:shadow-none"
+                )}
+              >
+                <span className="relative z-10">Ask AI</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent
+              onInteractOutside={(e) => e.preventDefault()}
+              className="!w-[30%] !max-w-none"
+            >
+              <SheetHeader>
+                <SheetTitle></SheetTitle>
+                <SheetDescription></SheetDescription>
+              </SheetHeader>
+              <div className="px-2">
+                <ChatSection />
+              </div>
+              <SheetFooter></SheetFooter>
+            </SheetContent>
+          </Sheet>
         </div>
-        <SheetFooter></SheetFooter>
-      </SheetContent>
-    </Sheet>
+      </TooltipTrigger>
+      <TooltipContent className={clsx(status === "authenticated" && "hidden")}>
+        <p>Login required to use AI chat</p>
+      </TooltipContent>
+    </Tooltip>
   );
 };

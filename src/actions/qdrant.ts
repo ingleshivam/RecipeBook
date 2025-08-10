@@ -1,6 +1,7 @@
 "use server";
 import {
   Document,
+  Settings,
   storageContextFromDefaults,
   VectorStoreIndex,
 } from "llamaindex";
@@ -9,6 +10,7 @@ import { QdrantVectorStore } from "@llamaindex/qdrant";
 import { QdrantClient } from "@qdrant/js-client-rest";
 import { InferenceClient } from "@huggingface/inference";
 import { Text } from "lucide-react";
+import { HuggingFaceAPIEmbedding } from "@/lib/embedModel";
 
 const client = new QdrantClient({
   url: process.env.QDRANT_URL,
@@ -73,6 +75,45 @@ export async function storeRecipeInQdrant(
     return true;
   } catch (error) {
     return false;
+  }
+}
+
+export async function storeRecipoeInQdrantUsingLlamaIndex(
+  id: number,
+  text: string,
+  tags: string[]
+) {
+  try {
+    Settings.embedModel = new HuggingFaceAPIEmbedding();
+
+    const qdrantStore = new QdrantVectorStore({
+      url: process.env.QDRANT_URL,
+      collectionName: process.env.QDRANT_COLLECTION,
+      apiKey: process.env.QDRANT_API_KEY,
+    });
+
+    const document = new Document({
+      text: text,
+      metadata: {
+        id: id,
+        tags: tags,
+      },
+    });
+
+    const documents = [document];
+    const storageContext = await storageContextFromDefaults({
+      vectorStore: qdrantStore,
+    });
+
+    const index = await VectorStoreIndex.fromDocuments(documents, {
+      storageContext,
+    });
+
+    console.log(`Recipe ${id} stored successfully in Qdrant`);
+    return { success: true, message: `Recipe ${id} stored successfully` };
+  } catch (error) {
+    console.error("Error storing recipe in Qdrant:", error);
+    return { success: false, error: error };
   }
 }
 

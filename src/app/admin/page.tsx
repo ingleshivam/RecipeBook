@@ -49,6 +49,7 @@ import {
   getRecipeFromQdrant,
   initializeCollection,
   storeRecipeInQdrant,
+  storeRecipoeInQdrantUsingLlamaIndex,
 } from "@/actions/qdrant";
 import { main } from "@/actions/chabot/main";
 
@@ -78,88 +79,90 @@ export default function AdminPage() {
 
   const [recipeViewDetails, setRecipeViewDetails] = useState<any>([]);
   const [selectedTab, setSelectedTab] = useState("pending");
-
+  const [approveLoading, setApproveLoading] = useState(false);
   const handleApprove = async (recipeId: number) => {
-    const status = "A";
-    const response = await fetch("/api/getRecipeDetailsById", {
-      method: "PUT",
-      body: JSON.stringify({ recipeId, status }),
-    });
-
-    const data = await response.json();
-    const AI_DATA = {
-      title: data.response.title,
-      description: data.response.description,
-      cookingTime: data.response.cookingTime,
-      servingSize: data.response.servingSize,
-      ingredients: data.response.ingredients.map((i: any) => i.ingredient.name),
-      instructions: data.response.instructions.map(
-        (i: any) => i.instruction.description
-      ),
-      nutritionInfo: {
-        calorie: data.response.nutritionInfo[0]?.nutritionInfo.calorie,
-        fat: data.response.nutritionInfo[0]?.nutritionInfo.fat,
-        carbs: data.response.nutritionInfo[0]?.nutritionInfo.carbs,
-        protein: data.response.nutritionInfo[0]?.nutritionInfo.protein,
-        sugar: data.response.nutritionInfo[0]?.nutritionInfo.sugar,
-        fiber: data.response.nutritionInfo[0]?.nutritionInfo.fiber,
-      },
-    };
-
-    if (response.ok) {
-      toast.success("Success", {
-        description: response.statusText,
-      });
-    }
-
-    const AI_RESPONSE = await fetch("/api/chat", {
-      method: "POST",
-      body: JSON.stringify({ AI_DATA }),
-    });
-
-    const AI_RESPONSE_DATA = await AI_RESPONSE.json();
-
-    const combineTagsAndFeatures = (data: any) => {
-      const tags = data.result?.tags || [];
-      const keyFeatures = data.result?.key_features || [];
-      const combinedSet = new Set([...tags, ...keyFeatures]);
-      const combinedArray = Array.from(combinedSet);
-
-      return {
-        ...data,
-        result: {
-          ...data.result,
-          combined_tags_and_features: combinedArray,
-        },
-      };
-    };
-    const processedData = combineTagsAndFeatures(AI_RESPONSE_DATA);
-
-    if (AI_RESPONSE.ok) {
-      toast.success("Success", {
-        description: "AI tags are generated successfully",
-      });
-
-      const tagsText =
-        processedData.result.combined_tags_and_features.join(",");
-      await initializeCollection();
-      const status = await storeRecipeInQdrant(
-        recipeId,
-        tagsText,
-        processedData.result.combined_tags_and_features
-      );
-    } else {
-      const status = "U";
-      await fetch("/api/getRecipeDetailsById", {
+    const approvePromise = async () => {
+      setApproveLoading(true);
+      const status = "A";
+      const response = await fetch("/api/getRecipeDetailsById", {
         method: "PUT",
         body: JSON.stringify({ recipeId, status }),
       });
-      toast.error("Error", {
-        description: "AI tags generation failed !",
-      });
-    }
 
-    await mutateData();
+      const data = await response.json();
+      const AI_DATA = {
+        title: data.response.title,
+        description: data.response.description,
+        cookingTime: data.response.cookingTime,
+        servingSize: data.response.servingSize,
+        ingredients: data.response.ingredients.map(
+          (i: any) => i.ingredient.name
+        ),
+        instructions: data.response.instructions.map(
+          (i: any) => i.instruction.description
+        ),
+        nutritionInfo: {
+          calorie: data.response.nutritionInfo[0]?.nutritionInfo.calorie,
+          fat: data.response.nutritionInfo[0]?.nutritionInfo.fat,
+          carbs: data.response.nutritionInfo[0]?.nutritionInfo.carbs,
+          protein: data.response.nutritionInfo[0]?.nutritionInfo.protein,
+          sugar: data.response.nutritionInfo[0]?.nutritionInfo.sugar,
+          fiber: data.response.nutritionInfo[0]?.nutritionInfo.fiber,
+        },
+      };
+
+      const AI_RESPONSE = await fetch("/api/chat", {
+        method: "POST",
+        body: JSON.stringify({ AI_DATA }),
+      });
+
+      const AI_RESPONSE_DATA = await AI_RESPONSE.json();
+
+      const combineTagsAndFeatures = (data: any) => {
+        const tags = data.result?.tags || [];
+        const keyFeatures = data.result?.key_features || [];
+        const combinedSet = new Set([...tags, ...keyFeatures]);
+        const combinedArray = Array.from(combinedSet);
+
+        return {
+          ...data,
+          result: {
+            ...data.result,
+            combined_tags_and_features: combinedArray,
+          },
+        };
+      };
+      const processedData = combineTagsAndFeatures(AI_RESPONSE_DATA);
+
+      if (AI_RESPONSE.ok) {
+        const tagsText =
+          processedData.result.combined_tags_and_features.join(",");
+        await initializeCollection();
+        await storeRecipoeInQdrantUsingLlamaIndex(
+          recipeId,
+          tagsText,
+          processedData.result.combined_tags_and_features
+        );
+        await mutateData();
+        setApproveLoading(false);
+        return "Recipe approved and AI tags generated successfully";
+      } else {
+        const status = "U";
+        await fetch("/api/getRecipeDetailsById", {
+          method: "PUT",
+          body: JSON.stringify({ recipeId, status }),
+        });
+        await mutateData();
+        setApproveLoading(false);
+        throw new Error("AI tags generation failed");
+      }
+    };
+
+    toast.promise(approvePromise(), {
+      loading: "Approving recipe...",
+      success: (message) => message,
+      error: "Failed to approve recipe",
+    });
   };
 
   const handleReject = async (recipeId: number) => {
