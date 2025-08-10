@@ -66,11 +66,12 @@ export default function MobileMenu() {
           onClick={() => router.push("/share-recipe")}
         />
       </NavIconWrapper>
+
       <NavIconWrapper>
-        <Heart
+        <MessageSquareText
           className="w-7 h-7"
-          color={isOnFavouriteRecipe ? "#EE4D28" : "#000"}
-          onClick={() => router.push("/favourite-recipe")}
+          color={isOnAskAI ? "#EE4D28" : "#000"}
+          onClick={() => router.push("/ai")}
         />
       </NavIconWrapper>
       <Sheet>
