@@ -436,20 +436,26 @@ export default function RecipeLandingPage() {
             </div>
             <div className="flex space-x-4 mx-auto mt-5  w-fit">
               <Link
-                href="#"
+                href="https://www.linkedin.com/in/shivam-ingle-969839163"
                 className="text-gray-400 hover:text-orange-500 transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <Twitter className="h-5 w-5" />
               </Link>
               <Link
-                href="#"
+                href="https://www.instagram.com/ig_shivampatil/"
                 className="text-gray-400 hover:text-orange-500 transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <Instagram className="h-5 w-5" />
               </Link>
               <Link
-                href="#"
+                href="https://www.linkedin.com/in/shivam-ingle-969839163"
                 className="text-gray-400 hover:text-orange-500 transition-colors"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <Linkedin className="h-5 w-5" />
               </Link>
