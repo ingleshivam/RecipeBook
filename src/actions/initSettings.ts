@@ -4,7 +4,7 @@ import { HuggingFaceEmbedding } from "@llamaindex/huggingface";
 
 export function initSettings() {
   Settings.llm = new Groq({
-    model: process.env.MODEL ?? "llama3-8b-8192",
+    model: process.env.MODEL ?? "llama-3.1-8b-instant",
     apiKey: process.env.GROQ_API_KEY!,
   });
 

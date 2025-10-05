@@ -3,6 +3,7 @@ import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
+import { PROJECT } from "@/lib/project";
 
 const handler = NextAuth({
   providers: [
@@ -21,10 +22,11 @@ const handler = NextAuth({
           throw new Error("Email and password required");
         }
 
-        const user = await prisma.user.findUnique({
+        const user = await prisma.user.findFirst({
           where: {
             email: credentials.email,
-          },
+            project: PROJECT,
+          } as any,
         });
 
         if (!user) {
@@ -66,8 +68,8 @@ const handler = NextAuth({
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
       if (account?.provider === "github") {
-        const existingUser = await prisma.user.findUnique({
-          where: { email: user.email! },
+        const existingUser = await prisma.user.findFirst({
+          where: { email: user.email!, project: PROJECT } as any,
         });
 
         if (!existingUser) {
@@ -78,7 +80,8 @@ const handler = NextAuth({
               lastName: user.name?.split(" ")[1] || "",
               role: "U",
               passwordHash: await bcrypt.hash(Math.random().toString(36), 10),
-            },
+              project: PROJECT,
+            } as any,
           });
           (user as any).id = newUser.userId.toString();
         } else {

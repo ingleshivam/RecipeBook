@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { PROJECT } from "@/lib/project";
 
 export async function GET(request: NextRequest) {
   const url = request.url;
@@ -7,7 +9,9 @@ export async function GET(request: NextRequest) {
 
   if (!email) {
     try {
-      const response = await prisma?.user.findMany();
+      const response = await prisma?.user.findMany({
+        where: { project: PROJECT } as any,
+      });
       return NextResponse.json(
         { response },
         { status: 200, statusText: "User details fetched successfully !" }
@@ -22,10 +26,11 @@ export async function GET(request: NextRequest) {
     }
   } else {
     try {
-      const response = await prisma?.user.findUnique({
+      const response = await prisma?.user.findFirst({
         where: {
           email: email,
-        },
+          project: PROJECT,
+        } as any,
       });
 
       if (!response) {

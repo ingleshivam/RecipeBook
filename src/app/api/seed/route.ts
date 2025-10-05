@@ -327,8 +327,9 @@ export async function GET() {
           categoryId: recipe.categoryId,
           prepTime: recipe.prepTime,
           difficulty: recipe.difficulty,
-          userId: 20,
+          userId: 30,
           approveStatus: "A",
+          approvedDate: new Date(),
           isSavedAsDraft: 0,
           images: {
             create: {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { PROJECT } from "@/lib/project";
 
 export async function POST(request: NextRequest) {
   const { otp, userId } = await request.json();
@@ -37,10 +38,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(url);
     const email = searchParams.get("email");
 
-    const userRecord = await prisma?.user?.findUnique({
+    const userRecord = await prisma?.user?.findFirst({
       where: {
         email: email || "",
-      },
+        project: PROJECT,
+      } as any,
       select: {
         userId: true,
       },
@@ -70,10 +72,11 @@ export async function PUT(request: NextRequest) {
   const { otp, email, mail } = await request.json();
 
   try {
-    await prisma?.user?.update({
+    await prisma?.user?.updateMany({
       where: {
         email: email || mail?.current,
-      },
+        project: PROJECT,
+      } as any,
       data: {
         isVerified: 1,
       },

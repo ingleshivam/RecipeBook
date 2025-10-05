@@ -1,5 +1,6 @@
 import { hashPassword } from "@/actions/hashPassword";
 import prisma from "@/lib/prisma";
+import { PROJECT } from "@/lib/project";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PUT(request: NextRequest) {
@@ -7,10 +8,11 @@ export async function PUT(request: NextRequest) {
     const { email, newPassword } = await request.json();
     const passwordHash = await hashPassword(newPassword);
 
-    const updateUser = await prisma?.user.update({
+    const updateUser = await prisma?.user.updateMany({
       where: {
         email: email,
-      },
+        project: PROJECT,
+      } as any,
       data: {
         passwordHash: passwordHash,
       },
@@ -34,18 +36,20 @@ export async function POST(request: NextRequest) {
 
     const passwordHash = await hashPassword(data.password);
 
-    const userExistsAndNotVerified = await prisma?.user.findUnique({
+    const userExistsAndNotVerified = await prisma?.user.findFirst({
       where: {
         email: data?.email,
         isVerified: 0,
-      },
+        project: PROJECT,
+      } as any,
     });
 
-    const userExistaAndVerified = await prisma?.user.findUnique({
+    const userExistaAndVerified = await prisma?.user.findFirst({
       where: {
         email: data?.email,
         isVerified: 1,
-      },
+        project: PROJECT,
+      } as any,
     });
 
     if (userExistsAndNotVerified) {
@@ -68,7 +72,8 @@ export async function POST(request: NextRequest) {
         passwordHash: passwordHash,
         role: "U",
         isVerified: 0,
-      },
+        project: PROJECT,
+      } as any,
     });
     return NextResponse.json(
       { message: "User created successfully", data: response },

@@ -158,7 +158,10 @@ export async function PUT(request: NextRequest) {
     const { recipeId, status } = await request.json();
     const response = await prisma.recipe.update({
       where: { recipeId: recipeId },
-      data: { approveStatus: status },
+      data: {
+        approveStatus: status,
+        approvedDate: status === "A" ? new Date() : null,
+      },
       include: {
         images: true,
         ingredients: {
