@@ -23,6 +23,21 @@ export const metadata: Metadata = {
   title: "RecipeShare | Share & Discover Delicious Recipes",
   description:
     "RecipeShare is a platform to explore, share, and save recipes from around the world. Discover new dishes, create your own recipes, and connect with food lovers.",
+  openGraph: {
+    type: "website",
+    url: "https://www.recipeshareonline.vercel.app",
+    title: "RecipeShare | Share & Discover Delicious Recipes",
+    description:
+      "RecipeShare is a platform to explore, share, and save recipes from around the world.",
+    images: [
+      {
+        url: "https://dwylojmkbggcdvus.public.blob.vercel-storage.com/RecipeShare.png",
+        width: 1200,
+        height: 630,
+        alt: "RecipeShare Image",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
